@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "ostream": "cpp",
+        "iostream": "cpp",
+        "array": "cpp",
+        "string_view": "cpp"
+    },
+    "cmake.sourceDirectory": "/home/chan/Documents/app_317/Seekfree_LS2K0300_Opensource_Library/project/user"
+}
