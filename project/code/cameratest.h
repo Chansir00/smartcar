@@ -7,7 +7,6 @@
 #include <sys/stat.h> // 用于检查文件夹是否存在
 #include <socket.h>
 #include<Pers.h>
-
 using namespace cv;
 using namespace std;
 
@@ -46,6 +45,8 @@ struct DetectionResult
     bool hasCross = false;         // 是否检测到十字路口
     bool hasZebraCrossing = false; // 是否检测到斑马线
     bool hasCircle = false;        // 是否检测到圆环
+    bool PointA_found = false;     // 是否检测到A点
+    bool PointC_found = false;     // 是否检测到C点
     Mat sourceImage;               // 原始图像
     Mat binaryImage;               // 二值化图像
     Mat outputImage;               // 输出图像
@@ -61,6 +62,9 @@ class LaneProcessor
 public:
 // member variables
     Point2f circlePointA, circlePointB, circlePointC;
+    bool PointA_found = false;
+    bool PointB_found = false;
+    bool PointC_found = false;
     vector<Point> virtualPath;
     CircleState circleState = CIRCLE_INACTIVE;
     int centre;
@@ -86,7 +90,7 @@ public:
     // 环岛处理
     void processCircle(vector<TrackPoint> &leftLane,
                        vector<TrackPoint> &rightLane,
-                       Mat &debugImage,int &leftMissedPoints, int &rightMissedPoints);
+                       Mat &debugImage,int &leftMissedPoints, int &rightMissedPoints,int &roiHeight);
     void resetCircleState();
 
     // 辅助函数
@@ -98,7 +102,7 @@ public:
     void generateVirtualPath(const Point2f &start, const Point2f &end,
         vector<Point> &path,
         bool isLeftLane);
-    bool checkExitCondition(const vector<TrackPoint>& leftLane, Mat& img);
+    bool checkExitCondition(const vector<TrackPoint>& Lane, Mat& img,int roiHeight);
     bool isPathClear(const vector<TrackPoint>& leftLane);
     void mergeVirtualPath(vector<TrackPoint> &lane,
         const vector<Point> &virtualPath,
