@@ -9,10 +9,10 @@ Mat applyInversePerspectiveTransform(const Mat &image) {
 
     // 定义源图像中的四个点（例如：图像中的四边形区域）
     std::vector<cv::Point2f> srcPoints;
-    srcPoints.push_back(cv::Point2f(79, 58));       // 左上角
-    srcPoints.push_back(cv::Point2f(254, 55));      // 右上角
-    srcPoints.push_back(cv::Point2f(305, 185));     // 右下角
-    srcPoints.push_back(cv::Point2f(20, 193));      // 左下角
+    srcPoints.push_back(cv::Point2f(82,25));       // 左上角
+    srcPoints.push_back(cv::Point2f(289,19));      // 右上角
+    srcPoints.push_back(cv::Point2f(317,153));     // 右下角
+    srcPoints.push_back(cv::Point2f(4,145));    // 左下角
 
     // 定义目标平面中的四个点（逆透视变换后的矩形区域）
     std::vector<cv::Point2f> dstPoints;
