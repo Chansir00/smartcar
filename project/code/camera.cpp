@@ -11,7 +11,7 @@ DetectionResult LaneProcessor::detect(const Mat &inputImage)
     result.warpedImage = result.binaryImage;
     // result.warpedImage = applyInversePerspectiveTransform(result.binaryImage);
     //  计算ROI区域的高度
-    int roiHeight = 240;
+    int roiHeight = image_h;
 
     // 计算白点分布
     detectWhitePixels(result.binaryImage, roiHeight, whitePixels);
@@ -111,10 +111,10 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
         checkExitCondition(leftLane, img, roiHeight);
         circle(img, circlePointB, 5, Scalar(0, 0, 0), -1); // 半径 1，颜色黑色，厚度 -1 表示填充
         Point2f endPoint = Point2f(320,0);
-        circle(img, rightLane[239].position, 5, Scalar(0, 0, 0), -1); // 半径 1，颜色黑色，厚度 -1 表示填充
+        //circle(img, rightLane[239].position, 5, Scalar(0, 0, 0), -1); // 半径 1，颜色黑色，厚度 -1 表示填充
         for(int i = roiHeight-1; i >roiHeight-rightLane.size(); i--)
         {
-            if(rightLane[i-1].position.x!=319;rightLane[i].position.x ==319&&rightLane[i+1].position.x ==319&&rightLane[i+2].position.x ==319)
+            if(rightLane[i-1].position.x!=319&&rightLane[i].position.x ==319&&rightLane[i+1].position.x ==319&&rightLane[i+2].position.x ==319)
             {
                 endPoint = rightLane[i].position;
             }
