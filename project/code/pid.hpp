@@ -14,7 +14,7 @@
 #include "cameratest.h"
 
 constexpr uint8_t weight[39] = {  // 将数组长度调整为38
-    1,9,11,13,13,15,15,              //0-7
+    1,3,11,13,13,15,15,              //0-7
     15,17,17,19,19,20,20,17,9, //8-16
     9,7,7,5,5,3,3,1,1,   //17-25
     1,1,1,1,1,1,1,1,1,3,4,5,6        //26-39     
@@ -308,7 +308,7 @@ public :
         // 初始化PID参数
         init_pid(pidLeft, 1.25f, 0.245f, 0.10f, PWM_MAX,DELTA_PID);       //you
         init_pid(pidRight, 1.25f, 0.205f, 0.18f, PWM_MAX,DELTA_PID);    //zuo
-        init_pid(pidservo, 2.7f, 0.0f, 0.3f, 367.0f, POSITION_PID);
+        init_pid(pidservo, 3.0f, 0.0f, 0.3f, 367.0f, POSITION_PID);
         init_serial();
     }
 

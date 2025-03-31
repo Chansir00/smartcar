@@ -1,12 +1,9 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <opencv2/opencv.hpp>
-#include <vector>
-#include <iostream>
-#include <sys/stat.h> // 用于检查文件夹是否存在
-#include <socket.h>
-#include<Pers.h>
+
+#include<zf_common_headfile.h>
+
 using namespace cv;
 using namespace std;
 
@@ -95,7 +92,7 @@ public:
     void resetCircleState();
 
     // 辅助函数
-    bool isLaneContinuous(const std::vector<TrackPoint> &lane,float &missedRadius);
+    bool isLaneContinuous(const vector<TrackPoint>& lane, float max_deviation);
     bool detectCircleEntry(const vector<TrackPoint> &left,
         const vector<TrackPoint> &right,float &leftMissedRadius, float &rightMissedRadius);
     bool findInflectionPoints(const vector<TrackPoint> &lane,
@@ -109,6 +106,12 @@ public:
         const vector<Point> &virtualPath,
         bool isLeftLane);
     void smoothPath(vector<Point> &path);
+    void linearRegression(
+        vector<Point>::iterator begin,
+        vector<Point>::iterator end,
+        float& k, float& b, float& r_squared
+    );
+    
 
 };
 
