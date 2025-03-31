@@ -23,8 +23,8 @@ int main()
     LaneProcessor detector;
     detector.initializeVariables(image_w, image_h);
     // 主循环：读取帧并处理
-    //int new_socket = sendImageOverSocket();
-    int new_socket = 0;
+    int new_socket = sendImageOverSocket();
+    //int new_socket = 0;
     atexit(cleanup);
     // 注册SIGINT信号的处理函数
     signal(SIGINT, sigint_handler);
@@ -32,7 +32,7 @@ int main()
     pit_ms_init(10, [&ctrl](){ 
         if(flag == 1){
         ctrl.pit_callback();
-        ctrl.motor_control(500, 0, 0);  // 将控制逻辑移到定时器回调
+        ctrl.motor_control(100, 0, 0);  // 将控制逻辑移到定时器回调200
         }
     });
 
@@ -50,7 +50,6 @@ int main()
             break;
         }
         DetectionResult result = detector.detect(frame);
-        cerr<<"centre: "<<detector.centre<<endl;
         float error = ctrl.Err_sum(detector.centerLine);
         flag = 1 ;
         cerr<<"error: "<<error<<endl;
