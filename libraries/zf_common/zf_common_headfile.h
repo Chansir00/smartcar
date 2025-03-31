@@ -39,7 +39,15 @@
 #include "stdio.h"
 #include "stdint.h"
 #include "string.h"
-
+#include <vector>
+#include <cmath>
+#include <numeric>
+#include <opencv2/opencv.hpp>
+#include <vector>
+#include <iostream>
+#include <sys/stat.h> // 用于检查文件夹是否存在
+#include <socket.h>
+#include<Pers.h>
 //===================================================芯片 SDK 底层===================================================
 
 //===================================================芯片 SDK 底层===================================================

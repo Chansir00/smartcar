@@ -55,7 +55,6 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
         circleflag=1;
         countcircle=0;
     }
-    cerr<<countcircle<<endl;
     cerr<<"circleflag: "<<circleflag<<endl;
     if(circleflag==0)
     {
@@ -71,7 +70,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
         // 先通过左车道单调性和右车道丢点率判断是否可能进入环岛
         if (detectCircleEntry(leftLane, rightLane, leftMissedRadius, rightMissedRadius))
         {
-            circleState = CIRCLE_DETECTED;
+            //circleState = CIRCLE_DETECTED;
         }
         else if(rightMissedRadius>0.9&&leftMissedRadius<0.3)
         {
@@ -81,10 +80,10 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
         {
             circleState = LEFT_TURN;
         }
-        else if(rightMissedRadius>0.5&&leftMissedRadius>0.5)
-        {
-            circleState = CROSSING;
-        }
+        // else if(rightMissedRadius>0.5&&leftMissedRadius>0.5)
+        // {
+        //     circleState = CROSSING;
+        // }
 
     }
     break;
@@ -271,23 +270,41 @@ bool LaneProcessor::detectZebraCrossing(const std::vector<int> &whitePixels,floa
     return changes >= 5;
 }
 
-bool LaneProcessor::isLaneContinuous(const std::vector<TrackPoint> &lane,float &missradius)
-{
-    bool isContinuous = false;
-    int left_count = 0;
-    for (size_t i = 0; i < lane.size(); i++)
-    {
-        if (lane[i].position.x == 0 ||lane[i].position.x == 319|| lane[i].position.x == -1)
-            continue;
-        int prevX = lane[i].position.x;
-        if (abs(lane[i + 1].position.x - prevX) < 5)
-        { // 允许的波动阈值
-            left_count++;
+bool LaneProcessor::isLaneContinuous(const vector<TrackPoint>& lane, float max_deviation) {
+    // 1. 数据有效性检查
+    if (lane.size() < 10) return false;
+
+    // 2. 提取有效点（过滤x=0/319等无效值）
+    vector<Point> valid_points;
+    for (const auto& pt : lane) {
+        if (pt.position.x > 1.0f && pt.position.x < 318.0f) { // 留1像素安全边界
+            valid_points.emplace_back(pt.position.x, pt.position.y);
         }
     }
-    if (left_count > (lane.size()*(1-missradius)* 0.9))
-        isContinuous = true;
-    return isContinuous;
+    if (valid_points.size() < 5) return false; // 有效点太少直接返回
+
+    // 3. 滑动窗口检测连续性
+    const int window_size = 5; // 滑动窗口大小
+    int valid_windows = 0;     // 有效连续窗口数
+    
+    for (size_t i = 0; i <= valid_points.size() - window_size; ++i) {
+        float k, b, r2;
+        linearRegression(
+            valid_points.begin() + i,
+            valid_points.begin() + i + window_size,
+            k, b, r2
+        );
+        
+        // R²>0.85表示线性显著，且斜率变化合理（过滤突变）
+        if (r2 > 0.85f && abs(k) < 2.0f) { 
+            valid_windows++;
+        }
+    }
+
+    // 4. 连续性比例计算
+    float continuity_ratio = static_cast<float>(valid_windows) / 
+                           (valid_points.size() - window_size + 1);
+    return continuity_ratio > (1.0f - max_deviation);
 }
 // 检测车道点
 void LaneProcessor::detectLanePoints(const Mat &binaryImage, int roiHeight,
@@ -505,8 +522,8 @@ bool LaneProcessor::detectCircleEntry(const vector<TrackPoint> &left,
                                       const vector<TrackPoint> &right, float &leftMissedRadius, float &rightMissedRadius)
 {
     // 条件1：左侧单调性检查
-    bool leftMonotonic = isLaneContinuous(left,leftMissedRadius);
-    bool rightMonotonic = isLaneContinuous(right,rightMissedRadius);
+    bool leftMonotonic = isLaneContinuous(left,0.1f);
+    bool rightMonotonic = isLaneContinuous(right,0.1f);
     cerr<<"rightMonotonic: "<<rightMonotonic<<endl;
     cerr << "leftMonotonic: " << leftMonotonic<< endl;
     // cerr << left[240].position.x << endl;
@@ -514,7 +531,7 @@ bool LaneProcessor::detectCircleEntry(const vector<TrackPoint> &left,
     //cerr << "lostRatio: " << rightMissedRadius << endl;
 
     // 综合判定（阈值需实际调整）
-    return leftMonotonic&&(rightMissedRadius > 0.3f && rightMissedRadius < 0.6f);
+    return left.size()>220 &&right.size()>220&& !rightMonotonic && rightMissedRadius > 0.3f && rightMissedRadius < 0.6f;
 }
 
 // 参数设置
@@ -793,4 +810,41 @@ void LaneProcessor::resetCircleState()
     PointB_found = false;
     PointC_found = false;
     virtualPath.clear();
+}
+
+// 最小二乘法线性回归（核心算法）
+void LaneProcessor::linearRegression(
+    vector<Point>::iterator begin,
+    vector<Point>::iterator end,
+    float& k, float& b, float& r_squared
+) {
+    size_t n = std::distance(begin, end);
+    if (n == 0) return;
+
+    // 计算均值
+    float sum_x = 0, sum_y = 0;
+    for (auto it = begin; it != end; ++it) {
+        sum_x += it->x;
+        sum_y += it->y;
+    }
+    float mean_x = sum_x / n;
+    float mean_y = sum_y / n;
+
+    // 计算协方差和方差
+    float cov_xy = 0, var_x = 0, var_y = 0;
+    for (auto it = begin; it != end; ++it) {
+        float dx = it->x - mean_x;
+        float dy = it->y - mean_y;
+        cov_xy += dx * dy;
+        var_x += dx * dx;
+        var_y += dy * dy;
+    }
+
+    // 计算斜率和截距
+    k = cov_xy / var_x;
+    b = mean_y - k * mean_x;
+
+    // 计算决定系数R²
+    r_squared = (var_x == 0 || var_y == 0) ? 0 : 
+               (cov_xy * cov_xy) / (var_x * var_y);
 }

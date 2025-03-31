@@ -32,7 +32,7 @@ int main()
     pit_ms_init(10, [&ctrl](){ 
         if(flag == 1){
         ctrl.pit_callback();
-        ctrl.motor_control(100, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(250, 0, 0);  // 将控制逻辑移到定时器回调200
         }
     });
 
