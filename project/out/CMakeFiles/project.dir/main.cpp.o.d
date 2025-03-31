@@ -277,6 +277,8 @@ CMakeFiles/project.dir/main.cpp.o: \
  /home/chan/Documents/app_317/Seekfree_LS2K0300_Opensource_Library/project/user/../../libraries/zf_components/seekfree_assistant.h \
  /home/chan/Documents/app_317/Seekfree_LS2K0300_Opensource_Library/project/user/../../libraries/zf_components/seekfree_assistant_interface.h \
  /home/chan/Documents/app_317/Seekfree_LS2K0300_Opensource_Library/project/user/../code/pid.hpp \
+ /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/termios.h \
+ /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/termios.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/algorithm \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/mutex \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/system_error \
@@ -504,4 +506,5 @@ CMakeFiles/project.dir/main.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/arpa/inet.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/netinet/in.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/in.h \
- /home/chan/Documents/app_317/Seekfree_LS2K0300_Opensource_Library/project/user/../code/Pers.h
+ /home/chan/Documents/app_317/Seekfree_LS2K0300_Opensource_Library/project/user/../code/Pers.h \
+ /home/chan/Documents/app_317/Seekfree_LS2K0300_Opensource_Library/project/user/../code/cameratest.h

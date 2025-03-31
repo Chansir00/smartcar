@@ -308,7 +308,7 @@ public :
         // 初始化PID参数
         init_pid(pidLeft, 1.25f, 0.245f, 0.10f, PWM_MAX,DELTA_PID);       //you
         init_pid(pidRight, 1.25f, 0.205f, 0.18f, PWM_MAX,DELTA_PID);    //zuo
-        init_pid(pidservo, 2.2f, 0.0f, 0.3f, 367.0f, POSITION_PID);
+        init_pid(pidservo, 2.7f, 0.0f, 0.3f, 367.0f, POSITION_PID);
         init_serial();
     }
 

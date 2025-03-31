@@ -4,6 +4,7 @@
 DetectionResult LaneProcessor::detect(const Mat &inputImage)
 {
     int leftMissedPoints, rightMissedPoints;
+    float leftMissedRadius, rightMissedRadius;
     DetectionResult result;
     result.outputImage = inputImage.clone();
     // 预处理图像
@@ -17,8 +18,8 @@ DetectionResult LaneProcessor::detect(const Mat &inputImage)
     detectWhitePixels(result.binaryImage, roiHeight, whitePixels);
 
     // 检测车道点
-    detectLanePoints(result.binaryImage, roiHeight, whitePixels, leftLane, rightLane, leftMissedPoints, rightMissedPoints);
-    processCircle(leftLane, rightLane, result.outputImage, leftMissedPoints, rightMissedPoints, roiHeight);
+    detectLanePoints(result.binaryImage, roiHeight, whitePixels, leftLane, rightLane, leftMissedPoints, rightMissedPoints,leftMissedRadius, rightMissedRadius);
+    processCircle(leftLane, rightLane, result.outputImage,  roiHeight,leftMissedRadius, rightMissedRadius);
     cerr << circleState << endl;
     // 每帧结束时检查重置
     if (circleState == CIRCLE_INACTIVE)
@@ -26,11 +27,11 @@ DetectionResult LaneProcessor::detect(const Mat &inputImage)
         resetCircleState();
     }
     // 检测斑马线
-    result.hasZebraCrossing = detectZebraCrossing(whitePixels);
+    result.hasZebraCrossing = detectZebraCrossing(whitePixels,leftMissedRadius, rightMissedRadius);
 
     // 绘制检测结果
 
-    centre = drawLanes(result.outputImage, roiHeight, leftLane, rightLane, centerLine);
+    drawLanes(result.outputImage, roiHeight, leftLane, rightLane, centerLine);
 
     // 如果检测到斑马线，添加文本标注
     if (result.hasZebraCrossing)
@@ -46,8 +47,9 @@ int countcircle = 0;
 // 检测圆环
 void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
                                   vector<TrackPoint> &rightLane,
-                                  Mat &img, int &leftMissedPoints, int &rightMissedPoints, int &roiHeight)
+                                  Mat &img,  int &roiHeight,float &leftMissedRadius, float &rightMissedRadius)
 {
+    
     if(countcircle==100)
     {
         circleflag=1;
@@ -60,18 +62,35 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
         countcircle++;
         return;
     }
+    
 
     switch (circleState)
     {
     case CIRCLE_INACTIVE:
+    {
         // 先通过左车道单调性和右车道丢点率判断是否可能进入环岛
-        if (detectCircleEntry(leftLane, rightLane, leftMissedPoints, rightMissedPoints))
+        if (detectCircleEntry(leftLane, rightLane, leftMissedRadius, rightMissedRadius))
         {
             circleState = CIRCLE_DETECTED;
         }
-        break;
+        else if(rightMissedRadius>0.9&&leftMissedRadius<0.3)
+        {
+            circleState = RIGHT_TURN;
+        }
+        else if(rightMissedRadius<0.3&&leftMissedRadius>0.9)
+        {
+            circleState = LEFT_TURN;
+        }
+        else if(rightMissedRadius>0.5&&leftMissedRadius>0.5)
+        {
+            circleState = CROSSING;
+        }
+
+    }
+    break;
 
     case CIRCLE_DETECTED:
+    {
         if (findInflectionPoints(rightLane, circlePointA, circlePointC))
             ;
         {
@@ -96,7 +115,8 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
             }
             // circleState = CIRCLE_INSIDE;
         }
-        break;
+    }
+    break;
     case CIRCLE_INSIDE:
     {
         if (checkExitCondition(leftLane, img, roiHeight))
@@ -131,9 +151,26 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
         }
     }
     break;
+    case LEFT_TURN:
+    {
+
+    }
+    break;
+    case RIGHT_TURN:
+    {
+
+    }
+    break;
+    case CROSSING:
+    {
+
+    }
+    break;
     default:
         break;
     }
+    cerr<<"rightMissedRadius: "<<rightMissedRadius<<endl;
+    cerr<<"leftMissedRadius: "<<leftMissedRadius<<endl;
 }
 // initializeVariables
 void LaneProcessor::initializeVariables(int image_w, int image_h)
@@ -199,7 +236,7 @@ void LaneProcessor::detectWhitePixels(const Mat &img, int roiHeight, std::vector
 }
 
 // 检测斑马线
-bool LaneProcessor::detectZebraCrossing(const std::vector<int> &whitePixels)
+bool LaneProcessor::detectZebraCrossing(const std::vector<int> &whitePixels,float &leftMissedRadius, float &rightMissedRadius)
 {
     // 条件1: 检查白线变化次数
     int changes = 0;
@@ -215,8 +252,8 @@ bool LaneProcessor::detectZebraCrossing(const std::vector<int> &whitePixels)
         return false;
 
     // 条件3: 检查左右车道线是否连续
-    bool isLeftLaneContinuous = isLaneContinuous(leftLane);
-    bool isRightLaneContinuous = isLaneContinuous(rightLane);
+    bool isLeftLaneContinuous = isLaneContinuous(leftLane,leftMissedRadius);
+    bool isRightLaneContinuous = isLaneContinuous(rightLane,rightMissedRadius);
     if (!isLeftLaneContinuous || !isRightLaneContinuous)
         return false;
 
@@ -234,13 +271,13 @@ bool LaneProcessor::detectZebraCrossing(const std::vector<int> &whitePixels)
     return changes >= 5;
 }
 
-bool LaneProcessor::isLaneContinuous(const std::vector<TrackPoint> &lane)
+bool LaneProcessor::isLaneContinuous(const std::vector<TrackPoint> &lane,float &missradius)
 {
-    bool isMonotonic = false;
+    bool isContinuous = false;
     int left_count = 0;
     for (size_t i = 0; i < lane.size(); i++)
     {
-        if (lane[i].position.x == 0 || lane[i].position.x == -1)
+        if (lane[i].position.x == 0 ||lane[i].position.x == 319|| lane[i].position.x == -1)
             continue;
         int prevX = lane[i].position.x;
         if (abs(lane[i + 1].position.x - prevX) < 5)
@@ -248,16 +285,17 @@ bool LaneProcessor::isLaneContinuous(const std::vector<TrackPoint> &lane)
             left_count++;
         }
     }
-    if (left_count > 120)
-        isMonotonic = true;
-    return isMonotonic;
+    if (left_count > (lane.size()*(1-missradius)* 0.9))
+        isContinuous = true;
+    return isContinuous;
 }
 // 检测车道点
 void LaneProcessor::detectLanePoints(const Mat &binaryImage, int roiHeight,
                                      const std::vector<int> &whitePixels,
                                      std::vector<TrackPoint> &leftLane,
                                      std::vector<TrackPoint> &rightLane,
-                                     int &leftMissedPoints, int &rightMissedPoints)
+                                     int &leftMissedPoints, int &rightMissedPoints,
+                                    float &leftMissedRadius, float &rightMissedRadius)
 {
     // 初始化丢点计数器
     leftMissedPoints = 0;
@@ -320,12 +358,12 @@ void LaneProcessor::detectLanePoints(const Mat &binaryImage, int roiHeight,
                 pointFound = true;
                 break; // 找到点后跳出循环
             }
-            // 如果未找到点，默认以图像左边界为赛道边界
-            if (!pointFound)
-            {
-                leftLane[y] = {Point(0, y), 0};
-                leftMissedPoints++;
-            }
+        }
+        // 如果未找到点，默认以图像左边界为赛道边界
+        if (!pointFound)
+        {
+            leftLane[y] = {Point(0, y), 0};
+            leftMissedPoints++;
         }
     }
 
@@ -346,21 +384,24 @@ void LaneProcessor::detectLanePoints(const Mat &binaryImage, int roiHeight,
                 pointFound = true;
                 break; // 找到点后跳出循环
             }
-            // 如果未找到点，默认以图像右边界为赛道边界
-            if (!pointFound)
-            {
-                rightLane[y] = {Point(cols - 1, y), 0};
-                rightMissedPoints++;
-            }
+        }
+        // 如果未找到点，默认以图像右边界为赛道边界
+        if (!pointFound)
+        {
+            rightLane[y] = {Point(cols - 1, y), 0};
+            rightMissedPoints++;
         }
     }
+    leftMissedRadius = float(leftMissedPoints) / LeftTrackLength;
+    rightMissedRadius = float(rightMissedPoints) / RightTrackLength;
 }
 // 绘制车道线
-int LaneProcessor::drawLanes(Mat &image, int roiHeight,
+void LaneProcessor::drawLanes(Mat &image, int roiHeight,
                              const vector<TrackPoint> &leftLane,
                              const vector<TrackPoint> &rightLane,
                              vector<Point> &centerLine)
 {
+    const int estimatedLaneWidth = 175; // 假设车道宽度为 100 像素，你可以动态计算
     // 清空之前的中线数据
     centerLine.clear();
 
@@ -387,7 +428,6 @@ int LaneProcessor::drawLanes(Mat &image, int roiHeight,
     {
         // 确保左右车道点的数量一致
         size_t numPoints = min(leftLane.size(), rightLane.size());
-        cerr << "numPoints: " << numPoints << endl;
         for (size_t i = roiHeight - 1; i > roiHeight - numPoints; i--)
         {
             const Point &leftPoint = leftLane[i].position;
@@ -399,12 +439,31 @@ int LaneProcessor::drawLanes(Mat &image, int roiHeight,
             {
                 continue;
             }
-
+            if (circleState == RIGHT_TURN)
+            {
+                Point center(
+                    (leftPoint.x + estimatedLaneWidth),
+                    (leftPoint.y));
+                if (center.x < image.cols)
+                    centerLine.push_back(center);
+                
+            }
             // 计算中点
+            else if(circleState == LEFT_TURN)
+            {
+                Point center(
+                    (rightPoint.x - estimatedLaneWidth),
+                    (rightPoint.y));
+                if (center.x > 0)
+                    centerLine.push_back(center);
+            }
+            else
+            {
             Point center(
                 (leftPoint.x + rightPoint.x) / 2,
                 (leftPoint.y + rightPoint.y) / 2);
             centerLine.push_back(center);
+            }
         }
         for (size_t i = 1; i < centerLine.size() - 2; i++)
         {
@@ -417,7 +476,7 @@ int LaneProcessor::drawLanes(Mat &image, int roiHeight,
             int dxNext = nextPoint.x - currPoint.x;
 
             // 如果差值较大且差值的乘积为负数，则认为当前点是异常点
-            if (abs(dxPrev) > 10 && abs(dxNext) > 10 && dxPrev * dxNext < 0)
+            if (dxPrev * dxNext < 0)
             {
                 // 将当前点替换为前一个点的值
                 currPoint = prevPoint;
@@ -427,24 +486,8 @@ int LaneProcessor::drawLanes(Mat &image, int roiHeight,
         // 只有当中线有点时才绘制
         if (!centerLine.empty())
         {
-            // // 按 y 坐标排序，确保点顺序正确
-            // sort(centerLine.begin(), centerLine.end(),
-            //      [](const Point &a, const Point &b)
-            //      {
-            //          return a.y < b.y; // 从近到远排序
-            //      });
-
             // 绘制中线
             polylines(image, centerLine, false, Scalar(0, 255, 0), 2);
-
-            // 输出中线中点坐标
-            int mid_point = centerLine.size() / 2;
-            if (mid_point < centerLine.size())
-            {
-                cerr << "中线中点坐标: " << centerLine[mid_point] << endl;
-                cerr << centerLine.size() << endl;
-            }
-            return centerLine[mid_point].x;
         }
         else
         {
@@ -455,25 +498,23 @@ int LaneProcessor::drawLanes(Mat &image, int roiHeight,
     {
         cerr << "左右车道线数据为空" << endl;
     }
-    return 0;
 }
 
 // 环岛入口检测（步骤1）
 bool LaneProcessor::detectCircleEntry(const vector<TrackPoint> &left,
-                                      const vector<TrackPoint> &right, int &leftMissedPoints, int &rightMissedPoints)
+                                      const vector<TrackPoint> &right, float &leftMissedRadius, float &rightMissedRadius)
 {
     // 条件1：左侧单调性检查
-    bool leftMonotonic = isLaneContinuous(left);
-    // cerr<<"leftsize: "<<left.size()<<endl;
-    cerr << "leftMonotonic: " << leftMonotonic << endl;
+    bool leftMonotonic = isLaneContinuous(left,leftMissedRadius);
+    bool rightMonotonic = isLaneContinuous(right,rightMissedRadius);
+    cerr<<"rightMonotonic: "<<rightMonotonic<<endl;
+    cerr << "leftMonotonic: " << leftMonotonic<< endl;
     // cerr << left[240].position.x << endl;
     //  条件2：右侧丢点率检查
-    float leftRatio = leftMissedPoints / (float)left.size();
-    float rightRatio = rightMissedPoints / (float)right.size();
-    cerr << "lostRatio: " << rightRatio << endl;
+    //cerr << "lostRatio: " << rightMissedRadius << endl;
 
     // 综合判定（阈值需实际调整）
-    return leftMonotonic && (rightRatio > 0.4f);
+    return leftMonotonic&&(rightMissedRadius > 0.3f && rightMissedRadius < 0.6f);
 }
 
 // 参数设置
