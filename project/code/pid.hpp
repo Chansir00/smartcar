@@ -434,8 +434,11 @@ public :
         cerr << "pwm" << target_pwm <<endl; 
     }
     float Err_sum(const vector<Point> &centerline)
-{
+    {
+    if(centerline.size()<car_startline-hope_line) 
+        hope_line = 240-centerline.size();
     int total_steps = (car_startline - hope_line) / 3 + 1;
+    cerr<<"total_steps: "<<total_steps<<endl;
     if (total_steps > sizeof(weight)) {
         cerr << "权重数组尺寸不足！" << endl;
         return 0.0f;

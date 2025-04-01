@@ -19,6 +19,9 @@ int main()
     // 设置摄像头分辨率
     cap.set(CAP_PROP_FRAME_WIDTH, 320);
     cap.set(CAP_PROP_FRAME_HEIGHT, 240);
+    cap.set(CAP_PROP_FPS, 30);
+    cerr<<"摄像头分辨率: " << cap.get(CAP_PROP_FRAME_WIDTH) << "x" << cap.get(CAP_PROP_FRAME_HEIGHT) << endl;
+
     // 创建车道检测器    }
     LaneProcessor detector;
     detector.initializeVariables(image_w, image_h);
@@ -32,7 +35,7 @@ int main()
     pit_ms_init(10, [&ctrl](){ 
         if(flag == 1){
         ctrl.pit_callback();
-        ctrl.motor_control(250, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
         }
     });
 
@@ -88,6 +91,13 @@ int main()
         
             } catch (const std::exception& e) {
                 std::cerr << "错误: " << e.what() << std::endl;
+            }
+        }
+        else if(debugmode==3)
+        {
+            if(getchar() == 'k')
+            {
+                imwrite("test.jpg", result.outputImage);
             }
         }
         if(++send_counter >= SEND_INTERVAL) {
