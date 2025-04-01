@@ -20,7 +20,12 @@ const int WIDTH_EXTEND2 = 70;           // 辅助宽度扩展
 extern int debugmode;                  // true调试模式
 
 
-
+// 数据结构
+struct TrackPoint
+{
+    Point position; // 点的位置
+    int status;     // 点的状态（例如：0-无效，1-有效）
+};
 
 // circle state
 enum CircleState
@@ -63,10 +68,10 @@ public:
     vector<Point> virtualPath;
     CircleState circleState = CIRCLE_INACTIVE;
     vector<int> whitePixels;                       // 白点分布
-    vector<Point> leftLane;  // 左车道
-    vector<Point> rightLane; // 右车道
-    vector<Point> rightcicle;      // right_circle
-    vector<Point> leftcicle;
+    vector<TrackPoint> leftLane;  // 左车道
+    vector<TrackPoint> rightLane; // 右车道
+    vector<TrackPoint> rightcicle;      // right_circle
+    vector<TrackPoint> leftcicle;
     vector<Point> centerLine; // left_circle
 
 
@@ -76,28 +81,28 @@ public:
     void detectWhitePixels(const Mat &img, int roiHeight, std::vector<int> &whitePixels);
     bool detectZebraCrossing(const std::vector<int> &whitePixels,float &leftMissedRadius, float &rightMissedRadius);
     void detectLanePoints(const Mat &img, int roiHeight, const std::vector<int> &whitePixels,
-                                 std::vector<Point> &leftLane, std::vector<Point> &rightLane,int &leftMissedPoints, int &rightMissedPoints,float &leftMissedRadius, float &rightMissedRadius);
-    void drawLanes(Mat &img, int roiHeight,vector<Point> &leftLane, vector<Point> &rightLane,
+                                 std::vector<TrackPoint> &leftLane, std::vector<TrackPoint> &rightLane,int &leftMissedPoints, int &rightMissedPoints,float &leftMissedRadius, float &rightMissedRadius);
+    void drawLanes(Mat &img, int roiHeight,vector<TrackPoint> &leftLane,vector<TrackPoint> &rightLane,
                    vector<Point> &centerLine);
 
     // 环岛处理
-    void processCircle(vector<Point> &leftLane,
-                       vector<Point> &rightLane,
+    void processCircle(vector<TrackPoint> &leftLane,
+                       vector<TrackPoint> &rightLane,
                        Mat &debugImage,int &leftMissedPoints, float &leftMissedRadius, float &rightMissedRadius);
     void resetCircleState();
 
     // 辅助函数
-    bool isLaneContinuous(const vector<Point>& lane, float max_deviation);
-    bool detectCircleEntry(const vector<Point> &left,
-        const vector<Point> &right,float &leftMissedRadius, float &rightMissedRadius);
-    bool findInflectionPoints(const vector<Point> &lane,
+    bool isLaneContinuous(const vector<TrackPoint>& lane, float max_deviation);
+    bool detectCircleEntry(const vector<TrackPoint> &left,
+        const vector<TrackPoint> &right,float &leftMissedRadius, float &rightMissedRadius);
+    bool findInflectionPoints(const vector<TrackPoint> &lane,
                               Point2f &pointA, Point2f &pointC);
     void generateVirtualPath(const Point2f &start, const Point2f &end,
         vector<Point> &path,
         bool isLeftLane);
-    bool checkExitCondition(const vector<Point>& Lane, Mat& img,int roiHeight);
-    bool isPathClear(const vector<Point>& leftLane);
-    void mergeVirtualPath(vector<Point> &lane,
+    bool checkExitCondition(const vector<TrackPoint>& Lane, Mat& img,int roiHeight);
+    bool isPathClear(const vector<TrackPoint>& leftLane);
+    void mergeVirtualPath(vector<TrackPoint> &lane,
         const vector<Point> &virtualPath,
         bool isLeftLane);
     void smoothPath(vector<Point> &path);

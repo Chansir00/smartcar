@@ -1,6 +1,7 @@
-CMakeFiles/project.dir/main.cpp.o: \
- /home/chan/Documents/app_317/smartcar/project/user/main.cpp \
+CMakeFiles/project.dir/home/chan/Documents/app_317/smartcar/project/code/camera.cpp.o: \
+ /home/chan/Documents/app_317/smartcar/project/code/camera.cpp \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/stdc-predef.h \
+ /home/chan/Documents/app_317/smartcar/project/code/cameratest.h \
  /home/chan/Documents/app_317/smartcar/project/user/../../libraries/zf_common/zf_common_headfile.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/stdio.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/libc-header-start.h \
