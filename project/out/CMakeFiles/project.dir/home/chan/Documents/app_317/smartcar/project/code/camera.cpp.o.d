@@ -2,9 +2,20 @@ CMakeFiles/project.dir/home/chan/Documents/app_317/smartcar/project/code/camera.
  /home/chan/Documents/app_317/smartcar/project/code/camera.cpp \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/stdc-predef.h \
  /home/chan/Documents/app_317/smartcar/project/code/cameratest.h \
+<<<<<<< HEAD
  /home/chan/Documents/app_317/smartcar/project/user/../../libraries/zf_common/zf_common_headfile.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/stdio.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/libc-header-start.h \
+=======
+ /path/to/install/opencv/include/opencv4/opencv2/opencv.hpp \
+ /path/to/install/opencv/include/opencv4/opencv2/opencv_modules.hpp \
+ /path/to/install/opencv/include/opencv4/opencv2/core.hpp \
+ /path/to/install/opencv/include/opencv4/opencv2/core/cvdef.h \
+ /path/to/install/opencv/include/opencv4/opencv2/core/version.hpp \
+ /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/limits \
+ /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/loongarch64-linux-gnu/bits/c++config.h \
+ /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/loongarch64-linux-gnu/bits/os_defines.h \
+>>>>>>> 1cec99b (tracebackto3_31)
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/features.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/sys/cdefs.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/wordsize.h \
@@ -431,6 +442,7 @@ CMakeFiles/project.dir/home/chan/Documents/app_317/smartcar/project/code/camera.
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/confname.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/getopt_posix.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/getopt_core.h \
+<<<<<<< HEAD
  /home/chan/Documents/app_317/smartcar/project/user/../code/Pers.h \
  /home/chan/Documents/app_317/smartcar/project/user/../../libraries/zf_common/zf_common_font.h \
  /home/chan/Documents/app_317/smartcar/project/user/../../libraries/zf_common/zf_common_typedef.h \
@@ -511,3 +523,6 @@ CMakeFiles/project.dir/home/chan/Documents/app_317/smartcar/project/code/camera.
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/termios.h \
  /home/chan/Documents/app_317/smartcar/project/user/../code/cameratest.h \
  /home/chan/Documents/app_317/smartcar/project/user/../code/cameratest.h
+=======
+ /home/chan/Documents/app_317/smartcar/project/user/../code/Pers.h
+>>>>>>> 1cec99b (tracebackto3_31)

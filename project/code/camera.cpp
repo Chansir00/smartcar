@@ -72,18 +72,29 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
         {
             //circleState = CIRCLE_DETECTED;
         }
-        else if(rightMissedRadius>0.9&&leftMissedRadius<0.3)
+        else if(rightMissedRadius>0.9&&leftMissedRadius<0.3&&leftLane.size()<150)
         {
             circleState = RIGHT_TURN;
         }
-        else if(rightMissedRadius<0.3&&leftMissedRadius>0.9)
+        else if(rightMissedRadius<0.3&&leftMissedRadius>0.9&&leftLane.size()<150)
         {
             circleState = LEFT_TURN;
         }
+<<<<<<< HEAD
         // else if(rightMissedRadius>0.5&&leftMissedRadius>0.5)
         // {
         //     circleState = CROSSING;
         // }
+=======
+        else if(rightMissedRadius>0.5&&leftMissedRadius>0.5&&leftLane.size()>150)
+        {
+            circleState = CROSSING;
+        }
+        else
+        {
+            circleState = CIRCLE_INACTIVE;
+        }   
+>>>>>>> 1cec99b (tracebackto3_31)
 
     }
     break;
@@ -152,17 +163,28 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
     break;
     case LEFT_TURN:
     {
+        if(leftLane.size()>200&&leftMissedRadius<0.7)
+        {
+            circleState = CIRCLE_INACTIVE;
+        }
 
     }
     break;
     case RIGHT_TURN:
     {
+        if(rightLane.size()>200&&rightMissedRadius<0.7)
+        {
+            circleState = CIRCLE_INACTIVE;
+        }
 
     }
     break;
     case CROSSING:
     {
-
+        if(rightLane.size()<150&&(leftMissedRadius<0.7||rightMissedRadius<0.7))
+        {
+            circleState = CIRCLE_INACTIVE;
+        }
     }
     break;
     default:
@@ -546,7 +568,11 @@ bool LaneProcessor::detectCircleEntry(const vector<TrackPoint> &left,
     //cerr << "lostRatio: " << rightMissedRadius << endl;
 
     // 综合判定（阈值需实际调整）
+<<<<<<< HEAD
     return left.size()>220 &&right.size()>220&& !rightMonotonic && rightMissedRadius > 0.3f && rightMissedRadius < 0.6f;
+=======
+    return leftMonotonic&&(rightMissedRadius > 0.3f && rightMissedRadius < 0.6f) && left.size()>220;
+>>>>>>> 1cec99b (tracebackto3_31)
 }
 
 // 参数设置
