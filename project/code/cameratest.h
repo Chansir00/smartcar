@@ -45,8 +45,6 @@ struct DetectionResult
     bool hasCross = false;         // 是否检测到十字路口
     bool hasZebraCrossing = false; // 是否检测到斑马线
     bool hasCircle = false;        // 是否检测到圆环
-    bool PointA_found = false;     // 是否检测到A点
-    bool PointC_found = false;     // 是否检测到C点
     Mat sourceImage;               // 原始图像
     Mat binaryImage;               // 二值化图像
     Mat outputImage;               // 输出图像
@@ -72,7 +70,7 @@ public:
     vector<TrackPoint> rightLane; // 右车道
     vector<TrackPoint> rightcicle;      // right_circle
     vector<TrackPoint> leftcicle;
-    vector<Point> centerLine; // left_circle
+    vector<Point> centerLine; // 中线
 
 
     // member function
