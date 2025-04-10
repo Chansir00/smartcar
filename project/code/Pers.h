@@ -11,5 +11,5 @@ using namespace std;
 
 Mat applyInversePerspectiveTransform(const Mat &image); // 逆透视变换
 
-
+void ImagePerspective_Init(Mat &SimBinImage,Mat &PerImg_ip);
 #endif // PERS_H

@@ -436,7 +436,7 @@ public :
     float Err_sum(const vector<Point> &centerline)
     {
     if(centerline.size()<car_startline-hope_line) 
-        hope_line = 240-centerline.size();
+        hope_line = 120-centerline.size();
     int total_steps = (car_startline - hope_line) / 3 + 1;
     cerr<<"total_steps: "<<total_steps<<endl;
     if (total_steps > sizeof(weight)) {
@@ -450,7 +450,7 @@ public :
 
         for (i = car_startline;i>=hope_line;i -= 3)
         {
-            error += (centerline[i].x-160)*weight[weight_index];
+            error += (centerline[i].x-80)*weight[weight_index];
             weight_count += weight[weight_index];
             weight_index++;
         }

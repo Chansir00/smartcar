@@ -9,17 +9,17 @@ DetectionResult LaneProcessor::detect(const Mat &inputImage)
     result.outputImage = inputImage.clone();
     // 预处理图像
     binaryThreshold(inputImage, result.binaryImage);
-    result.warpedImage = result.binaryImage;
-    // result.warpedImage = applyInversePerspectiveTransform(result.binaryImage);
+    ///result.warpedImage = result.binaryImage;
+    applyFastPerspectiveTransform(result.binaryImage, result.warpedImage);
     //  计算ROI区域的高度
     int roiHeight = image_h;
 
     // 计算白点分布
-    detectWhitePixels(result.binaryImage, roiHeight, whitePixels);
+    detectWhitePixels(result.warpedImage, roiHeight, whitePixels);
 
     // 检测车道点
-    detectLanePoints(result.binaryImage, roiHeight, whitePixels, leftLane, rightLane, leftMissedPoints, rightMissedPoints, leftMissedRadius, rightMissedRadius);
-    processCircle(leftLane, rightLane, result.outputImage, roiHeight, leftMissedRadius, rightMissedRadius);
+    detectLanePoints(result.warpedImage, roiHeight, whitePixels, leftLane, rightLane, leftMissedPoints, rightMissedPoints, leftMissedRadius, rightMissedRadius);
+    processCircle(leftLane, rightLane, result.warpedImage, roiHeight, leftMissedRadius, rightMissedRadius);
     cerr << circleState << endl;
     // 每帧结束时检查重置
     if (circleState == CIRCLE_INACTIVE)
@@ -31,7 +31,7 @@ DetectionResult LaneProcessor::detect(const Mat &inputImage)
 
     // 绘制检测结果
 
-    drawLanes(result.outputImage, roiHeight, leftLane, rightLane, centerLine);
+    drawLanes(result.warpedImage, roiHeight, leftLane, rightLane, centerLine);
 
     // 如果检测到斑马线，添加文本标注
     if (result.hasZebraCrossing)
@@ -39,7 +39,6 @@ DetectionResult LaneProcessor::detect(const Mat &inputImage)
         putText(result.binaryImage, "ZEBRA CROSSING", Point(20, 40),
                 FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255), 2);
     }
-
     return result;
 }
 int circleflag = 1;
@@ -71,15 +70,15 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
         {
             // circleState = CIRCLE_DETECTED;
         }
-        else if (rightMissedRadius > 0.9 && leftMissedRadius < 0.3 && leftLane.size() < 150)
+        else if (rightMissedRadius > 0.9 && leftMissedRadius < 0.3 && leftLane.size() < 0.6*image_h)
         {
             circleState = RIGHT_TURN;
         }
-        else if (rightMissedRadius < 0.3 && leftMissedRadius > 0.9 && leftLane.size() < 150)
+        else if (rightMissedRadius < 0.3 && leftMissedRadius > 0.9 && leftLane.size() < 0.6*image_h)
         {
             circleState = LEFT_TURN;
         }
-        else if (rightMissedRadius > 0.5 && leftMissedRadius > 0.5 && leftLane.size() > 150)
+        else if (rightMissedRadius > 0.5 && leftMissedRadius > 0.5 && leftLane.size() > 0.6*image_h)
         {
             circleState = CROSSING;
         }
@@ -99,7 +98,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
             circle(img, circlePointC, 5, Scalar(0, 0, 0), -1); // 半径 1，颜色黑色，厚度 -1 表示填充
             // 满足三个特征：A 点（正向变化且另一端平缓）、圆弧、C 点（负向变化且另一端平缓）
             // 从左车道中寻找一个有效的连接点（例如第一个有效点）
-            Point2f leftStart = leftLane[120].position;
+            Point2f leftStart = leftLane[image_h/2].position;
             // 生成虚拟路径：从左车道的连接点延伸到 C 点
             vector<Point> virtualPath;
             // isLeftLane = true ;//表示生成时向左偏移，具体根据你的车道配置而定
@@ -110,7 +109,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
             // 将生成的虚拟路径合并到左车道中，实现车道线拉线
             mergeVirtualPath(leftLane, virtualPath, true);
             // 状态转移到环内循迹（根据需要也可以直接进入 INSIDE 状态）
-            if (circlePointC.x < 50)
+            if (circlePointC.x < 30)
             {
                 circleState = CIRCLE_INSIDE;
             }
@@ -131,11 +130,11 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
     {
         checkExitCondition(leftLane, img, roiHeight);
         circle(img, circlePointB, 5, Scalar(0, 0, 0), -1); // 半径 1，颜色黑色，厚度 -1 表示填充
-        Point2f endPoint = Point2f(320, 0);
+        Point2f endPoint = Point2f(160, 0);
         // circle(img, rightLane[239].position, 5, Scalar(0, 0, 0), -1); // 半径 1，颜色黑色，厚度 -1 表示填充
         for (int i = roiHeight - 1; i > roiHeight - rightLane.size(); i--)
         {
-            if (rightLane[i - 1].position.x != 319 && rightLane[i].position.x == 319 && rightLane[i + 1].position.x == 319 && rightLane[i + 2].position.x == 319)
+            if (rightLane[i - 1].position.x != image_h-1 && rightLane[i].position.x == image_h-1 && rightLane[i + 1].position.x == image_h-1 && rightLane[i + 2].position.x == image_h-1)
             {
                 endPoint = rightLane[i].position;
             }
@@ -154,7 +153,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
     break;
     case LEFT_TURN:
     {
-        if (leftLane.size() > 200 && leftMissedRadius < 0.7)
+        if (leftLane.size() > 0.8*image_h && leftMissedRadius < 0.7)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -162,7 +161,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
     break;
     case RIGHT_TURN:
     {
-        if (rightLane.size() > 200 && rightMissedRadius < 0.7)
+        if (rightLane.size() > 0.8*image_h && rightMissedRadius < 0.7)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -170,7 +169,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
     break;
     case CROSSING:
     {
-        if (rightLane.size() < 150 && (leftMissedRadius < 0.7 || rightMissedRadius < 0.7))
+        if (rightLane.size() < 0.6*image_h && (leftMissedRadius < 0.7 || rightMissedRadius < 0.7))
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -242,6 +241,7 @@ void LaneProcessor::detectWhitePixels(const Mat &img, int roiHeight, std::vector
             else
                 break;
         }
+        cerr << "whitePixels[" << x << "] = " << whitePixels[x] << endl;
     }
 }
 
@@ -285,10 +285,10 @@ bool LaneProcessor::isLaneContinuous(const vector<TrackPoint>& lane, float max_d
     // 1. 数据有效性检查
     if (lane.size() < 10) return false;
 
-    // 2. 提取有效点（过滤x=0/319等无效值）
+    // 2. 提取有效点（过滤x=0/image_h-1等无效值）
     vector<Point> valid_points;
     for (const auto& pt : lane) {
-        if (pt.position.x > 1.0f && pt.position.x < 318.0f) { // 留1像素安全边界
+        if (pt.position.x > 1.0f && pt.position.x < image_h-1) { // 留1像素安全边界
             valid_points.emplace_back(pt.position.x, pt.position.y);
         }
     }
@@ -435,7 +435,8 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
         return;
     }
     size_t numPoints = min(leftLane.size(), rightLane.size());
-    const int estimatedLaneWidth = 175; // 假设车道宽度为 100 像素，你可以动态计算
+    //cerr<<"numPoints"<<numPoints<<endl;
+    const int estimatedLaneWidth = 80; // 假设车道宽度为 100 像素，你可以动态计算
     // 清空之前的中线数据
     centerLine.clear();
     Point leftJumpPoint(-1, -1);
@@ -459,7 +460,7 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
         // {
         //     rightLane[i].position.x = rightLane[i-1].position.x;
         // }
-        if (rightLane[i].position.x - rightLane[i - 1].position.x > 10) // 阈值10
+        if (rightLane[i].position.x - rightLane[i - 1].position.x > 20) // 阈值10
             rightJumpPoint = rightLane[i - 1].position;
         circle(image, rightLane[i].position, 2, Scalar(0, 0, 255), FILLED);
     }
@@ -508,7 +509,7 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
                         Point temp(
                             (leftPoint.x + rightPoint.x) / 2,
                             (leftPoint.y + rightPoint.y) / 2);
-                        Point end(159, 239);
+                        Point end(80, 119);
                         generateVirtualPath(end, temp, virtualPath, true);
                         centerLine.insert(centerLine.end(), virtualPath.begin(), virtualPath.end());
                         break;
@@ -569,7 +570,7 @@ bool LaneProcessor::findInflectionPoints(const vector<TrackPoint> &lane,
                                          Point2f &pointA, Point2f &pointC)
 {
     // 从索引 239 开始查找 A 点
-    size_t startIndex = 239;
+    size_t startIndex = 120;
     size_t candidateAIndex = startIndex;
     int maxJumpA = 5;
     // cerr << lane[239].position << endl;
@@ -614,7 +615,7 @@ bool LaneProcessor::findInflectionPoints(const vector<TrackPoint> &lane,
     // 得到 A 点位置
 
     // 从 A 点之后查找 C 点
-    size_t candidateCIndex = 230;
+    size_t candidateCIndex = 120;
     int maxJumpC = -5;
     // cerr << candidateCIndex << endl;
     for (size_t i = startIndex + 1 - lane.size(); i < candidateCIndex; i++)
@@ -888,4 +889,53 @@ void LaneProcessor::linearRegression(
 
     // 计算决定系数R²
     r_squared = (var_x == 0 || var_y == 0) ? 0 : (cov_xy * cov_xy) / (var_x * var_y);
+}
+
+void LaneProcessor::initPerspectiveMap(int outputWidth = 140, int outputHeight = 100) {
+    if (isMapInitialized) return;  // 避免重复初始化
+
+    mapX.create(outputHeight, outputWidth, CV_32FC1);  // 存储 x 坐标映射
+    mapY.create(outputHeight, outputWidth, CV_32FC1);  // 存储 y 坐标映射
+
+    // 透视变换矩阵（和之前一样）
+    Mat perspectiveMatrix = (Mat_<double>(3, 3) <<
+    -1.598485,1.971616,-131.134036,-0.000000,0.958183,-159.498816,0.000000,0.023463,-2.905579);
+
+    // 计算每个输出像素对应的输入像素位置
+    for (int y = 0; y < outputHeight; y++) {
+        for (int x = 0; x < outputWidth; x++) {
+            // 计算原始图像中的位置
+            double denominator = perspectiveMatrix.at<double>(2, 0) * x + 
+                                perspectiveMatrix.at<double>(2, 1) * y + 
+                                perspectiveMatrix.at<double>(2, 2);
+            
+            float srcX = (perspectiveMatrix.at<double>(0, 0) * x + 
+                        perspectiveMatrix.at<double>(0, 1) * y + 
+                        perspectiveMatrix.at<double>(0, 2)) / denominator;
+            
+            float srcY = (perspectiveMatrix.at<double>(1, 0) * x + 
+                        perspectiveMatrix.at<double>(1, 1) * y + 
+                        perspectiveMatrix.at<double>(1, 2)) / denominator;
+
+            mapX.at<float>(y, x) = srcX;  // 存储 x 坐标
+            mapY.at<float>(y, x) = srcY;  // 存储 y 坐标
+        }
+    }
+
+    isMapInitialized = true;  // 标记为已初始化
+}
+void LaneProcessor::applyFastPerspectiveTransform(const cv::Mat &input, cv::Mat &output) {
+    if (!isMapInitialized) {
+        initPerspectiveMap();  // 如果未初始化，先初始化
+    }
+
+    cv::remap(
+        input,           // 输入图像
+        output,          // 输出图像
+        mapX,            // x 映射表
+        mapY,            // y 映射表
+        cv::INTER_LINEAR,// 插值方式
+        cv::BORDER_CONSTANT,  // 边界填充
+        cv::Scalar(0)    // 填充值（黑色）
+    );
 }
