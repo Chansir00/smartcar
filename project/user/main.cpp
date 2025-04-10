@@ -17,14 +17,15 @@ int main()
         return -1;
     }
     // 设置摄像头分辨率
-    cap.set(CAP_PROP_FRAME_WIDTH, 320);
-    cap.set(CAP_PROP_FRAME_HEIGHT, 240);
-    cap.set(CAP_PROP_FPS, 30);
+    cap.set(CAP_PROP_FRAME_WIDTH, 160);
+    cap.set(CAP_PROP_FRAME_HEIGHT, 120);
+    cap.set(CAP_PROP_FPS, 60);
     cerr<<"摄像头分辨率: " << cap.get(CAP_PROP_FRAME_WIDTH) << "x" << cap.get(CAP_PROP_FRAME_HEIGHT) << endl;
 
     // 创建车道检测器    }
     LaneProcessor detector;
     detector.initializeVariables(image_w, image_h);
+
     // 主循环：读取帧并处理
     int new_socket = sendImageOverSocket();
     //int new_socket = 0;
@@ -35,7 +36,7 @@ int main()
     pit_ms_init(10, [&ctrl](){ 
         if(flag == 1){
         ctrl.pit_callback();
-        ctrl.motor_control(200, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
         }
     });
 
@@ -80,7 +81,7 @@ int main()
             vector<int> params = {cv::IMWRITE_JPEG_QUALITY, 90};
             try {
                 // 将图像编码为JPEG格式
-                cv::imencode(".jpg", result.outputImage, buf, params);
+                cv::imencode(".jpg", result.warpedImage, buf, params);
         
                 // 发送图像大小
                 unsigned long img_size = buf.size();
@@ -97,7 +98,7 @@ int main()
         {
             if(getchar() == 'k')
             {
-                imwrite("test.jpg", result.outputImage);
+                imwrite("test.jpg", result.binaryImage);
             }
         }
         if(++send_counter >= SEND_INTERVAL) {

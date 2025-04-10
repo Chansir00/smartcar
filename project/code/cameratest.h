@@ -8,8 +8,8 @@ using namespace cv;
 using namespace std;
 
 // 可配置参数
-const int image_h = 240;                // 图像高度
-const int image_w = 320;                // 图像宽度
+const int image_h = 120;                // 图像高度
+const int image_w = 160;                // 图像宽度
 const int INTEGRAL_STEPS = 5;           // 积分步长
 const int POINT_DISTANCE_THRESHOLD = 5; // 点间距阈值
 const float FLYING_RATIO = 1;           // 飞行占空比
@@ -58,6 +58,9 @@ bool binaryThreshold(const Mat &input, Mat &output);
 class LaneProcessor
 {
 public:
+
+    cv::Mat mapX, mapY;  // 存储像素映射关系（初始化时计算）
+    bool isMapInitialized = false;  // 是否已初始化映射表
 // member variables
     Point2f circlePointA, circlePointB, circlePointC;
     bool PointA_found = false;
@@ -109,7 +112,8 @@ public:
         vector<Point>::iterator end,
         float& k, float& b, float& r_squared
     );
-    void filterLanePoints(vector<Point>& lane);
+    void initPerspectiveMap(int outputWidth, int outputHeight);
+    void applyFastPerspectiveTransform(const cv::Mat &input, cv::Mat &output);
     
 
 };
