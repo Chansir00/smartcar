@@ -65,10 +65,14 @@ public:
     cv::Mat mapX, mapY;  // 存储像素映射关系（初始化时计算）
     bool isMapInitialized = false;  // 是否已初始化映射表
 // member variables
-    Point2f circlePointA, circlePointB, circlePointC;
-    bool PointA_found = false;
-    bool PointB_found = false;
-    bool PointC_found = false;
+    Point leftJumpPointA;
+    Point rightJumpPointA;
+    Point leftJumpPointB;
+    Point rightJumpPointB;
+    bool isleftJumpPointA = false;
+    bool isrightJumpPointA = false;
+    bool isleftJumpPointB = false;
+    bool isrightJumpPointB = false;
     vector<Point> virtualPath;
     CircleState circleState = CIRCLE_INACTIVE;
     vector<int> whitePixels;                       // 白点分布
@@ -99,8 +103,8 @@ public:
     bool isLaneContinuous(const vector<TrackPoint>& lane, float max_deviation);
     bool detectCircleEntry(const vector<TrackPoint> &left,
         const vector<TrackPoint> &right,float &leftMissedRadius, float &rightMissedRadius);
-    bool findInflectionPoints(const vector<TrackPoint> &lane,
-                              Point2f &pointA, Point2f &pointC);
+    void findInflectionPoints(const vector<TrackPoint> &lane,
+                              Point &pointA, Point &pointB,bool &pointA_found , bool &pointB_found,bool isleft);
     void generateVirtualPath(const Point2f &start, const Point2f &end,
         vector<Point> &path,
         bool isLeftLane);
@@ -116,8 +120,7 @@ public:
         float& k, float& b, float& r_squared
     );
     Mat ApplyInversePerspective(const cv::Mat& inputImage);
-    void applyFastPerspectiveTransform(const cv::Mat &input, cv::Mat &output);
-    
+    Point findInflectionPoint(const vector<TrackPoint>& points);
 
 };
 

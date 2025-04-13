@@ -81,7 +81,7 @@ int main()
             vector<int> params = {cv::IMWRITE_JPEG_QUALITY, 90};
             try {
                 // 将图像编码为JPEG格式
-                cv::imencode(".jpg", result.warpedImage, buf, params);
+                cv::imencode(".jpg", result.outputImage, buf, params);
         
                 // 发送图像大小
                 unsigned long img_size = buf.size();

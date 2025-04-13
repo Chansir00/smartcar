@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/chan/Documents/app_317/smartcar/project/user
+CMAKE_SOURCE_DIR = /home/chan/Documents/smartcar/project/user
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/chan/Documents/app_317/smartcar/project/out
+CMAKE_BINARY_DIR = /home/chan/Documents/smartcar/project/out
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -81,14 +81,14 @@ clean: CMakeFiles/project.dir/clean
 CMakeFiles/project.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/chan/Documents/app_317/smartcar/project/out/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26 "Built target project"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26 "Built target project"
 .PHONY : CMakeFiles/project.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/project.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/chan/Documents/app_317/smartcar/project/out/CMakeFiles 26
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/chan/Documents/smartcar/project/out/CMakeFiles 26
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/project.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/chan/Documents/app_317/smartcar/project/out/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/chan/Documents/smartcar/project/out/CMakeFiles 0
 .PHONY : CMakeFiles/project.dir/rule
 
 # Convenience name for target.

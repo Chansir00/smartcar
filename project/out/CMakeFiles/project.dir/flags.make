@@ -4,7 +4,7 @@
 # compile CXX with /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/chan/Documents/app_317/smartcar/project/user/../user -I/home/chan/Documents/app_317/smartcar/project/user/../code -I/home/chan/Documents/app_317/smartcar/project/user/../../libraries/zf_common -I/home/chan/Documents/app_317/smartcar/project/user/../../libraries/zf_device -I/home/chan/Documents/app_317/smartcar/project/user/../../libraries/zf_driver -I/home/chan/Documents/app_317/smartcar/project/user/../../libraries/zf_components -isystem /path/to/install/opencv/include/opencv4
+CXX_INCLUDES = -I/home/chan/Documents/smartcar/project/user/../user -I/home/chan/Documents/smartcar/project/user/../code -I/home/chan/Documents/smartcar/project/user/../../libraries/zf_common -I/home/chan/Documents/smartcar/project/user/../../libraries/zf_device -I/home/chan/Documents/smartcar/project/user/../../libraries/zf_driver -I/home/chan/Documents/smartcar/project/user/../../libraries/zf_components -isystem /path/to/install/opencv/include/opencv4
 
 CXX_FLAGS =  -O3 -pthread -Wall -std=gnu++17
 
