@@ -10,6 +10,8 @@ using namespace std;
 // 可配置参数
 const int image_h = 120;                // 图像高度
 const int image_w = 160;                // 图像宽度
+const int wrapped_image_h = 100;        // 透视变换后图像高度
+const int wrapped_image_w = 114;        // 透视变换后图像宽度
 const int INTEGRAL_STEPS = 5;           // 积分步长
 const int POINT_DISTANCE_THRESHOLD = 5; // 点间距阈值
 const float FLYING_RATIO = 1;           // 飞行占空比
@@ -18,6 +20,7 @@ const int CIRCLE_ACCURACY = 10;         // 圆环检测精度
 const int WIDTH_EXTEND = 90;            // 宽度扩展量
 const int WIDTH_EXTEND2 = 70;           // 辅助宽度扩展
 extern int debugmode;                  // true调试模式
+
 
 
 // 数据结构
@@ -112,7 +115,7 @@ public:
         vector<Point>::iterator end,
         float& k, float& b, float& r_squared
     );
-    void initPerspectiveMap(int outputWidth, int outputHeight);
+    Mat ApplyInversePerspective(const cv::Mat& inputImage);
     void applyFastPerspectiveTransform(const cv::Mat &input, cv::Mat &output);
     
 
