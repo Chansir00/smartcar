@@ -22,7 +22,7 @@ int main() {
     serv_addr.sin_port = htons(PORT);
     //192.168.10.92;192.168.66.92
     // 将IP地址从字符串转换为二进制格式
-    if (inet_pton(AF_INET, "192.168.108.164", &serv_addr.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, "192.168.84.164", &serv_addr.sin_addr) <= 0) {
         std::cerr << "无效的地址/地址不支持！" << std::endl;
         return -1;
     }
@@ -37,7 +37,8 @@ int main() {
 
     cv::Mat frame;
     std::vector<uchar> buf;
-
+    cv::namedWindow("Client", cv::WINDOW_NORMAL); // 设置窗口可调大小
+    cv::resizeWindow("Client", 1280, 720);         // 设置窗口初始大小
     try {
         while (true) {
             // 接收图像大小
