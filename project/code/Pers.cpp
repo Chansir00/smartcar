@@ -33,5 +33,47 @@ Mat applyInversePerspectiveTransform(const Mat &image) {
 }
 
 
+Mat ApplyInversePerspective(const cv::Mat &inputImage)
+{
+    const int RESULT_ROW = 100;
+    const int RESULT_COL = 114;
 
+    // 定义逆透视矩阵（double 类型）
+    cv::Mat change_un_Mat = (cv::Mat_<double>(3, 3) << -1.508309, 2.023527, -138.070108, 0.072206, 0.613826, -102.201813, 0.001605, 0.023339, -2.756092);
 
+    // 创建输出图像（结果图，大小为 RESULT_ROW x RESULT_COL）
+    cv::Mat result(RESULT_ROW, RESULT_COL, inputImage.type(), cv::Scalar(0));
+
+    for (int j = 0; j < RESULT_ROW; ++j)
+    {
+        for (int i = 0; i < RESULT_COL; ++i)
+        {
+
+            // 齐次坐标变换计算原图上的坐标
+            double x = (change_un_Mat.at<double>(0, 0) * i +
+                        change_un_Mat.at<double>(0, 1) * j +
+                        change_un_Mat.at<double>(0, 2));
+            double y = (change_un_Mat.at<double>(1, 0) * i +
+                        change_un_Mat.at<double>(1, 1) * j +
+                        change_un_Mat.at<double>(1, 2));
+            double w = (change_un_Mat.at<double>(2, 0) * i +
+                        change_un_Mat.at<double>(2, 1) * j +
+                        change_un_Mat.at<double>(2, 2));
+
+            int src_x = static_cast<int>(x / w);
+            int src_y = static_cast<int>(y / w);
+
+            // 边界检查
+            if (src_x >= 0 && src_x < inputImage.cols && src_y >= 0 && src_y < inputImage.rows)
+            {
+                result.at<uchar>(j, i) = inputImage.at<uchar>(src_y, src_x);
+            }
+            else
+            {
+                result.at<uchar>(j, i) = 0; // 黑色填充
+            }
+        }
+    }
+
+    return result;
+}

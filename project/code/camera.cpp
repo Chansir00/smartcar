@@ -73,7 +73,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &leftLane,
     {
 
         // 先通过左车道单调性和右车道丢点率判断是否可能进入环岛
-        if (leftMissedRadius<0.1&&rightMissedRadius>0.1&&rightMissedRadius<0.5 && leftLane.size()>0.6 * image_h)
+        if (isLaneContinuous(leftLane,0.1)&&leftMissedRadius<0.1&&rightMissedRadius>0.1&&rightMissedRadius<0.5 && leftLane.size()>0.6 * image_h)
         {
             circleState = CIRCLE_DETECTED;
         }
@@ -559,6 +559,7 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
             // 绘制中线
 
             polylines(image, centerLine, false, Scalar(0, 255, 0), 1);
+            cerr<<"centerLine: " << centerLine[numPoints/2] << endl;
         }
         else
         {
@@ -895,118 +896,4 @@ void LaneProcessor::linearRegression(
     r_squared = (var_x == 0 || var_y == 0) ? 0 : (cov_xy * cov_xy) / (var_x * var_y);
 }
 
-#include <opencv2/opencv.hpp>
 
-cv::Mat ApplyInversePerspective(const cv::Mat &inputImage)
-{
-    const int RESULT_ROW = 100;
-    const int RESULT_COL = 114;
-
-    // 定义逆透视矩阵（double 类型）
-    cv::Mat change_un_Mat = (cv::Mat_<double>(3, 3) << -1.508309, 2.023527, -138.070108, 0.072206, 0.613826, -102.201813, 0.001605, 0.023339, -2.756092);
-
-    // 创建输出图像（结果图，大小为 RESULT_ROW x RESULT_COL）
-    cv::Mat result(RESULT_ROW, RESULT_COL, inputImage.type(), cv::Scalar(0));
-
-    for (int j = 0; j < RESULT_ROW; ++j)
-    {
-        for (int i = 0; i < RESULT_COL; ++i)
-        {
-
-            // 齐次坐标变换计算原图上的坐标
-            double x = (change_un_Mat.at<double>(0, 0) * i +
-                        change_un_Mat.at<double>(0, 1) * j +
-                        change_un_Mat.at<double>(0, 2));
-            double y = (change_un_Mat.at<double>(1, 0) * i +
-                        change_un_Mat.at<double>(1, 1) * j +
-                        change_un_Mat.at<double>(1, 2));
-            double w = (change_un_Mat.at<double>(2, 0) * i +
-                        change_un_Mat.at<double>(2, 1) * j +
-                        change_un_Mat.at<double>(2, 2));
-
-            int src_x = static_cast<int>(x / w);
-            int src_y = static_cast<int>(y / w);
-
-            // 边界检查
-            if (src_x >= 0 && src_x < inputImage.cols && src_y >= 0 && src_y < inputImage.rows)
-            {
-                result.at<uchar>(j, i) = inputImage.at<uchar>(src_y, src_x);
-            }
-            else
-            {
-                result.at<uchar>(j, i) = 0; // 黑色填充
-            }
-        }
-    }
-
-    return result;
-}
-#include <opencv2/opencv.hpp>
-
-Mat LaneProcessor::ApplyInversePerspective(const cv::Mat &inputImage)
-{
-    const int RESULT_ROW = 100;
-    const int RESULT_COL = 114;
-
-    // 定义逆透视矩阵（double 类型）
-    cv::Mat change_un_Mat = (cv::Mat_<double>(3, 3) << -1.330861, 1.785465, -124.138197,
-                             0.063711, 0.541612, -94.298591,
-                             0.001416, 0.020594, -2.463509);
-
-    // 创建输出图像（结果图，大小为 RESULT_ROW x RESULT_COL）
-    cv::Mat result(RESULT_ROW, RESULT_COL, inputImage.type(), cv::Scalar(0));
-
-    for (int j = 0; j < RESULT_ROW; ++j)
-    {
-        for (int i = 0; i < RESULT_COL; ++i)
-        {
-
-            // 齐次坐标变换计算原图上的坐标
-            double x = (change_un_Mat.at<double>(0, 0) * i +
-                        change_un_Mat.at<double>(0, 1) * j +
-                        change_un_Mat.at<double>(0, 2));
-            double y = (change_un_Mat.at<double>(1, 0) * i +
-                        change_un_Mat.at<double>(1, 1) * j +
-                        change_un_Mat.at<double>(1, 2));
-            double w = (change_un_Mat.at<double>(2, 0) * i +
-                        change_un_Mat.at<double>(2, 1) * j +
-                        change_un_Mat.at<double>(2, 2));
-
-            int src_x = static_cast<int>(x / w);
-            int src_y = static_cast<int>(y / w);
-
-            // 边界检查
-            if (src_x >= 0 && src_x < inputImage.cols && src_y >= 0 && src_y < inputImage.rows)
-            {
-                result.at<uchar>(j, i) = inputImage.at<uchar>(src_y, src_x);
-            }
-            else
-            {
-                result.at<uchar>(j, i) = 0; // 黑色填充
-            }
-        }
-    }
-
-    return result;
-}
-Point LaneProcessor::findInflectionPoint(const vector<TrackPoint> &points)
-{
-    int n = points.size();
-    if (n < 3)
-        return {-1, -1}; // 至少3个点才能判断拐点
-
-    // 从倒数第二个点往前遍历（排除边界）
-    for (int i = n - 2; i > 0; --i)
-    {
-        double dy1 = points[i].position.x - points[i - 1].position.x; // 当前点和前一个点差值
-        double dy2 = points[i + 1].position.x - points[i].position.x; // 后一个点和当前点差值
-
-        // 判断趋势是否发生变化（一个正一个负）
-        if (dy1 * dy2 < 0)
-        {
-            return points[i].position; // 当前点是拐点
-        }
-    }
-
-    return {0, 0}; // 没找到拐点
-}
