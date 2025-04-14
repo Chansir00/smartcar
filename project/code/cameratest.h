@@ -69,11 +69,10 @@ public:
     Point rightJumpPointA;
     Point leftJumpPointB;
     Point rightJumpPointB;
-    bool isleftJumpPointA = false;
-    bool isrightJumpPointA = false;
-    bool isleftJumpPointB = false;
-    bool isrightJumpPointB = false;
-    vector<Point> virtualPath;
+    bool isleftJumpvalid = false;
+    bool isrightJumpvalid= false;
+    vector<Point> rightvirtualPath;
+    vector<Point> leftvirtualPath;
     CircleState circleState = CIRCLE_INACTIVE;
     vector<int> whitePixels;                       // 白点分布
     vector<TrackPoint> leftLane;  // 左车道
@@ -104,7 +103,8 @@ public:
     bool detectCircleEntry(const vector<TrackPoint> &left,
         const vector<TrackPoint> &right,float &leftMissedRadius, float &rightMissedRadius);
     void findInflectionPoints(const vector<TrackPoint> &lane,
-                              Point &pointA, Point &pointB,bool &pointA_found , bool &pointB_found,bool isleft);
+                              Point &pointA, Point &pointB,
+                              bool &isValid);
     void generateVirtualPath(const Point2f &start, const Point2f &end,
         vector<Point> &path,
         bool isLeftLane);
