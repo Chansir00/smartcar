@@ -3,7 +3,7 @@
 
 
 #include<zf_common_headfile.h>
-
+#define BEEP "/dev/zf_driver_gpio_beep"
 using namespace cv;
 using namespace std;
 
@@ -34,7 +34,8 @@ struct TrackPoint
 enum CircleState
 {
     CIRCLE_INACTIVE,    // 未检测到环岛
-    CIRCLE_DETECTED,       // 检测到环岛入口
+    LEFT_CIRCLE_DETECTED,       // 检测到环岛入口
+    RIGHT_CIRCLE_DETECTED,      // 检测到环岛入口
     CIRCLE_APPROACHING, // 正在接近环岛（检测到入口）
     CIRCLE_INSIDE,      // 正在环岛内循迹
     CIRCLE_EXITING,      // 正在离开环岛
@@ -71,6 +72,8 @@ public:
     Point rightJumpPointB;
     bool isleftJumpvalid = false;
     bool isrightJumpvalid= false;
+    bool isleftLanecontinuous = false;
+    bool isrightLanecontinuous = false;
     vector<Point> rightvirtualPath;
     vector<Point> leftvirtualPath;
     CircleState circleState = CIRCLE_INACTIVE;
@@ -99,7 +102,7 @@ public:
     void resetCircleState();
 
     // 辅助函数
-    bool isLaneContinuous(const vector<TrackPoint>& lane, float max_deviation);
+    bool isLaneContinuous(const vector<TrackPoint>& lane);
     bool detectCircleEntry(const vector<TrackPoint> &left,
         const vector<TrackPoint> &right,float &leftMissedRadius, float &rightMissedRadius);
     void findInflectionPoints(const vector<TrackPoint> &lane,

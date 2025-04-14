@@ -308,7 +308,7 @@ public :
         // 初始化PID参数
         init_pid(pidLeft, 1.25f, 0.245f, 0.10f, PWM_MAX,DELTA_PID);       //you
         init_pid(pidRight, 1.25f, 0.205f, 0.18f, PWM_MAX,DELTA_PID);    //zuo
-        init_pid(pidservo, 3.0f, 0.0f, 0.3f, 367.0f, POSITION_PID);
+        init_pid(pidservo, 8.0f, 0.0f, 0.3f, 367.0f, POSITION_PID);
         init_serial();
     }
 
@@ -433,29 +433,62 @@ public :
         pwm_set_duty(SERVO_MOTOR1_PWM, target_pwm);
         cerr << "pwm" << target_pwm <<endl; 
     }
-    float Err_sum(const vector<Point> &centerline)
+    float Err_sum(const vector<Point> &centerline) 
     {
-    int total_steps = 38;
-    cerr<<"total_steps: "<<total_steps<<endl;
-    int weight_size = sizeof(weight) / sizeof(weight[0]); // 正确计算元素数目
-    if (total_steps > weight_size) {
-        cerr << "权重数组尺寸不足！" << endl;
-        return 0.0f;
-    }
-        int i = 0;
-        float error = 0;
-        float weight_count = 0;
-        int weight_index = 0;
-
-        for (i = centerline.size()-5;i>=centerline.size()-43;i--)
-        {
-            cerr<<"centerline[i].x: "<<centerline[i].x<<endl;
-            error += (centerline[i].x-80)*weight[weight_index];
-            weight_count += weight[weight_index];
-            weight_index++;
+        // 1. 检查输入有效性
+        if (centerline.empty()) {
+            cerr << "错误：centerline 是空的！" << endl;
+            return 0.0f;
         }
-        error = error/weight_count;
-        return error;
+    
+        // 2. 检查权重数组
+        const int weight_size = sizeof(weight) / sizeof(weight[0]);
+        const int total_steps = 38; // 需要计算的步数
+        
+        if (weight_size == 0) {
+            cerr << "错误：权重数组为空！" << endl;
+            return 0.0f;
+        }
+        if (total_steps > weight_size) {
+            cerr << "错误：权重数组尺寸不足（需要 " << total_steps 
+                 << "，实际 " << weight_size << "）" << endl;
+            return 0.0f;
+        }
+    
+        // 3. 检查 centerline 是否足够长
+        const int required_size = 43; // 从 size-5 到 size-43 需要至少 43 个点
+        if (centerline.size() < required_size) {
+            cerr << "错误：centerline 长度不足（需要 " << required_size 
+                 << "，实际 " << centerline.size() << "）" << endl;
+            return 0.0f;
+        }
+    
+        // 4. 计算加权误差
+        float error = 0.0f;
+        float weight_count = 0.0f;
+    
+        for (int i = 0; i < total_steps; ++i) 
+        {
+            // 从 centerline.size()-5 开始向前取 total_steps 个点
+            int idx = centerline.size() - 5 - i;
+            
+            // 额外保护（理论上不需要，因为前面已经检查过）
+            if (idx < 0 || idx >= centerline.size()) {
+                cerr << "错误：索引越界（idx=" << idx << "）" << endl;
+                return 0.0f;
+            }
+    
+            error += (centerline[idx].x - 80) * weight[i];
+            weight_count += weight[i];
+        }
+    
+        // 5. 检查权重和是否为0（避免除零）
+        if (fabs(weight_count) < 1e-6f) {
+            cerr << "错误：权重和为0！" << endl;
+            return 0.0f;
+        }
+    
+        return error / weight_count;
     }
     
 private:
