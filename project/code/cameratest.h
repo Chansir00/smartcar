@@ -119,7 +119,7 @@ public:
         vector<Point>::iterator end,
         float& k, float& b, float& r_squared
     );
-    Mat ApplyInversePerspective(const cv::Mat& inputImage);
+
     Point findInflectionPoint(const vector<TrackPoint>& points);
 
 };

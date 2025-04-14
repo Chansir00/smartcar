@@ -17,7 +17,7 @@ constexpr uint8_t weight[39] = {  // 将数组长度调整为38
     1,3,11,13,13,15,15,              //0-7
     15,17,17,19,19,20,20,17,9, //8-16
     9,7,7,5,5,3,3,1,1,   //17-25
-    1,1,1,1,1,1,1,1,1,3,4,5,6        //26-39     
+    1,1,1,1,1,1,1,1,1,3,4,5,6,1        //26-39     
 };
 
 using namespace std;
@@ -157,8 +157,8 @@ private:
     std::mutex encoder_mutex;  // 添加互斥锁
     int16 encoder_left = 0;
     int16 encoder_right = 0;
-    int car_startline = 200;        // 起始行
-    int hope_line = 85;            // 目标行
+    int car_startline = 115;        // 起始行
+    int hope_line = 77;            // 目标行
 
     void init_serial() {
         serial_fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
@@ -435,11 +435,10 @@ public :
     }
     float Err_sum(const vector<Point> &centerline)
     {
-    if(centerline.size()<car_startline-hope_line) 
-        hope_line = 120-centerline.size();
-    int total_steps = (car_startline - hope_line) / 3 + 1;
+    int total_steps = 38;
     cerr<<"total_steps: "<<total_steps<<endl;
-    if (total_steps > sizeof(weight)) {
+    int weight_size = sizeof(weight) / sizeof(weight[0]); // 正确计算元素数目
+    if (total_steps > weight_size) {
         cerr << "权重数组尺寸不足！" << endl;
         return 0.0f;
     }
@@ -448,8 +447,9 @@ public :
         float weight_count = 0;
         int weight_index = 0;
 
-        for (i = car_startline;i>=hope_line;i -= 3)
+        for (i = centerline.size()-5;i>=centerline.size()-43;i--)
         {
+            cerr<<"centerline[i].x: "<<centerline[i].x<<endl;
             error += (centerline[i].x-80)*weight[weight_index];
             weight_count += weight[weight_index];
             weight_index++;

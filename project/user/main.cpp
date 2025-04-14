@@ -3,12 +3,13 @@
 // g++ -g -o main main.cpp src/camera.cpp -Iinclude/ `pkg-config --cflags --libs opencv4`;./main
 
 int debugmode = 2;
-const int camera = 0;
+const int camera = 1;
 int flag = 0 ;
 
 
 int main()
 {
+    ips200_init("/dev/fb0");
     // 打开摄像头
     VideoCapture cap(camera, CAP_V4L2); // 0 表示默认摄像头，如果有多个摄像头可以尝试 1, 2, ...
     if (!cap.isOpened())
@@ -36,7 +37,7 @@ int main()
     pit_ms_init(10, [&ctrl](){ 
         if(flag == 1){
         ctrl.pit_callback();
-        ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(100, 0, 0);  // 将控制逻辑移到定时器回调200
         }
     });
 
@@ -46,6 +47,7 @@ int main()
 
     while (true)
     {
+        ips200_clear();
         Mat frame;
         cap >> frame; // 从摄像头读取一帧
         if (frame.empty())
@@ -98,7 +100,7 @@ int main()
         {
             if(getchar() == 'k')
             {
-                imwrite("test.jpg", result.binaryImage);
+                imwrite("test.jpg", result.outputImage);
             }
         }
         if(++send_counter >= SEND_INTERVAL) {
