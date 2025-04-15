@@ -199,7 +199,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     break;
     case CROSSING:
     {
-        if (RightLane.size() < 0.4 * image_h && (leftMissedRadius < 0.7 || rightMissedRadius < 0.7))
+        if ((rightJumpPointB.y>60&&leftJumpPointB.y>60)||(isleftLanecontinuous&&isrightLanecontinuous))
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -221,6 +221,11 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             rightJumpPointB.x = leftJumpPointB.x + 40;
             rightJumpPointB.y = leftJumpPointB.y;
         }
+        else
+        {
+            leftJumpPointA = leftLane[leftLane.size() - 1].position;
+            rightJumpPointA = rightLane[rightLane.size() - 1].position;
+        }
         generateVirtualPath(rightJumpPointA, rightJumpPointB, rightvirtualPath, true);
         generateVirtualPath(leftJumpPointA, leftJumpPointB, leftvirtualPath, true);
         mergeVirtualPath(LeftLane, leftvirtualPath, true);
@@ -230,18 +235,18 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     default:
         break;
     }
-    // cerr << "circleflag: " << circleflag << endl;
-    // cerr << "isleftJumpvalid: " << isleftJumpvalid << endl;
-    // cerr << "isrightJumpvalid: " << isrightJumpvalid << endl;
-    // cerr << "leftJumpPointA: " << leftJumpPointA << endl;
-    // cerr << "leftJumpPointB: " << leftJumpPointB << endl;
-    // cerr << "rightJumpPointA: " << rightJumpPointA << endl;
-    // cerr << "rightJumpPointB: " << rightJumpPointB << endl;
-    // cerr << "isleftLanecontinuous: " << isleftLanecontinuous << endl;
-    // cerr << "isrightLanecontinuous: " << isrightLanecontinuous << endl;
-    // cerr << circleState << endl;
-    // cerr << "rightMissedRadius: " << rightMissedRadius << endl;
-    // cerr << "leftMissedRadius: " << leftMissedRadius << endl;
+    cerr << "circleflag: " << circleflag << endl;
+    cerr << "isleftJumpvalid: " << isleftJumpvalid << endl;
+    cerr << "isrightJumpvalid: " << isrightJumpvalid << endl;
+    cerr << "leftJumpPointA: " << leftJumpPointA << endl;
+    cerr << "leftJumpPointB: " << leftJumpPointB << endl;
+    cerr << "rightJumpPointA: " << rightJumpPointA << endl;
+    cerr << "rightJumpPointB: " << rightJumpPointB << endl;
+    cerr << "isleftLanecontinuous: " << isleftLanecontinuous << endl;
+    cerr << "isrightLanecontinuous: " << isrightLanecontinuous << endl;
+    cerr << circleState << endl;
+    cerr << "rightMissedRadius: " << rightMissedRadius << endl;
+    cerr << "leftMissedRadius: " << leftMissedRadius << endl;
 }
 // initializeVariables
 void LaneProcessor::initializeVariables(int image_w, int image_h)
@@ -286,7 +291,7 @@ bool binaryThreshold(const Mat &input, Mat &output)
 
     Mat img, blurred;
     cvtColor(input, img, COLOR_BGR2GRAY);
-    GaussianBlur(img, blurred, Size(5, 5), 0);
+    GaussianBlur(img, blurred, Size(3, 3), 0);
     threshold(blurred, output, 0, 255, THRESH_BINARY | THRESH_OTSU);
     return true;
 }
@@ -566,7 +571,7 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
             }
         }
 
-        //cerr << "centerLine size: " << centerLine.size() << endl;
+        cerr << "centerLine size: " << centerLine.size() << endl;
         // 只有当中线有点时才绘制
         if (!centerLine.empty())
         {
