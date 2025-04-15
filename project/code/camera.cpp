@@ -19,7 +19,7 @@ DetectionResult LaneProcessor::detect(const Mat &inputImage)
     // 检测车道点
     detectLanePoints(result.binaryImage, roiHeight, whitePixels, leftLane, rightLane, leftMissedPoints, rightMissedPoints, leftMissedRadius, rightMissedRadius);
     processCircle(leftLane, rightLane, result.binaryImage, roiHeight, leftMissedRadius, rightMissedRadius);
-    cerr << circleState << endl;
+
     // 每帧结束时检查重置
     if (circleState == CIRCLE_INACTIVE)
     {
@@ -53,7 +53,6 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         circleflag = 1;
         countcircle = 0;
     }
-    cerr << "circleflag: " << circleflag << endl;
     if (circleflag == 0)
     {
         countcircle++;
@@ -63,14 +62,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     findInflectionPoints(LeftLane, leftJumpPointA, leftJumpPointB, isleftJumpvalid);
     isleftLanecontinuous = isLaneContinuous(LeftLane);
     isrightLanecontinuous = isLaneContinuous(RightLane);
-    cerr << "isleftJumpvalid: " << isleftJumpvalid << endl;
-    cerr << "isrightJumpvalid: " << isrightJumpvalid << endl;
-    cerr << "leftJumpPointA: " << leftJumpPointA << endl;
-    cerr << "leftJumpPointB: " << leftJumpPointB << endl;
-    cerr << "rightJumpPointA: " << rightJumpPointA << endl;
-    cerr << "rightJumpPointB: " << rightJumpPointB << endl;
-    cerr << "isleftLanecontinuous: " << isleftLanecontinuous << endl;
-    cerr << "isrightLanecontinuous: " << isrightLanecontinuous << endl;
+
 
     switch (circleState)
     {
@@ -238,8 +230,18 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     default:
         break;
     }
-    cerr << "rightMissedRadius: " << rightMissedRadius << endl;
-    cerr << "leftMissedRadius: " << leftMissedRadius << endl;
+    // cerr << "circleflag: " << circleflag << endl;
+    // cerr << "isleftJumpvalid: " << isleftJumpvalid << endl;
+    // cerr << "isrightJumpvalid: " << isrightJumpvalid << endl;
+    // cerr << "leftJumpPointA: " << leftJumpPointA << endl;
+    // cerr << "leftJumpPointB: " << leftJumpPointB << endl;
+    // cerr << "rightJumpPointA: " << rightJumpPointA << endl;
+    // cerr << "rightJumpPointB: " << rightJumpPointB << endl;
+    // cerr << "isleftLanecontinuous: " << isleftLanecontinuous << endl;
+    // cerr << "isrightLanecontinuous: " << isrightLanecontinuous << endl;
+    // cerr << circleState << endl;
+    // cerr << "rightMissedRadius: " << rightMissedRadius << endl;
+    // cerr << "leftMissedRadius: " << leftMissedRadius << endl;
 }
 // initializeVariables
 void LaneProcessor::initializeVariables(int image_w, int image_h)
@@ -564,7 +566,7 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
             }
         }
 
-        cerr << "centerLine size: " << centerLine.size() << endl;
+        //cerr << "centerLine size: " << centerLine.size() << endl;
         // 只有当中线有点时才绘制
         if (!centerLine.empty())
         {
