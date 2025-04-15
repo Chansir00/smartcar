@@ -62,5 +62,6 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp"
     },
-    "cmake.sourceDirectory": "/home/chan/Documents/app_317/smartcar/project/user"
+    "cmake.sourceDirectory": "/home/chan/Documents/app_317/smartcar/project/user",
+    "cmake.ignoreCMakeListsMissing": true
 }

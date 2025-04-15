@@ -47,7 +47,6 @@ int main()
 
     while (true)
     {
-        ips200_clear();
         Mat frame;
         cap >> frame; // 从摄像头读取一帧
         if (frame.empty())
