@@ -71,10 +71,12 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     cerr << "rightJumpPointB: " << rightJumpPointB << endl;
     cerr << "isleftLanecontinuous: " << isleftLanecontinuous << endl;
     cerr << "isrightLanecontinuous: " << isrightLanecontinuous << endl;
+
     switch (circleState)
     {
     case CIRCLE_INACTIVE:
     {
+        gpio_set_level(BEEP, 0x0);
 
         // 先通过左车道单调性和右车道丢点率判断是否可能进入环岛
         if (isrightJumpvalid&&isleftLanecontinuous&&leftMissedRadius<0.1&&rightMissedRadius<0.5 && LeftLane.size()>0.6 * image_h)
@@ -106,7 +108,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
 
     case RIGHT_CIRCLE_DETECTED:
     {
-        
+        gpio_set_level(BEEP, 0x1);
         // if (rightJumpPointB.x < 40)
         // {
         //     circleState = CIRCLE_INSIDE;
@@ -131,6 +133,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     break;
     case LEFT_CIRCLE_DETECTED:
     {
+        gpio_set_level(BEEP, 0x1);
         // if (leftJumpPointB.x < 40)
         // {
         //    circleState = CIRCLE_INSIDE;
