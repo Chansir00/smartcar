@@ -20,7 +20,7 @@ int main()
     // 设置摄像头分辨率
     cap.set(CAP_PROP_FRAME_WIDTH, 160);
     cap.set(CAP_PROP_FRAME_HEIGHT, 120);
-    cap.set(CAP_PROP_FPS, 60);
+    //cap.set(CAP_PROP_FPS, 60);
     cerr<<"摄像头分辨率: " << cap.get(CAP_PROP_FRAME_WIDTH) << "x" << cap.get(CAP_PROP_FRAME_HEIGHT) << endl;
 
     // 创建车道检测器    }

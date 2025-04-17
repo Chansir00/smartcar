@@ -22,7 +22,7 @@ int main() {
     serv_addr.sin_port = htons(PORT);
     //192.168.10.92;192.168.66.92
     // 将IP地址从字符串转换为二进制格式
-    if (inet_pton(AF_INET, "192.168.31.164", &serv_addr.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, "192.168.84.164", &serv_addr.sin_addr) <= 0) {
         std::cerr << "无效的地址/地址不支持！" << std::endl;
         return -1;
     }

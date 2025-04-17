@@ -65,6 +65,8 @@ public:
 
     cv::Mat mapX, mapY;  // 存储像素映射关系（初始化时计算）
     bool isMapInitialized = false;  // 是否已初始化映射表
+    int startline ; // 起始线
+    int numPoints;
 // member variables
     Point leftJumpPointA;
     Point rightJumpPointA;
