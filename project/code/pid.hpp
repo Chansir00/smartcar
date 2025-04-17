@@ -164,7 +164,10 @@ private:
     int16 encoder_right = 0;
     int car_startline = 115; // 起始行
     int hope_line = 77;      // 目标行
-
+    float lsd_p = 0.05f;      
+    float lsd_pl = 0.2f;     // 滞后比例系数
+    float lsd_d = 0.4f;      
+    int16_t encoder_err_last = 0;
     void init_serial()
     {
         serial_fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
@@ -429,38 +432,44 @@ public:
         //}
     }
 
-    void motor_control(int speed, float k, int limit)
-    {
+    void motor_control(int speed, float k, int limit) {
         std::lock_guard<std::mutex> lock(encoder_mutex);
         // 获取编码器值
-        pidLeft.actual = encoder_left;
+        pidLeft.actual =  encoder_left;
         pidRight.actual = -encoder_right;
 
-        // cerr << "left: " << pidLeft.actual << " right: " << pidRight.actual << endl;
-        //  PID计算
-        float raw_outL = calculate_pid(pidLeft, speed);
-        float raw_outR = calculate_pid(pidRight, speed);
-        gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 0 : 1); // 假设0为正转
-        gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 0 : 1); // 假设0为转
-        float outL = std::clamp(abs(raw_outL), 0.0f, 0.40f * static_cast<float>(PWM_MAX));
-        float outR = std::clamp(abs(raw_outR), 0.0f, 0.40f * static_cast<float>(PWM_MAX));
-        // float outL = calculate_pid(pidLeft, speed);
-        // float outR = calculate_pid(pidRight, speed);
+        //cerr << "left: " << pidLeft.actual << " right: " << pidRight.actual << endl;
+        // PID计算
+        pidLeft.target = speed;
+        pidRight.target = speed;
 
-        // outL = std::clamp(abs(outL), 0.0f, static_cast<float>(PWM_MAX));
-        // outR = std::clamp(abs(outR), 0.0f, static_cast<float>(PWM_MAX));
+        LSD_Control(); 
 
+        float raw_outL = calculate_pid(pidLeft, pidLeft.target);
+        float raw_outR = calculate_pid(pidRight, pidRight.target);
+        gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 0 : 1);  // 假设0为正转
+        gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 0 : 1);  // 假设0为转
+        float outL = std::clamp(abs(raw_outL), 0.0f, 0.40f*static_cast<float>(PWM_MAX));
+        float outR = std::clamp(abs(raw_outR), 0.0f, 0.40f*static_cast<float>(PWM_MAX));
+        //float outL = calculate_pid(pidLeft, speed);
+        //float outR = calculate_pid(pidRight, speed);
+
+        //outL = std::clamp(abs(outL), 0.0f, static_cast<float>(PWM_MAX));
+        //outR = std::clamp(abs(outR), 0.0f, static_cast<float>(PWM_MAX));
+  
         // 设置电机输出
         pwm_set_duty(MOTOR1_PWM, outL);
         pwm_set_duty(MOTOR2_PWM, outR);
-        // cerr << "dutyl: " << outL <<"dutyr: " <<  outR << endl;
+        //cerr << "dutyl: " << outL <<"dutyr: " <<  outR << endl;
     }
-    void set_servo_angle(int error)
-    {
+    void set_servo_angle(int error) {
         // 死区处理 (±4像素不响应)
-        if (abs(error) < 4)
-        {
+        static int error_last = 0;
+        if(abs(error_last - error) >20) error = error_last;
+
+        if(abs(error) < 4) {
             pwm_set_duty(SERVO_MOTOR1_PWM, 4333);
+            error_last = error;
             return;
         }
         // 设置PID目标为0（期望error归零），实际值为处理后的误差
@@ -469,72 +478,16 @@ public:
 
         // 计算PID输出（角度调整量）
         float pwm_adjustment = calculate_pid(pidservo, pidservo.target);
-
+        
         // 计算目标角度（中位85度 ± 调整量）并约束范围
         float target_pwm = 4333 + pwm_adjustment;
         target_pwm = std::clamp(target_pwm, static_cast<float>(SERVO_MOTOR_R_MAX), static_cast<float>(SERVO_MOTOR_L_MAX));
         // 转换为舵机占空比并设置PWM
-        // uint16_t duty = static_cast<uint16_t>(SERVO_MOTOR_DUTY(target_angle));
+        //uint16_t duty = static_cast<uint16_t>(SERVO_MOTOR_DUTY(target_angle));
         pwm_set_duty(SERVO_MOTOR1_PWM, target_pwm);
-        cerr << "pwm" << target_pwm << endl;
+        //cerr << "pwm" << target_pwm <<endl; 
+        error_last = error; 
     }
-    // float Err_sum(const vector<Point> &centerline)
-    // {
-    //     // 1. 检查输入有效性
-    //     if (centerline.empty()) {
-    //         cerr << "错误：centerline 是空的！" << endl;
-    //         return 0.0f;
-    //     }
-
-    //     // 2. 检查权重数组
-    //     const int weight_size = sizeof(weight) / sizeof(weight[0]);
-    //     const int total_steps = 38; // 需要计算的步数
-
-    //     if (weight_size == 0) {
-    //         cerr << "错误：权重数组为空！" << endl;
-    //         return 0.0f;
-    //     }
-    //     if (total_steps > weight_size) {
-    //         cerr << "错误：权重数组尺寸不足（需要 " << total_steps
-    //              << "，实际 " << weight_size << "）" << endl;
-    //         return 0.0f;
-    //     }
-
-    //     // 3. 检查 centerline 是否足够长
-    //     const int required_size = 43; // 从 size-5 到 size-43 需要至少 43 个点
-    //     if (centerline.size() < required_size) {
-    //         cerr << "错误：centerline 长度不足（需要 " << required_size
-    //              << "，实际 " << centerline.size() << "）" << endl;
-    //         return 0.0f;
-    //     }
-
-    //     // 4. 计算加权误差
-    //     float error = 0.0f;
-    //     float weight_count = 0.0f;
-
-    //     for (int i = 0; i < total_steps; ++i)
-    //     {
-    //         // 从 centerline.size()-5 开始向前取 total_steps 个点
-    //         int idx = centerline.size() - 5 - i;
-
-    //         // 额外保护（理论上不需要，因为前面已经检查过）
-    //         if (idx < 0 || idx >= centerline.size()) {
-    //             cerr << "错误：索引越界（idx=" << idx << "）" << endl;
-    //             return 0.0f;
-    //         }
-
-    //         error += (centerline[idx].x - 80) * weight[i];
-    //         weight_count += weight[i];
-    //     }
-
-    //     // 5. 检查权重和是否为0（避免除零）
-    //     if (fabs(weight_count) < 1e-6f) {
-    //         cerr << "错误：权重和为0！" << endl;
-    //         return 0.0f;
-    //     }
-
-    //     return error / weight_count;
-    // }
 
     float Err_sum(const vector<Point> &centerline)
     {
@@ -676,6 +629,32 @@ private:
 
         return pid.output;
     }
+    void LSD_Control() {
+        int16_t encoder_err = encoder_left - encoder_right;
+        int16_t encoder_det = encoder_err - encoder_err_last;
+
+        if (abs(encoder_err) < 10) return;
+
+        if (abs(encoder_err) > 50) { 
+            lsd_p = lsd_p * 0.5f;   // 过弯时进一步降低比例项
+            lsd_d = lsd_d* 0.6f;   // 减少微分响应
+        } else {
+            lsd_p = lsd_p;
+            lsd_d = lsd_d;
+        }
+
+        float lsd = encoder_err * lsd_p + 
+                   encoder_err_last * lsd_pl + 
+                   encoder_det * lsd_d;
+        
+        lsd = std::clamp(lsd, -36.0f, 36.0f);      //12%
+
+        pidLeft.target += static_cast<int16_t>(lsd);
+        pidRight.target -= static_cast<int16_t>(lsd);
+        
+        encoder_err_last = encoder_err;
+    }
+
 };
 void cleanup();
 void sigint_handler(int signum);
