@@ -82,11 +82,11 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         gpio_set_level(BEEP, 0x0);
 
         // 先通过左车道单调性和右车道丢点率判断是否可能进入环岛
-        if (!isleftJumpvalid&&leftJumpPointB.x==-1&&rightJumpPointB.x!=-1&&isleftLanecontinuous&&leftMissedRadius<0.1&&rightMissedRadius<0.5 && numPoints>0.6 * image_h)
+        if (!isleftJumpvalid&&leftJumpPointB.x==-1&&rightJumpPointB.x!=-1&&isleftLanecontinuous&&leftMissedRadius<0.1&&rightMissedRadius<0.5 && numPoints>0.67 * image_h)
         {
             circleState = RIGHT_CIRCLE_DETECTED;
         }
-        else if(!isrightJumpvalid&&rightJumpPointB.x==-1&&leftJumpPointB.x!=-1&&isrightLanecontinuous&&rightMissedRadius<0.1&&leftMissedRadius<0.5 && numPoints>0.6 * image_h)
+        else if(!isrightJumpvalid&&rightJumpPointB.x==-1&&leftJumpPointB.x!=-1&&isrightLanecontinuous&&rightMissedRadius<0.1&&leftMissedRadius<0.5 && numPoints>0.67 * image_h)
         {
             circleState = LEFT_CIRCLE_DETECTED;
         }
@@ -98,7 +98,8 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = LEFT_TURN;
         }
-        else if ((isrightJumpvalid||isleftJumpvalid)&&!isleftLanecontinuous&&!isrightLanecontinuous&&numPoints>0.5*image_h)  
+
+        else if (((isrightJumpvalid&&isleftJumpvalid)||(isrightJumpvalid&&leftJumpPointB.x!=-1)||(isleftJumpvalid&&rightJumpPointB.x!=-1))&&!isleftLanecontinuous&&!isrightLanecontinuous&&numPoints>0.6*image_h)
         {
             circleState = CROSSING;
         }
@@ -212,7 +213,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     break;
     case CROSSING:
     {
-        if ((rightJumpPointB.y>70&&leftJumpPointB.y>70)||(isleftLanecontinuous&&isrightLanecontinuous))
+        if ((rightJumpPointB.y>70&&leftJumpPointB.y>70)||(isleftLanecontinuous&&isrightLanecontinuous)||(!isrightJumpvalid&&!isleftJumpvalid))
         {
             circleState = CIRCLE_INACTIVE;
             break;
@@ -626,20 +627,25 @@ void LaneProcessor::findInflectionPoints(const vector<TrackPoint> &lane,
     // 从索引 239 开始查找 A 点
     int startIndex = 119;
     size_t candidateAIndex = startIndex;
-    int maxJumpA = 5;
+    int maxJumpA = 10;
+    int pre_error = 0;
+    int error = 0;
     // cerr << lane[239].position << endl;
     if (!pointA_found)
     {
-        for (int i = startIndex; i > 50; i--)
+        for (int i = startIndex-2; i > 40; i--)
         {
             //cerr<<lane[i].position<<endl;
             // 计算当前点的跳变点数
             if (lane[i].position.x == -1 )
                 continue;
-            int jump = abs(lane[i].position.x - lane[i-1].position.x);
-            if (jump > maxJumpA)
+            pre_error = lane[i+2].position.x - lane[i ].position.x;
+            error = lane[i].position.x - lane[i-1].position.x;
+
+
+            if (pre_error*error<0&&pre_error!=error)
             {
-                // 检查左侧五个点的跳变点数是否很小
+                // 
                 bool isSmallJump = true;
                 for (size_t j = i + SLOPE_CHECK_WINDOW; j > i; j--)
                 {
@@ -652,7 +658,29 @@ void LaneProcessor::findInflectionPoints(const vector<TrackPoint> &lane,
 
                 if (isSmallJump)
                 {
-                    maxJumpA = jump;
+                    // maxJumpA = jump;
+                    candidateAIndex = i;
+                    pointA_found = true;
+                    pointA = lane[candidateAIndex].position;
+                    break;
+                }
+            }
+            else if(abs(error)>maxJumpA)
+            {
+                // 检查右侧五个点的跳变点数是否很小
+                bool isSmallJump = true;
+                for (size_t j = i + SLOPE_CHECK_WINDOW; j > i; j--)
+                {
+                    if (abs(lane[j].position.x - lane[j - 1].position.x) > SMALL_JUMP_THRESHOLD)
+                    {
+                        isSmallJump = false;
+                        break;
+                    }
+                }
+
+                if (isSmallJump)
+                {
+                    // maxJumpA = jump;
                     candidateAIndex = i;
                     pointA_found = true;
                     pointA = lane[candidateAIndex].position;
