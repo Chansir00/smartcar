@@ -657,6 +657,30 @@ home/chan/Documents/smartcar/project/code/camera.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.s
 .PHONY : home/chan/Documents/smartcar/project/code/camera.cpp.s
 
+home/chan/Documents/smartcar/project/code/imu.o: home/chan/Documents/smartcar/project/code/imu.cpp.o
+.PHONY : home/chan/Documents/smartcar/project/code/imu.o
+
+# target to build an object file
+home/chan/Documents/smartcar/project/code/imu.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o
+.PHONY : home/chan/Documents/smartcar/project/code/imu.cpp.o
+
+home/chan/Documents/smartcar/project/code/imu.i: home/chan/Documents/smartcar/project/code/imu.cpp.i
+.PHONY : home/chan/Documents/smartcar/project/code/imu.i
+
+# target to preprocess a source file
+home/chan/Documents/smartcar/project/code/imu.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.i
+.PHONY : home/chan/Documents/smartcar/project/code/imu.cpp.i
+
+home/chan/Documents/smartcar/project/code/imu.s: home/chan/Documents/smartcar/project/code/imu.cpp.s
+.PHONY : home/chan/Documents/smartcar/project/code/imu.s
+
+# target to generate assembly for a file
+home/chan/Documents/smartcar/project/code/imu.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.s
+.PHONY : home/chan/Documents/smartcar/project/code/imu.cpp.s
+
 home/chan/Documents/smartcar/project/code/pid.o: home/chan/Documents/smartcar/project/code/pid.cpp.o
 .PHONY : home/chan/Documents/smartcar/project/code/pid.o
 
@@ -804,6 +828,9 @@ help:
 	@echo "... home/chan/Documents/smartcar/project/code/camera.o"
 	@echo "... home/chan/Documents/smartcar/project/code/camera.i"
 	@echo "... home/chan/Documents/smartcar/project/code/camera.s"
+	@echo "... home/chan/Documents/smartcar/project/code/imu.o"
+	@echo "... home/chan/Documents/smartcar/project/code/imu.i"
+	@echo "... home/chan/Documents/smartcar/project/code/imu.s"
 	@echo "... home/chan/Documents/smartcar/project/code/pid.o"
 	@echo "... home/chan/Documents/smartcar/project/code/pid.i"
 	@echo "... home/chan/Documents/smartcar/project/code/pid.s"

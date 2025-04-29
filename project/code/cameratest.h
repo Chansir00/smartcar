@@ -117,7 +117,7 @@ public:
     bool isPathClear(const vector<TrackPoint>& leftLane);
     void mergeVirtualPath(vector<TrackPoint> &lane,
         const vector<Point> &virtualPath,
-        bool isLeftLane);
+        float minY);
     void smoothPath(vector<Point> &path);
     void linearRegression(
         vector<Point>::iterator begin,

@@ -5,7 +5,8 @@
 int debugmode = 2;
 const int camera = 0;
 int flag = 0 ;
-
+unsigned int send_counter = 0;
+const unsigned int SEND_INTERVAL = 20;
 
 int main()
 {
@@ -26,7 +27,9 @@ int main()
     // 创建车道检测器    }
     LaneProcessor detector;
     detector.initializeVariables(image_w, image_h);
-
+    //Kalman滤波器初始化
+    Kalman kf_roll;
+    Kalman_Init(&kf_roll);
     // 主循环：读取帧并处理
     int new_socket = sendImageOverSocket();
     //int new_socket = 0;
@@ -34,16 +37,23 @@ int main()
     // 注册SIGINT信号的处理函数
     signal(SIGINT, sigint_handler);
     MotionController ctrl;
-    pit_ms_init(10, [&ctrl](){ 
+    pit_ms_init(10, [&ctrl, &kf_roll](){ 
         if(flag == 1){
+        // imu963ra_get_acc();
+        // imu963ra_get_gyro();
+    
+        // // 2. 从加速度计计算Roll角度 (rad)
+        // float acc_roll = atan2(imu963ra_acc_y, imu963ra_acc_z);
+    
+        // // 3. 卡尔曼滤波更新
+        // float dt = 0.01f; // 10ms
+        // float estimated_roll = Kalman_Update(&kf_roll, acc_roll, imu963ra_gyro_x, dt);
+        //cerr << "Estimated Roll: " << estimated_roll << endl;
         ctrl.pit_callback();
-        ctrl.motor_control(200, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(300, 0, 0);  // 将控制逻辑移到定时器回调200
         }
     });
 
-
-    unsigned int send_counter = 0;
-    const unsigned int SEND_INTERVAL = 20;
 
     while (true)
     {
