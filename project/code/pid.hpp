@@ -427,7 +427,7 @@ public :
     void set_servo_angle(int error) {
         // 死区处理 (±4像素不响应)
         static int error_last = 0;
-        if(abs(error_last - error) >30) error = error_last;
+        //if(abs(error_last - error) >30) error = error_last;
 
         if(abs(error) < 4) {
             pwm_set_duty(SERVO_MOTOR1_PWM, 4333);

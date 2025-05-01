@@ -36,9 +36,11 @@ enum CircleState
     CIRCLE_INACTIVE,    // 未检测到环岛
     LEFT_CIRCLE_DETECTED,       // 检测到环岛入口
     RIGHT_CIRCLE_DETECTED,      // 检测到环岛入口
-    CIRCLE_APPROACHING, // 正在接近环岛（检测到入口）
+    LEFT_CIRCLE_INTRY, // 左环岛入口
+    RIGHT_CIRCLE_INTRY, // 右环岛入口
     CIRCLE_INSIDE,      // 正在环岛内循迹
-    CIRCLE_EXITING,      // 正在离开环岛
+    LEFT_CIRCLE_EXITING,      // 正在离开环岛
+    RIGHT_CIRCLE_EXITING,     // 正在离开环岛
     LEFT_TURN,
     RIGHT_TURN,
     CROSSING
@@ -98,18 +100,21 @@ public:
                    vector<Point> &centerLine);
 
     // 环岛处理
-    void processCircle(vector<TrackPoint> &leftLane,
-                       vector<TrackPoint> &rightLane,
-                       Mat &debugImage,int &leftMissedPoints, float &leftMissedRadius, float &rightMissedRadius);
+    void processCircle(vector<TrackPoint> &LeftLane,
+                                  vector<TrackPoint> &RightLane,
+                                  Mat &img, Mat&output, int &roiHeight, float &leftMissedRadius, float &rightMissedRadiu);
     void resetCircleState();
 
     // 辅助函数
     bool isLaneContinuous(const vector<TrackPoint>& lane);
     bool detectCircleEntry(const vector<TrackPoint> &left,
         const vector<TrackPoint> &right,float &leftMissedRadius, float &rightMissedRadius);
-    void findInflectionPoints(const vector<TrackPoint> &lane,
+    void findrightInflectionPoints(const vector<TrackPoint> &lane,
                               Point &pointA, Point &pointB,
                               bool &isValid);
+    void findleftInflectionPoints(const vector<TrackPoint> &lane,
+    Point &pointA, Point &pointB,
+    bool &isValid);
     void generateVirtualPath(const Point2f &start, const Point2f &end,
         vector<Point> &path,
         bool isLeftLane);
@@ -124,7 +129,7 @@ public:
         vector<Point>::iterator end,
         float& k, float& b, float& r_squared
     );
-
+    Point findSuddenChangePoint(const vector<TrackPoint>& points,bool isLeftLane,int y);
     Point findInflectionPoint(const vector<TrackPoint>& points);
 
 };

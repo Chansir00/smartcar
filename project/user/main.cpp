@@ -50,7 +50,7 @@ int main()
         // float estimated_roll = Kalman_Update(&kf_roll, acc_roll, imu963ra_gyro_x, dt);
         //cerr << "Estimated Roll: " << estimated_roll << endl;
         ctrl.pit_callback();
-        ctrl.motor_control(300, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
         }
     });
 
@@ -66,6 +66,20 @@ int main()
         }
         DetectionResult result = detector.detect(frame);
         float error = ctrl.Err_sum(detector.centerLine);
+        switch(detector.circleState)
+        {
+            case RIGHT_CIRCLE_DETECTED:
+            error+=5;
+            break;
+            case RIGHT_CIRCLE_INTRY:
+            error += 10;
+            break;
+            case LEFT_CIRCLE_INTRY:
+            error -= 50;
+            break;
+            default:
+            break;
+        }
         flag = 1 ;
         cerr<<"error: "<<error<<endl;
         ctrl.set_servo_angle(error);
