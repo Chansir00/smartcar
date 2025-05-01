@@ -78,6 +78,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     cerr << circleState << endl;
     cerr << "rightMissedRadius: " << rightMissedRadius << endl;
     cerr << "leftMissedRadius: " << leftMissedRadius << endl;
+    cerr << "hemisphere: " << hemisphere << endl;
 
     switch (circleState)
     {
@@ -193,6 +194,8 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             circleflag = 0;
             leftvirtualPath.clear();
         }
+        generateVirtualPath(leftLane[90].position, rightJumpPointB, leftvirtualPath, true);
+        mergeVirtualPath(LeftLane, leftvirtualPath, rightJumpPointB.y);
     }
     break;
     case LEFT_CIRCLE_DETECTED:
@@ -621,7 +624,7 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
             {
                 continue;
             }
-            if (circleState == RIGHT_TURN)
+            if (circleState == RIGHT_TURN || circleState == RIGHT_CIRCLE_INTRY)
             {
                 Point center(
                     (leftPoint.x + estimatedLaneWidth),
@@ -765,7 +768,7 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
     size_t candidateCIndex = 50;
     int maxJumpC = 7;
     // cerr << candidateCIndex << endl;
-    for (size_t i = startline; i < 100; i++)
+    for (size_t i = startline; i < 119; i++)
     {
         // cerr << i << endl;
         if (lane[i].position.x == -1)
