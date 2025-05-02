@@ -113,7 +113,8 @@ constexpr int CONTROL_PERIOD_MS = 10;
 extern int16 encoder_left;
 extern int16 encoder_right;
 extern float servo_motor_duty ;                                                  // 舵机zhongzhi
-extern float servo_motor_dir;    
+extern float servo_motor_dir;  
+extern int flag; // 0 停止 1 启动  
 
 enum PID_Mode {
     POSITION_PID,
@@ -314,7 +315,7 @@ public :
         // 初始化PID参数
         init_pid(pidLeft, 1.25f, 0.245f, 0.10f, PWM_MAX,DELTA_PID);       //you
         init_pid(pidRight, 1.25f, 0.205f, 0.18f, PWM_MAX,DELTA_PID);    //zuo
-        init_pid(pidservo, 5.0f, 0.0f, 10.0f, 367.0f, FUZZY_PID);
+        init_pid(pidservo, 6.5f, 0.0f, 10.0f, 367.0f, FUZZY_PID);
         init_serial();
     }
 
@@ -455,6 +456,7 @@ public :
     // 1. 检查输入有效性
     if (centerline.empty()) {
         cerr << "错误：centerline 是空的！" << endl;
+        flag=0;
         return 0.0f;
     }
     
@@ -463,6 +465,7 @@ public :
     if (centerline.size() < min_required_size) {
         cerr << "错误：centerline 长度不足（至少需要 " << min_required_size 
              << " 个点，实际 " << centerline.size() << "）" << endl;
+        flag=0;
         return 0.0f;
     }
     
@@ -476,6 +479,7 @@ public :
     if (weight_size < steps_used) {
         cerr << "错误：权重数组尺寸不足（需要 " << steps_used 
              << "，实际 " << weight_size << "）" << endl;
+        flag=0;
         return 0.0f;
     }
     

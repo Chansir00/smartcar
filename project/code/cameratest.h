@@ -34,15 +34,17 @@ struct TrackPoint
 enum CircleState
 {
     CIRCLE_INACTIVE,    // 未检测到环岛
-    LEFT_CIRCLE_DETECTED,       // 检测到环岛入口
     RIGHT_CIRCLE_DETECTED,      // 检测到环岛入口
-    LEFT_CIRCLE_INTRY, // 左环岛入口
     RIGHT_CIRCLE_INTRY, // 右环岛入口
-    CIRCLE_INSIDE,      // 正在环岛内循迹
-    LEFT_CIRCLE_EXITING,      // 正在离开环岛
+    RIGHT_CIRCLE_INSIDE,      // 正在环岛内循迹
     RIGHT_CIRCLE_EXITING,     // 正在离开环岛
+    LEFT_CIRCLE_DETECTED,       // 检测到环岛入口
+    LEFT_CIRCLE_INTRY, // 左环岛入口
+    LEFT_CIRCLE_INSIDE,       // 正在环岛内循迹
+    LEFT_CIRCLE_EXITING,      // 正在离开环岛
     LEFT_TURN,
     RIGHT_TURN,
+    STRAIGHT,
     CROSSING
 };
 
@@ -106,9 +108,7 @@ public:
     void resetCircleState();
 
     // 辅助函数
-    bool isLaneContinuous(const vector<TrackPoint>& lane);
-    bool detectCircleEntry(const vector<TrackPoint> &left,
-        const vector<TrackPoint> &right,float &leftMissedRadius, float &rightMissedRadius);
+    bool isLaneContinuous(const vector<TrackPoint>& lane, int trend);
     void findrightInflectionPoints(const vector<TrackPoint> &lane,
                               Point &pointA, Point &pointB,
                               bool &isValid);

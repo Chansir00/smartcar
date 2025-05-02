@@ -3,7 +3,7 @@
 // g++ -g -o main main.cpp src/camera.cpp -Iinclude/ `pkg-config --cflags --libs opencv4`;./main
 
 int debugmode = 2;
-const int camera = 0;
+const int camera = 1;
 int flag = 0 ;
 unsigned int send_counter = 0;
 const unsigned int SEND_INTERVAL = 20;
@@ -50,7 +50,11 @@ int main()
         // float estimated_roll = Kalman_Update(&kf_roll, acc_roll, imu963ra_gyro_x, dt);
         //cerr << "Estimated Roll: " << estimated_roll << endl;
         ctrl.pit_callback();
-        ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(400, 0, 0);  // 将控制逻辑移到定时器回调200
+        }
+        else
+        {
+            ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
         }
     });
 
@@ -69,13 +73,19 @@ int main()
         switch(detector.circleState)
         {
             case RIGHT_CIRCLE_DETECTED:
-            error+=5;
+            error+=0;
             break;
             case RIGHT_CIRCLE_INTRY:
-            error += 10;
+            error =95;
             break;
             case LEFT_CIRCLE_INTRY:
-            error -= 50;
+            error =-95;
+            break;
+            case RIGHT_CIRCLE_EXITING:
+            error = 70;
+            break;
+            case LEFT_CIRCLE_EXITING:
+            error = -70;
             break;
             default:
             break;
