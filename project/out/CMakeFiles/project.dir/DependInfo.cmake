@@ -33,6 +33,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/chan/Documents/smartcar/project/code/imu.cpp" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o" "gcc" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o.d"
   "/home/chan/Documents/smartcar/project/code/pid.cpp" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o" "gcc" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o.d"
   "/home/chan/Documents/smartcar/project/code/socket.cpp" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.o" "gcc" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.o.d"
+  "/home/chan/Documents/smartcar/project/code/test2.cpp" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.o" "gcc" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.o.d"
   "/home/chan/Documents/smartcar/project/user/main.cpp" "CMakeFiles/project.dir/main.cpp.o" "gcc" "CMakeFiles/project.dir/main.cpp.o.d"
   )
 

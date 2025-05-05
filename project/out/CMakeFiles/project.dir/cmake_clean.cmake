@@ -49,6 +49,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o.d"
   "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.o"
   "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.o.d"
+  "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.o"
+  "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.o.d"
   "CMakeFiles/project.dir/main.cpp.o"
   "CMakeFiles/project.dir/main.cpp.o.d"
   "project"

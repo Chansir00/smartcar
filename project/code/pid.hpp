@@ -1,3 +1,4 @@
+
 #ifndef __PID_H__
 #define __PID_H__
 #include <fcntl.h>       // 解决O_RDWR等文件控制定义
@@ -11,14 +12,37 @@
 #include <iostream>
 #include <cmath>
 #include <cstdint>
-#include "cameratest.h"
-
+#include <memory> // 添加智能指针支持
+class LaneProcessor;
+//车尾向前
 constexpr uint8_t weight[39] = {  // 将数组长度调整为38
-    1,3,5,7,9,11,13,              //0-7
-    15,17,17,19,19,20,20,19,19, //8-16
-    17,17,15,5,5,3,3,1,1,   //17-25
-    1,1,1,1,1,1,1,1,1,3,4,5,6,1        //26-39     
+1,1,1,1,1,1,1,              //0-7
+1,1,1,11,11,12,12,13,13, //8-16
+15,15,13,13,12,12,13,13,13,   //17-25
+1,1,1,1,1,1,1,1,1,1,1,1,1,1        //26-39   
 };
+
+constexpr uint8_t weight1[39] = { 
+1,1,1,1,1,1,1,1,1,
+3,3,3,3,11,13,13,15,
+17,17,19,19,20,20,19,19,11,13,15,
+17,19,20,20,19,15,10,5,3,1
+};
+
+// 1,1,1,1,1,1,1,              //0-7
+// 1,1,1,1,1,12,12,14,15, //8-16
+// 19,17,17,15,15,13,13,1,1,   //17-25
+// 1,1,1,1,1,1,1,1,1,1,1,1,1,1        //26-39   
+
+// 3,3,5,7,9,11,13,              //0-7
+// 15,17,17,19,19,20,20,19,9, //8-16
+// 9,7,7,5,5,3,3,10,10,   //17-25
+// 1,1,1,1,1,1,1,1,1,3,4,5,6,1        //26-39    
+
+// 1,1,1,1,1,1,1,1,1,
+// 3,3,3,3,11,13,13,15,
+// 17,17,19,19,20,20,19,19,11,13,15,
+// 17,19,20,20,19,15,10,5,3,1
 
 using namespace std;
 //+-15测误差变化率范围
@@ -38,7 +62,7 @@ static const int rule_p[7][7] = {
     /* NB */ {PB, PB, PM, PM, PS, ZO, ZO},
     /* NM */ {PB, PB, PM, PS, PS, ZO, PS},
     /* NS */ {PM, PM, PM, PS, ZO, PS, PS},
-    /* ZO */ {PM, PM, PS, ZO, PS, PM, PM},
+    /* ZO */ {PS, PS, PS, ZO, PS, PS, PS},//{PM, PM, PS, ZO, PS, PM, PM},
     /* PS */ {PS, PS, ZO, PS, PS, PM, PM},
     /* PM */ {ZO, ZO, PS, PM, PM, PM, PB},
     /* PB */ {PB, PB, PB, PB, PM, PB, PB}
@@ -113,8 +137,7 @@ constexpr int CONTROL_PERIOD_MS = 10;
 extern int16 encoder_left;
 extern int16 encoder_right;
 extern float servo_motor_duty ;                                                  // 舵机zhongzhi
-extern float servo_motor_dir;  
-extern int flag; // 0 停止 1 启动  
+extern float servo_motor_dir;    
 
 enum PID_Mode {
     POSITION_PID,
@@ -149,7 +172,9 @@ struct PID_Controller {
 };
 
 class MotionController {
+    friend class LaneProcessor;
 private:
+    LaneProcessor* laneProcessor; // 改用原始指针
     int serial_fd = -1;  // 串口文件描述符
     std::chrono::steady_clock::time_point last_serial_retry;  // 最后重试时间
     PID_Controller pidLeft;
@@ -159,13 +184,20 @@ private:
     std::mutex encoder_mutex;  // 添加互斥锁
     int16 encoder_left = 0;
     int16 encoder_right = 0;
-    int car_startline = 115;        // 起始行
-    int hope_line = 77;            // 目标行
+    int car_startline = 100;        // 起始行
+    int hope_line = 62;            // 目标行
 
     float lsd_p = 0.05f;      
     float lsd_pl = 0.2f;     // 滞后比例系数
     float lsd_d = 0.4f;      
     int16_t encoder_err_last = 0;  
+
+    float Speed_Goal = 400.0f;
+    const uint16_t steer_middle = 4333; // 舵机中位PWM值
+    const float Left_Speed = 1.2f;      // 左转差速系数
+    const float Right_Speed = 1.1f;     // 右转差速系数
+    float current_servo_pwm = steer_middle; // 当前舵机PWM
+    const float ackerman_limit = 0.3f; // 差速限幅系数
 
     void init_serial() {
         serial_fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
@@ -304,9 +336,35 @@ private:
             pid.dmf.DF[0] = 1.0f;
         }
     }
+
+    void ackerman_diff_control() {
+        double y, x;
+        const float encoder_scale = 0.51619f;
+        const float poly_coeff[3] = {-0.014344f, 0.0078637f, -0.000014484f};
+        const float speed_factor = 0.3875f;
+
+        if(current_servo_pwm >= steer_middle) { // 左转
+            x = (current_servo_pwm - steer_middle) * Left_Speed * encoder_scale;
+            x = std::min(x, 367.0);
+            y = poly_coeff[0] + poly_coeff[1]*x + poly_coeff[2]*x*x;
+            
+            pidRight.target = Speed_Goal * (1 + speed_factor * y* ackerman_limit);
+            pidLeft.target = Speed_Goal * (1 - speed_factor * y );
+        } else { // 右转 pwm-
+            x = (steer_middle - current_servo_pwm) * Right_Speed * encoder_scale;
+            x = std::min(x, 433.0);
+            y = poly_coeff[0] + poly_coeff[1]*x + poly_coeff[2]*x*x;
+            
+            pidLeft.target = Speed_Goal * (1 + speed_factor * y* ackerman_limit);
+            pidRight.target = Speed_Goal * (1 - speed_factor * y);
+        }
+    }
+
+
 public :
-    MotionController()
-    {   //设备初始化
+explicit MotionController(LaneProcessor* lp) : laneProcessor(lp) {  // 通过构造函数注入实例
+    //MotionController();
+    // {   //设备初始化
         pwm_get_dev_info(MOTOR1_PWM, &motor_1_pwm_info);
         pwm_get_dev_info(MOTOR2_PWM, &motor_2_pwm_info);  //获取PWM设备信息
         pwm_get_dev_info(SERVO_MOTOR1_PWM, &servo_pwm_info);
@@ -315,11 +373,13 @@ public :
         // 初始化PID参数
         init_pid(pidLeft, 1.25f, 0.245f, 0.10f, PWM_MAX,DELTA_PID);       //you
         init_pid(pidRight, 1.25f, 0.205f, 0.18f, PWM_MAX,DELTA_PID);    //zuo
-        init_pid(pidservo, 6.5f, 0.0f, 10.0f, 367.0f, FUZZY_PID);
+        init_pid(pidservo, 10.0f, 0.0f, 12.0f, 367.0f, POSITION_PID);//
         init_serial();
+        
     }
 
-    ~MotionController() {
+     ~MotionController()
+    {
         if(serial_fd != -1) {
             close(serial_fd);
         }
@@ -394,41 +454,11 @@ public :
         //}
 }
   
-    void motor_control(int speed, float k, int limit) {
-        std::lock_guard<std::mutex> lock(encoder_mutex);
-        // 获取编码器值
-        pidLeft.actual =  encoder_left;
-        pidRight.actual = -encoder_right;
-
-        //cerr << "left: " << pidLeft.actual << " right: " << pidRight.actual << endl;
-        // PID计算
-        //pidLeft.target = speed;
-        //pidRight.target = speed;
-        //LSD_Control(); 
-        //float raw_outL = calculate_pid(pidLeft, pidLeft.target);
-        //float raw_outR = calculate_pid(pidRight, pidRight.target);
-
-        float raw_outL = calculate_pid(pidLeft,speed);
-        float raw_outR = calculate_pid(pidRight,speed);
-        gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 0 : 1);  // 假设0为正转
-        gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 0 : 1);  // 假设0为转
-        float outL = std::clamp(abs(raw_outL), 0.0f, 0.40f*static_cast<float>(PWM_MAX));
-        float outR = std::clamp(abs(raw_outR), 0.0f, 0.40f*static_cast<float>(PWM_MAX));
-        //float outL = calculate_pid(pidLeft, speed);
-        //float outR = calculate_pid(pidRight, speed);
-
-        //outL = std::clamp(abs(outL), 0.0f, static_cast<float>(PWM_MAX));
-        //outR = std::clamp(abs(outR), 0.0f, static_cast<float>(PWM_MAX));
-  
-        // 设置电机输出
-        pwm_set_duty(MOTOR1_PWM, outL);
-        pwm_set_duty(MOTOR2_PWM, outR);
-        //cerr << "dutyl: " << outL <<"dutyr: " <<  outR << endl;
-    }
+    void motor_control(int speed, float k, int limit);
     void set_servo_angle(int error) {
         // 死区处理 (±4像素不响应)
         static int error_last = 0;
-        //if(abs(error_last - error) >30) error = error_last;
+        if(abs(error_last - error) >30) error = error_last;
 
         if(abs(error) < 4) {
             pwm_set_duty(SERVO_MOTOR1_PWM, 4333);
@@ -449,61 +479,12 @@ public :
         //uint16_t duty = static_cast<uint16_t>(SERVO_MOTOR_DUTY(target_angle));
         pwm_set_duty(SERVO_MOTOR1_PWM, target_pwm);
         cerr << "pwm" << target_pwm <<endl; 
+        current_servo_pwm = target_pwm;
         error_last = error; 
     }
-    float Err_sum(const vector<Point> &centerline) 
-{
-    // 1. 检查输入有效性
-    if (centerline.empty()) {
-        cerr << "错误：centerline 是空的！" << endl;
-        flag=0;
-        return 0.0f;
-    }
-    
-    // 2. 检查 centerline 是否至少包含 5 个点
-    const int min_required_size = 5;
-    if (centerline.size() < min_required_size) {
-        cerr << "错误：centerline 长度不足（至少需要 " << min_required_size 
-             << " 个点，实际 " << centerline.size() << "）" << endl;
-        flag=0;
-        return 0.0f;
-    }
-    
-    // 3. 计算实际可用的步数
-    const int total_steps = 38; // 默认需要计算的步数
-    const int start_idx = centerline.size() - 5; // 起始索引
-    const int steps_used = min(total_steps, start_idx + 1); // 实际计算的步数
-    
-    // 4. 检查权重数组是否足够
-    const int weight_size = sizeof(weight) / sizeof(weight[0]);
-    if (weight_size < steps_used) {
-        cerr << "错误：权重数组尺寸不足（需要 " << steps_used 
-             << "，实际 " << weight_size << "）" << endl;
-        flag=0;
-        return 0.0f;
-    }
-    
-    // 5. 计算加权误差
-    float error = 0.0f;
-    float weight_count = 0.0f;
-    for (int i = 0; i < steps_used; ++i) 
-    {
-        int idx = start_idx - i; // 自动确保 idx >= 0
-        error += (centerline[idx].x - 80) * weight[i];
-        weight_count += weight[i];
-    }
-    
-    // 6. 检查权重和是否为0（避免除零）
-    if (fabs(weight_count) < 1e-6f) {
-        cerr << "错误：权重和为0！" << endl;
-        return 0.0f;
-    }
-    
-    return error / weight_count;
-}
+float Err_sum(const vector<Point> &centerline) ;
 
 
-    
 private:
     void init_pid(PID_Controller& pid, float Kp, float Ki, float Kd, float max_out, PID_Mode mode = POSITION_PID) {
         pid.Kp = Kp;
@@ -523,11 +504,12 @@ private:
     /* maximum */ 
     /* minimum */ 
     /* factor */
-            float uff_p_max = 30.0f, uff_d_max = 30.0f;
+            float uff_p_max = 50.0f, uff_d_max = 60.0f;
             for(int i=0; i<7; ++i) {
                 pid.uff.UFF_P[i] = uff_p_max * (i-3.0f)/3.0f;
                 pid.uff.UFF_D[i] = uff_d_max * (i-3.0f)/3.0f;
                 pid.EFF[i] = 60.0f * (i-3.0f)/3.0f;//21f误差范围
+                if(i == 3) pid.EFF[i] = 20.0f;
                 pid.DFF[i] = 30.0f * (i-3.0f)/3.0f;//18f变化率范围
             }
             pid.fuzzy_initialized = true;
@@ -575,7 +557,8 @@ private:
         else if (pid.mode == FUZZY_PID && pid.fuzzy_initialized) {
             float ec = error - pid.last_error;
             pid.last_error = error;
-
+            float error_abs = fabs(error);
+            pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f; 
             // 执行模糊推理
             count_DMF(pid, error*pid.fuzzy_pd.factor, ec*pid.fuzzy_pd.factor*EC_FACTOR);
             float delta_kp = Fuzzy_Kp(pid);
@@ -625,7 +608,6 @@ private:
         encoder_err_last = encoder_err;
     }
 };
-
 void cleanup();
 void sigint_handler(int signum);
 

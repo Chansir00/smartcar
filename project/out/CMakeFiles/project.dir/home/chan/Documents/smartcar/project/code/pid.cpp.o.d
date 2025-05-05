@@ -509,5 +509,4 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /home/chan/Documents/smartcar/project/user/../../libraries/zf_components/seekfree_assistant.h \
  /home/chan/Documents/smartcar/project/user/../../libraries/zf_components/seekfree_assistant_interface.h \
  /home/chan/Documents/smartcar/project/user/../code/cameratest.h \
- /home/chan/Documents/smartcar/project/user/../code/imu.h \
- /home/chan/Documents/smartcar/project/user/../code/cameratest.h
+ /home/chan/Documents/smartcar/project/user/../code/imu.h

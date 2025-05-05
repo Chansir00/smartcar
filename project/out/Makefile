@@ -729,6 +729,30 @@ home/chan/Documents/smartcar/project/code/socket.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.s
 .PHONY : home/chan/Documents/smartcar/project/code/socket.cpp.s
 
+home/chan/Documents/smartcar/project/code/test2.o: home/chan/Documents/smartcar/project/code/test2.cpp.o
+.PHONY : home/chan/Documents/smartcar/project/code/test2.o
+
+# target to build an object file
+home/chan/Documents/smartcar/project/code/test2.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.o
+.PHONY : home/chan/Documents/smartcar/project/code/test2.cpp.o
+
+home/chan/Documents/smartcar/project/code/test2.i: home/chan/Documents/smartcar/project/code/test2.cpp.i
+.PHONY : home/chan/Documents/smartcar/project/code/test2.i
+
+# target to preprocess a source file
+home/chan/Documents/smartcar/project/code/test2.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.i
+.PHONY : home/chan/Documents/smartcar/project/code/test2.cpp.i
+
+home/chan/Documents/smartcar/project/code/test2.s: home/chan/Documents/smartcar/project/code/test2.cpp.s
+.PHONY : home/chan/Documents/smartcar/project/code/test2.s
+
+# target to generate assembly for a file
+home/chan/Documents/smartcar/project/code/test2.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.s
+.PHONY : home/chan/Documents/smartcar/project/code/test2.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -837,6 +861,9 @@ help:
 	@echo "... home/chan/Documents/smartcar/project/code/socket.o"
 	@echo "... home/chan/Documents/smartcar/project/code/socket.i"
 	@echo "... home/chan/Documents/smartcar/project/code/socket.s"
+	@echo "... home/chan/Documents/smartcar/project/code/test2.o"
+	@echo "... home/chan/Documents/smartcar/project/code/test2.i"
+	@echo "... home/chan/Documents/smartcar/project/code/test2.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

@@ -1,12 +1,12 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include <zf_common_headfile.h>
 
-#include<zf_common_headfile.h>
 #define BEEP "/dev/zf_driver_gpio_beep"
 using namespace cv;
 using namespace std;
-
+Mat ApplyInversePerspective(const Mat& input);
 // 可配置参数
 const int image_h = 120;                // 图像高度
 const int image_w = 160;                // 图像宽度
@@ -91,6 +91,17 @@ public:
     vector<Point> centerLine; // 中线
 
 
+    struct ControlParams {
+        float speed_factor = 1.0f;
+        int lookahead_lines = 39;
+        float weight_case = 0.0f;
+    };
+
+    ControlParams getControlParams() const {
+        return current_params;
+    }
+
+
     // member function
     DetectionResult detect(const cv::Mat &inputImage);
     void initializeVariables(int image_w, int image_h);
@@ -132,6 +143,32 @@ public:
     Point findSuddenChangePoint(const vector<TrackPoint>& points,bool isLeftLane,int y);
     Point findInflectionPoint(const vector<TrackPoint>& points);
 
+    private:
+    ControlParams current_params;
+
+    void updateControlParams() {
+        switch(circleState) {
+            case RIGHT_CIRCLE_DETECTED:
+            case RIGHT_CIRCLE_INTRY:
+                current_params = {0.8f, 25, 0.0f};
+                break;
+            case LEFT_CIRCLE_DETECTED:
+            case LEFT_CIRCLE_INTRY:
+                current_params = {0.8f, 25, 0.0f};
+                break;
+            case CROSSING:
+                current_params = {0.9f, 15, 0.0f};
+                break;
+            case RIGHT_TURN:
+                current_params = {0.8f, 25, 0.0f};
+                break;
+            case LEFT_TURN:
+                current_params = {0.8f, 25, 0.0f};
+                break;
+            default:
+                current_params = {1.0f, 35, 0.0f};
+        }
+    }
 };
 
 // 逆透视变换类

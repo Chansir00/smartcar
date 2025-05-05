@@ -19,7 +19,7 @@ DetectionResult LaneProcessor::detect(const Mat &inputImage)
     // 检测车道点
     detectLanePoints(result.binaryImage, roiHeight, whitePixels, leftLane, rightLane, leftMissedPoints, rightMissedPoints, leftMissedRadius, rightMissedRadius);
     processCircle(leftLane, rightLane, result.binaryImage, result.outputImage, roiHeight, leftMissedRadius, rightMissedRadius);
-
+    updateControlParams();
     // 每帧结束时检查重置
     if (circleState == CIRCLE_INACTIVE)
     {
@@ -134,9 +134,9 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         circle(output, righthemisphere, 2, Scalar(0, 0, 0), 2);
         generateVirtualPath(RightLane[RightLane.size() - 1].position, rightJumpPointB, rightvirtualPath, true);
         mergeVirtualPath(RightLane, rightvirtualPath, -1);
-        if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 55)
+        if (rightJumpPointB.y >= 55)
         {
-            circleState = RIGHT_CIRCLE_INTRY;
+            circleState = CIRCLE_INACTIVE;
         }
     }
     break;
@@ -211,9 +211,9 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         circle(output, lefthemisphere, 2, Scalar(0, 0, 0), 2);
         generateVirtualPath(LeftLane[LeftLane.size() - 1].position, leftJumpPointB, leftvirtualPath, true);
         mergeVirtualPath(LeftLane, leftvirtualPath, -1);
-        if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 55)
+        if (leftJumpPointB.y >= 55)
         {
-            circleState = LEFT_CIRCLE_INTRY;
+            circleState =  CIRCLE_INACTIVE;
         }
     }
     break;

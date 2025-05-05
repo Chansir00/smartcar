@@ -1,9 +1,9 @@
 #include <zf_common_headfile.h>
-
+#include <chrono>
 // g++ -g -o main main.cpp src/camera.cpp -Iinclude/ `pkg-config --cflags --libs opencv4`;./main
 
 int debugmode = 2;
-const int camera = 1;
+const int camera = 0;
 int flag = 0 ;
 unsigned int send_counter = 0;
 const unsigned int SEND_INTERVAL = 20;
@@ -27,16 +27,16 @@ int main()
     // 创建车道检测器    }
     LaneProcessor detector;
     detector.initializeVariables(image_w, image_h);
-    //Kalman滤波器初始化
-    Kalman kf_roll;
-    Kalman_Init(&kf_roll);
     // 主循环：读取帧并处理
     int new_socket = sendImageOverSocket();
     //int new_socket = 0;
     atexit(cleanup);
     // 注册SIGINT信号的处理函数
     signal(SIGINT, sigint_handler);
-    MotionController ctrl;
+    MotionController ctrl(&detector);
+     //Kalman滤波器初始化
+    Kalman kf_roll;
+    Kalman_Init(&kf_roll);
     pit_ms_init(10, [&ctrl, &kf_roll](){ 
         if(flag == 1){
         // imu963ra_get_acc();
@@ -50,7 +50,7 @@ int main()
         // float estimated_roll = Kalman_Update(&kf_roll, acc_roll, imu963ra_gyro_x, dt);
         //cerr << "Estimated Roll: " << estimated_roll << endl;
         ctrl.pit_callback();
-        ctrl.motor_control(400, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
         }
         else
         {
@@ -68,7 +68,18 @@ int main()
             cerr << "错误：读取帧失败！" << endl;
             break;
         }
+        auto start = std::chrono::high_resolution_clock::now();
+
+        // 调用你要测试的函数
         DetectionResult result = detector.detect(frame);
+    
+        // 获取结束时间点
+        auto end = std::chrono::high_resolution_clock::now();
+    
+        // 计算耗时（以毫秒为单位）
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "函数运行时间: " << duration.count() << " 毫秒" << std::endl;
+
         float error = ctrl.Err_sum(detector.centerLine);
         switch(detector.circleState)
         {
@@ -76,16 +87,16 @@ int main()
             error+=0;
             break;
             case RIGHT_CIRCLE_INTRY:
-            error =95;
+            error =50;
             break;
             case LEFT_CIRCLE_INTRY:
-            error =-95;
+            error =-50;
             break;
             case RIGHT_CIRCLE_EXITING:
-            error = 70;
+            error = 50;
             break;
             case LEFT_CIRCLE_EXITING:
-            error = -70;
+            error = -50;
             break;
             default:
             break;
