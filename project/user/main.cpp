@@ -68,17 +68,17 @@ int main()
             cerr << "错误：读取帧失败！" << endl;
             break;
         }
-        auto start = std::chrono::high_resolution_clock::now();
+        //auto start = std::chrono::high_resolution_clock::now();
 
         // 调用你要测试的函数
         DetectionResult result = detector.detect(frame);
     
-        // 获取结束时间点
-        auto end = std::chrono::high_resolution_clock::now();
+        // // 获取结束时间点
+        // auto end = std::chrono::high_resolution_clock::now();
     
-        // 计算耗时（以毫秒为单位）
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-        std::cout << "函数运行时间: " << duration.count() << " 毫秒" << std::endl;
+        // // 计算耗时（以毫秒为单位）
+        // auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        // std::cout << "函数运行时间: " << duration.count() << " 毫秒" << std::endl;
 
         float error = ctrl.Err_sum(detector.centerLine);
         switch(detector.circleState)
