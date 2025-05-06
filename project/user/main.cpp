@@ -78,7 +78,7 @@ int main()
     
         // // 计算耗时（以毫秒为单位）
         // auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-        // std::cout << "函数运行时间: " << duration.count() << " 毫秒" << std::endl;
+        // cout<< "函数运行时间: " << duration.count() << " 毫秒" << std::endl;
 
         float error = ctrl.Err_sum(detector.centerLine);
         switch(detector.circleState)
