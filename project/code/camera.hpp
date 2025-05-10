@@ -22,6 +22,7 @@ const int WIDTH_EXTEND2 = 70;           // 辅助宽度扩展
 extern int debugmode;                  // true调试模式
 
 
+
 // 数据结构
 struct TrackPoint
 {
@@ -150,20 +151,20 @@ public:
         switch(circleState) {
             case RIGHT_CIRCLE_DETECTED:
             case RIGHT_CIRCLE_INTRY:
-                current_params = {0.8f, 25, 0.0f};
+                current_params = {1.0f, 25, 0.0f};
                 break;
             case LEFT_CIRCLE_DETECTED:
             case LEFT_CIRCLE_INTRY:
-                current_params = {0.8f, 25, 0.0f};
+                current_params = {1.0f, 25, 0.0f};
                 break;
             case CROSSING:
-                current_params = {0.9f, 15, 0.0f};
+                current_params = {1.0f, 15, 0.0f};
                 break;
             case RIGHT_TURN:
-                current_params = {0.8f, 25, 0.0f};
+                current_params = {1.0f, 25, 0.0f};
                 break;
             case LEFT_TURN:
-                current_params = {0.8f, 25, 0.0f};
+                current_params = {1.0f, 25, 0.0f};
                 break;
             default:
                 current_params = {1.0f, 35, 0.0f};

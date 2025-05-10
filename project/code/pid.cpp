@@ -50,27 +50,35 @@ void cleanup()
 // }
 void MotionController::motor_control(int speed, float k, int limit) {
     std::lock_guard<std::mutex> lock(encoder_mutex);
-    auto params = laneProcessor->getControlParams();
-    float speed_factor = params.speed_factor;
-    int speed1 = speed * speed_factor;
-    Speed_Goal = speed1;
-    ackerman_diff_control();
+    //auto params = laneProcessor->getControlParams();
+    //float speed_factor = params.speed_factor;
+    //int speed1 = speed * speed_factor;
+    float chasu = 0.8;
+    float pwm_error = current_servo_pwm - SERVO_MOTOR_MID;
+    float k_decision = 8;
+
+    float speed1 = speed - (speed * (1 - chasu) * abs(pwm_error) * k_decision / SERVO_MOTOR_MID); //打满时速度为0.825
+
+    ackerman_diff_control(speed1);
+    //suibian_control(speed1);
 
     // 获取编码器值
     pidLeft.actual =  encoder_left;
     pidRight.actual = -encoder_right;
 
-    //cerr << "left: " << pidLeft.actual << " right: " << pidRight.actual << endl;
+    cerr << "left: " << pidLeft.actual << " right: " << pidRight.actual << endl;
     // PID计算
-    //pidLeft.target = speed;
-    //pidRight.target = speed;
-    //LSD_Control(); 
-    //float raw_outL = calculate_pid(pidLeft, pidLeft.target);
-    //float raw_outR = calculate_pid(pidRight, pidRight.target);
 
-    float raw_outL = calculate_pid(pidLeft,pidLeft.target);
-    float raw_outR = calculate_pid(pidRight,pidRight.target);
-    gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 0 : 1);  // 假设0为正转
+    //pidLeft.target = speed1;
+    //pidRight.target = speed1;
+    //LSD_Control(); 
+
+    float raw_outL = calculate_pid(pidLeft, pidLeft.target);
+    float raw_outR = calculate_pid(pidRight, pidRight.target);
+
+    //float raw_outL = calculate_pid(pidLeft,pidLeft.target);
+    //float raw_outR = calculate_pid(pidRight,pidRight.target);
+    gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 1 : 0);  // 假设0为正转
     gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 0 : 1);  // 假设0为转
     float outL = std::clamp(abs(raw_outL), 0.0f, 0.40f*static_cast<float>(PWM_MAX));
     float outR = std::clamp(abs(raw_outR), 0.0f, 0.40f*static_cast<float>(PWM_MAX));
@@ -83,7 +91,7 @@ void MotionController::motor_control(int speed, float k, int limit) {
     // 设置电机输出
     pwm_set_duty(MOTOR1_PWM, outL);
     pwm_set_duty(MOTOR2_PWM, outR);
-    //cerr << "dutyl: " << outL <<"dutyr: " <<  outR << endl;
+    cerr << "dutyl: " << outL <<"dutyr: " <<  outR << endl;
 }
 
 // float MotionController::Err_sum(const vector<Point> &centerline) {
@@ -130,7 +138,7 @@ float MotionController::Err_sum(const vector<Point> &centerline)
     // 3. 计算实际可用的步数
     const int total_steps = 38; // 默认需要计算的步数
     const int start_idx = centerline.size(); // 起始索引
-    const int start = 30;
+    const int start = 48;     //430 52  440 50
     //cerr<<start_idx<<endl;
     const int steps_used = min(total_steps, start_idx + 1); // 实际计算的步数
     
@@ -168,4 +176,12 @@ else{
     }
     
     return error / weight_count;
+}
+void MotionController::update_shared_error(float err) {
+    std::lock_guard<std::mutex> lock(error_mutex);
+    shared_error = err;
+}
+float MotionController::get_shared_error() {
+    std::lock_guard<std::mutex> lock(error_mutex);
+    return shared_error;
 }

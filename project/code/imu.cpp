@@ -42,4 +42,3 @@ float Kalman_Update(Kalman *kf, float acc_angle, float gyro_rate, float dt) {
 
     return kf->angle;
 }
-

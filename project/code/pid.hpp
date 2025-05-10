@@ -1,6 +1,7 @@
 
 #ifndef __PID_H__
 #define __PID_H__
+#include <camera.hpp>
 #include <fcntl.h>       // 解决O_RDWR等文件控制定义
 #include <termios.h>     // 解决termios结构体和串口配置相关定义
 #include <unistd.h>      // 解决write/close等POSIX函数
@@ -13,12 +14,13 @@
 #include <cmath>
 #include <cstdint>
 #include <memory> // 添加智能指针支持
+#include <cmath>
 class LaneProcessor;
 //车尾向前
 constexpr uint8_t weight[39] = {  // 将数组长度调整为38
 1,1,1,1,1,1,1,              //0-7
-1,1,1,11,11,12,12,13,13, //8-16
-15,15,13,13,12,12,13,13,13,   //17-25
+1,1,1,1,11,12,12,13,13, //8-16
+15,15,13,13,12,12,11,11,12,   //17-25
 1,1,1,1,1,1,1,1,1,1,1,1,1,1        //26-39   
 };
 
@@ -58,7 +60,7 @@ using namespace std;
 
 // 模糊规则表   kp kd
 static const int rule_p[7][7] = { 
-    // 误差\误差变化率 | NB   NM    NS    ZO    PS    PM    PB
+    //误差\误差变化率 | NB   NM    NS    ZO    PS    PM    PB
     /* NB */ {PB, PB, PM, PM, PS, ZO, ZO},
     /* NM */ {PB, PB, PM, PS, PS, ZO, PS},
     /* NS */ {PM, PM, PM, PS, ZO, PS, PS},
@@ -66,6 +68,14 @@ static const int rule_p[7][7] = {
     /* PS */ {PS, PS, ZO, PS, PS, PM, PM},
     /* PM */ {ZO, ZO, PS, PM, PM, PM, PB},
     /* PB */ {PB, PB, PB, PB, PM, PB, PB}
+    // // 误差\误差变化率 | NB   NM    NS    ZO    PS    PM    PB
+    // /* NB (极左) */ {PB, PB, PM, PM, PS, ZO, ZO},  // 需强右转（负输出）
+    // /* NM (中左) */ {PB, PB, PM, PS, PS, ZO, NS}, 
+    // /* NS (微左) */ {PM, PM, PS, PS, ZO, NS, NM}, 
+    // /* ZO (中线) */ {PS, PS, ZO, ZO, ZO, NS, NS}, // 对称修正
+    // /* PS (微右) */ {NM, NS, ZO, NS, NS, NM, NM}, 
+    // /* PM (中右) */ {NM, NM, NS, NM, NM, NB, NB}, 
+    // /* PB (极右) */ {ZO, ZO, NM, NM, NM, NB, NB}  // 需强左转（正输出）
 };
 static const int rule_d[7][7] = { 
     {PS,NS,NB,NB,NB,NM,PS},
@@ -120,9 +130,10 @@ typedef struct {
 #define MOTOR2_PWM_DUTY_MAX    (motor_2_pwm_info.duty_max) 
 #define SERVO_MOTOR_FREQ            (servo_pwm_info.freq)
 #define PWM_DUTY_MAX                (servo_pwm_info.duty_max)
-#define SERVO_MOTOR_MID             (4333 )    
-#define SERVO_MOTOR_L_MAX           (4700 )                       
-#define SERVO_MOTOR_R_MAX           (3900)
+#define SERVO_MOTOR_MID             (4360 )    
+#define SERVO_MOTOR_L_MAX           (4840 )                       
+#define SERVO_MOTOR_R_MAX           (3870)
+//((float)PWM_DUTY_MAX/(1000.0/(float)SERVO_MOTOR_FREQ)*(0.5+(float)(x)/90.0))
 //#define SERVO_MOTOR_DUTY(x) ((float)PWM_DUTY_MAX/(1000.0/(float)SERVO_MOTOR_FREQ)*(0.5+(float)(x)/90.0))
 
 extern struct pwm_info motor_1_pwm_info;
@@ -187,17 +198,23 @@ private:
     int car_startline = 100;        // 起始行
     int hope_line = 62;            // 目标行
 
-    float lsd_p = 0.05f;      
+    float lsd_p = 0.35f;      
     float lsd_pl = 0.2f;     // 滞后比例系数
     float lsd_d = 0.4f;      
     int16_t encoder_err_last = 0;  
 
-    float Speed_Goal = 400.0f;
-    const uint16_t steer_middle = 4333; // 舵机中位PWM值
+    float Speed_Goal = 0.0f;
+    const uint16_t steer_middle = 4360; // 舵机中位PWM值
     const float Left_Speed = 1.2f;      // 左转差速系数
     const float Right_Speed = 1.1f;     // 右转差速系数
     float current_servo_pwm = steer_middle; // 当前舵机PWM
-    const float ackerman_limit = 0.3f; // 差速限幅系数
+    const float ackerman_limit = 0.1f;//0.3f; // 差速限幅系数
+
+    float lim_cs = 0.9; //差速限幅
+    float chasu_k = 1.0; //差速
+
+    float shared_error;
+    std::mutex error_mutex;  // 新增互斥锁声明
 
     void init_serial() {
         serial_fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
@@ -337,30 +354,60 @@ private:
         }
     }
 
-    void ackerman_diff_control() {
-        double y, x;
-        const float encoder_scale = 0.51619f;
-        const float poly_coeff[3] = {-0.014344f, 0.0078637f, -0.000014484f};
-        const float speed_factor = 0.3875f;
+    // void ackerman_diff_control() {
+    //     double y, x;
+    //     const float encoder_scale = 0.51619f;
+    //     const float poly_coeff[3] = {-0.014344f, 0.0078637f, -0.000014484f};
+    //     const float speed_factor =  0.15f;//0.3875f;
 
-        if(current_servo_pwm >= steer_middle) { // 左转
-            x = (current_servo_pwm - steer_middle) * Left_Speed * encoder_scale;
-            x = std::min(x, 367.0);
-            y = poly_coeff[0] + poly_coeff[1]*x + poly_coeff[2]*x*x;
+    //     if(current_servo_pwm >= steer_middle) { // 左转
+    //         x = (current_servo_pwm - steer_middle) * Left_Speed * encoder_scale;
+    //         x = std::min(x, 367.0);
+    //         y = poly_coeff[0] + poly_coeff[1]*x + poly_coeff[2]*x*x;
             
-            pidRight.target = Speed_Goal * (1 + speed_factor * y* ackerman_limit);
-            pidLeft.target = Speed_Goal * (1 - speed_factor * y );
-        } else { // 右转 pwm-
-            x = (steer_middle - current_servo_pwm) * Right_Speed * encoder_scale;
-            x = std::min(x, 433.0);
-            y = poly_coeff[0] + poly_coeff[1]*x + poly_coeff[2]*x*x;
+    //         pidRight.target = Speed_Goal * (1 + speed_factor * y* ackerman_limit);
+    //         pidLeft.target = Speed_Goal * (1 - speed_factor * y );
+    //     } else { // 右转 pwm-
+    //         x = (steer_middle - current_servo_pwm) * Right_Speed * encoder_scale;
+    //         x = std::min(x, 433.0);
+    //         y = poly_coeff[0] + poly_coeff[1]*x + poly_coeff[2]*x*x;
             
-            pidLeft.target = Speed_Goal * (1 + speed_factor * y* ackerman_limit);
-            pidRight.target = Speed_Goal * (1 - speed_factor * y);
+    //         pidLeft.target = Speed_Goal * (1 + speed_factor * y* ackerman_limit);
+    //         pidRight.target = Speed_Goal * (1 - speed_factor * y);
+    //     }
+    // }
+    void ackerman_diff_control(int Speed_Goal) {
+        //A 1.05 //差速的大小系数
+        //K 1.06 //差速的预知系数  K越大差速越提前
+        //AK 1  
+        const float L = 200.0f, W = 150.0f;
+        //float angle1 = (current_servo_pwm / 3000 /0.96 - 0.5)*90;
+        //float angle2 = abs(angle1 - 90);
+        //angle2 = max(0.0f, min(angle2, 89.9f));
+        float angle1 =abs((4360 - current_servo_pwm) * 0.09278f);
+        float angle_rad = angle1 * M_PI / 180.0f;
+        float tn = tan(angle_rad);
+        cerr<<"tn"<<tn<<endl;
+        // 基础几何模型
+        float outer_factor = 1.0f + 0.10*(W/2)*tn/L; //0.15
+        float inner_factor = 1.0f - 0.90*(W/2)*tn/L; //0.75
+
+        inner_factor = max(0.8f, min(inner_factor, 1.2f));  // 限制在 0.9~1.1 范围内
+        outer_factor = max(0.8f, min(outer_factor, 1.2f));   // 可选：对称限幅
+        cerr<<"in:"<<inner_factor<<endl;
+        cerr<<"out:"<<outer_factor<<endl;
+        //float outer_factor = (A*(K+0.5*W*tn/L*AK));
+        //float inner_factor = (A*(K-0.5*W*tn/L*AK));
+        // 应用差速
+        if(current_servo_pwm >= steer_middle){
+            pidLeft.target  = Speed_Goal * inner_factor; 
+            pidRight.target = Speed_Goal * outer_factor;
+        }
+        else{
+            pidLeft.target  = Speed_Goal * outer_factor; 
+            pidRight.target = Speed_Goal * inner_factor;
         }
     }
-
-
 public :
 explicit MotionController(LaneProcessor* lp) : laneProcessor(lp) {  // 通过构造函数注入实例
     //MotionController();
@@ -373,7 +420,7 @@ explicit MotionController(LaneProcessor* lp) : laneProcessor(lp) {  // 通过构
         // 初始化PID参数
         init_pid(pidLeft, 1.25f, 0.245f, 0.10f, PWM_MAX,DELTA_PID);       //you
         init_pid(pidRight, 1.25f, 0.205f, 0.18f, PWM_MAX,DELTA_PID);    //zuo
-        init_pid(pidservo, 10.0f, 0.0f, 12.0f, 367.0f, POSITION_PID);//
+        init_pid(pidservo, 10.0f, 0.0f, 28.0f, 367.0f, FUZZY_PID);//
         init_serial();
         
     }
@@ -458,10 +505,10 @@ explicit MotionController(LaneProcessor* lp) : laneProcessor(lp) {  // 通过构
     void set_servo_angle(int error) {
         // 死区处理 (±4像素不响应)
         static int error_last = 0;
-        //if(abs(error_last - error) >30) error = error_last;
+        if(abs(error_last - error) >30) error = error_last;
 
         if(abs(error) < 4) {
-            pwm_set_duty(SERVO_MOTOR1_PWM, 4333);
+            pwm_set_duty(SERVO_MOTOR1_PWM, 4360);
             error_last = error;
             return;
         }
@@ -473,7 +520,7 @@ explicit MotionController(LaneProcessor* lp) : laneProcessor(lp) {  // 通过构
         float pwm_adjustment = calculate_pid(pidservo, pidservo.target);
         
         // 计算目标角度（中位85度 ± 调整量）并约束范围
-        float target_pwm = 4333 + pwm_adjustment;
+        float target_pwm = 4360 + pwm_adjustment;
         target_pwm = std::clamp(target_pwm, static_cast<float>(SERVO_MOTOR_R_MAX), static_cast<float>(SERVO_MOTOR_L_MAX));
         // 转换为舵机占空比并设置PWM
         //uint16_t duty = static_cast<uint16_t>(SERVO_MOTOR_DUTY(target_angle));
@@ -482,7 +529,9 @@ explicit MotionController(LaneProcessor* lp) : laneProcessor(lp) {  // 通过构
         current_servo_pwm = target_pwm;
         error_last = error; 
     }
-float Err_sum(const vector<Point> &centerline) ;
+    float Err_sum(const vector<Point> &centerline);
+    void update_shared_error(float err);
+    float get_shared_error();
 
 
 private:
@@ -497,20 +546,20 @@ private:
         
         if (mode == FUZZY_PID) {
             // 初始化模糊参数
-            pid.fuzzy_pd = {4.0f, 10.0f, 4.0, 35.0, -25.0, 1.0f};
+            pid.fuzzy_pd = {6.0f, 12.0f, 4.0, 35.0, -25.0, 1.0f};
     /* Kp0 */ 
     /* Kd0 */ 
     /* threshold */ 
     /* maximum */ 
     /* minimum */ 
-    /* factor */
-            float uff_p_max = 50.0f, uff_d_max = 60.0f;
+    /* factor *///假设误差范围为 ±160 像素，缩放因子 factor=0.5 后为 ±80
+            float uff_p_max = 18.0f, uff_d_max = 48.0f;
             for(int i=0; i<7; ++i) {
                 pid.uff.UFF_P[i] = uff_p_max * (i-3.0f)/3.0f;
                 pid.uff.UFF_D[i] = uff_d_max * (i-3.0f)/3.0f;
-                pid.EFF[i] = 60.0f * (i-3.0f)/3.0f;//21f误差范围
+                pid.EFF[i] = 66.0f * (i-3.0f)/3.0f;//21f误差范围
                 if(i == 3) pid.EFF[i] = 20.0f;
-                pid.DFF[i] = 30.0f * (i-3.0f)/3.0f;//18f变化率范围
+                pid.DFF[i] = 40.0f * (i-3.0f)/3.0f;//18f变化率范围
             }
             pid.fuzzy_initialized = true;
         }
@@ -558,7 +607,7 @@ private:
             float ec = error - pid.last_error;
             pid.last_error = error;
             float error_abs = fabs(error);
-            pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f; 
+            //pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f; 
             // 执行模糊推理
             count_DMF(pid, error*pid.fuzzy_pd.factor, ec*pid.fuzzy_pd.factor*EC_FACTOR);
             float delta_kp = Fuzzy_Kp(pid);
@@ -607,8 +656,30 @@ private:
         
         encoder_err_last = encoder_err;
     }
+    void suibian_control(int speed){
+        float angle1 = (current_servo_pwm / 3000 /0.9688 - 0.5)*90;
+        float angle2 = abs(angle1 - 90);
+        float chasu=(chasu_k*angle2)/(2+chasu_k*angle2)*speed;
+        if(chasu>lim_cs*speed)//差速限幅，不一定是0.9
+        {
+            chasu=lim_cs*speed;
+        }
+        if(current_servo_pwm > SERVO_MOTOR_MID)//zuo
+        {
+            pidLeft.target = speed + chasu;
+            pidRight.target = speed;
+        }else{
+            pidLeft.target = speed;
+            pidRight.target -= speed + chasu;
+        }
+    }
 };
 void cleanup();
 void sigint_handler(int signum);
 
 #endif
+
+
+//加线性
+
+

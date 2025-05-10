@@ -1,5 +1,5 @@
 #include <zf_common_headfile.h>
-#include <chrono>
+
 // g++ -g -o main main.cpp src/camera.cpp -Iinclude/ `pkg-config --cflags --libs opencv4`;./main
 
 int debugmode = 2;
@@ -7,6 +7,7 @@ const int camera = 0;
 int flag = 0 ;
 unsigned int send_counter = 0;
 const unsigned int SEND_INTERVAL = 20;
+bool LOSTLINE;
 
 int main()
 {
@@ -37,8 +38,8 @@ int main()
      //Kalman滤波器初始化
     Kalman kf_roll;
     Kalman_Init(&kf_roll);
-    pit_ms_init(10, [&ctrl, &kf_roll](){ 
-        if(flag == 1){
+    pit_ms_init(5, [&ctrl, &detector](){ 
+        if(!detector.lost){
         // imu963ra_get_acc();
         // imu963ra_get_gyro();
     
@@ -49,14 +50,17 @@ int main()
         // float dt = 0.01f; // 10ms
         // float estimated_roll = Kalman_Update(&kf_roll, acc_roll, imu963ra_gyro_x, dt);
         //cerr << "Estimated Roll: " << estimated_roll << endl;
+        //float current_error = ctrl.get_shared_error();
+        //ctrl.set_servo_angle(current_error);
         ctrl.pit_callback();
-        ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(100, 0, 0);  // 将控制逻辑移到定时器回调200
         }
         else
         {
             ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
         }
     });
+    //pwm_set_duty(SERVO_MOTOR1_PWM, 3870);
 
 
     while (true)
@@ -68,18 +72,11 @@ int main()
             cerr << "错误：读取帧失败！" << endl;
             break;
         }
-        //auto start = std::chrono::high_resolution_clock::now();
-
-        // 调用你要测试的函数
         DetectionResult result = detector.detect(frame);
-    
-        // // 获取结束时间点
-        // auto end = std::chrono::high_resolution_clock::now();
-    
-        // // 计算耗时（以毫秒为单位）
-        // auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-        // cout<< "函数运行时间: " << duration.count() << " 毫秒" << std::endl;
-
+        if(detector.lost)
+        {
+            break;
+        }
         float error = ctrl.Err_sum(detector.centerLine);
         switch(detector.circleState)
         {
@@ -102,13 +99,14 @@ int main()
             break;
         }
         flag = 1 ;
+        //ctrl.update_shared_error(error);
         cerr<<"error: "<<error<<endl;
         ctrl.set_servo_angle(error);
-        //pwm_set_duty(MOTOR1_PWM, 2000); // 小占空比
-        //gpio_set_level(MOTOR1_DIR, 0);
-        //pwm_set_duty(MOTOR2_PWM, 2000); // 小占空比
-        //gpio_set_level(MOTOR2_DIR, 1);
-        //cerr << "Forward countl: " << encoder_get_count(ENCODER_1) <<"Forward countr: " << encoder_get_count(ENCODER_2) << endl;
+        // pwm_set_duty(MOTOR1_PWM, 1000); // 小占空比
+        // gpio_set_level(MOTOR1_DIR, 1);
+        // pwm_set_duty(MOTOR2_PWM, 1000); // 小占空比
+        // gpio_set_level(MOTOR2_DIR, 0);
+        // cerr << "Forward countl: " << encoder_get_count(ENCODER_1) <<"Forward countr: " << encoder_get_count(ENCODER_2) << endl;
         if (debugmode==1)
         {
             // imshow("原始帧", frame);
@@ -156,7 +154,6 @@ int main()
 
     // 释放摄像头资源
     cap.release();
-    destroyAllWindows();
     // 释放资源
     close(new_socket);
 
