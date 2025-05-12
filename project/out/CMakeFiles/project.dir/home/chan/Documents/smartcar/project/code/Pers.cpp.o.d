@@ -405,6 +405,7 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/Pers.cpp.o: \
  /path/to/install/opencv/include/opencv4/opencv2/video.hpp \
  /path/to/install/opencv/include/opencv4/opencv2/video/tracking.hpp \
 <<<<<<< HEAD
+<<<<<<< HEAD
  /path/to/install/opencv/include/opencv4/opencv2/video/background_segm.hpp \
  /home/chan/Documents/smartcar/project/user/../code/cameratest.h \
  /home/chan/Documents/smartcar/project/user/../../libraries/zf_common/zf_common_headfile.h \
@@ -514,3 +515,6 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/Pers.cpp.o: \
 =======
  /path/to/install/opencv/include/opencv4/opencv2/video/background_segm.hpp
 >>>>>>> 2f0fdd5 (brushing)
+=======
+ /path/to/install/opencv/include/opencv4/opencv2/video/background_segm.hpp
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d

@@ -3,19 +3,26 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/stdc-predef.h \
  /home/chan/Documents/smartcar/project/user/../code/pid.hpp \
 <<<<<<< HEAD
+<<<<<<< HEAD
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/fcntl.h \
 =======
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /home/chan/Documents/smartcar/project/user/../code/camera.hpp \
  /home/chan/Documents/smartcar/project/user/../../libraries/zf_common/zf_common_headfile.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/stdio.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/libc-header-start.h \
+<<<<<<< HEAD
 >>>>>>> 2f0fdd5 (brushing)
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/features.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/sys/cdefs.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/wordsize.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/long-double.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/gnu/stubs.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/gnu/stubs-lp64.h \
+<<<<<<< HEAD
 <<<<<<< HEAD
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/typesizes.h \
@@ -71,11 +78,16 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/stdio.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/lib/gcc/loongarch64-linux-gnu/8.3.0/include/stdarg.h \
 =======
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/lib/gcc/loongarch64-linux-gnu/8.3.0/include/stddef.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/lib/gcc/loongarch64-linux-gnu/8.3.0/include/stdarg.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/typesizes.h \
+<<<<<<< HEAD
 >>>>>>> 2f0fdd5 (brushing)
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/__fpos_t.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/__mbstate_t.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/__fpos64_t.h \
@@ -87,11 +99,14 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/sys_errlist.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/stdio.h \
 <<<<<<< HEAD
+<<<<<<< HEAD
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/string.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/strings.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/vector \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/bits/stl_algobase.h \
 =======
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/lib/gcc/loongarch64-linux-gnu/8.3.0/include/stdint.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/stdint.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/wchar.h \
@@ -106,7 +121,10 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/loongarch64-linux-gnu/bits/c++config.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/loongarch64-linux-gnu/bits/os_defines.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/loongarch64-linux-gnu/bits/cpu_defines.h \
+<<<<<<< HEAD
 >>>>>>> 2f0fdd5 (brushing)
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/bits/functexcept.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/bits/exception_defines.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/bits/cpp_type_traits.h \
@@ -116,9 +134,13 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/bits/move.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/bits/concept_check.h \
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/type_traits \
 >>>>>>> 2f0fdd5 (brushing)
+=======
+ /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/type_traits \
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/bits/stl_iterator_base_types.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/bits/stl_iterator_base_funcs.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/debug/assertions.h \
@@ -170,7 +192,10 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/waitstatus.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/sys/types.h \
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/clock_t.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/clockid_t.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/time_t.h \
@@ -179,16 +204,24 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/endian.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/byteswap.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/uintn-identity.h \
+<<<<<<< HEAD
 >>>>>>> 2f0fdd5 (brushing)
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/sys/select.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/select.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/sigset_t.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/__sigset_t.h \
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/struct_timeval.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/struct_timespec.h \
 >>>>>>> 2f0fdd5 (brushing)
+=======
+ /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/struct_timeval.h \
+ /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/struct_timespec.h \
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/pthreadtypes.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/thread-shared-types.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/pthreadtypes-arch.h \
@@ -197,9 +230,13 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/stdlib-float.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/bits/specfun.h \
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/limits \
 >>>>>>> 2f0fdd5 (brushing)
+=======
+ /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/limits \
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/tr1/gamma.tcc \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/tr1/special_function_util.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/tr1/bessel_function.tcc \
@@ -223,9 +260,13 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /path/to/install/opencv/include/opencv4/opencv2/core/hal/interface.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/cstddef \
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/cstdint \
 >>>>>>> 2f0fdd5 (brushing)
+=======
+ /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/cstdint \
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /path/to/install/opencv/include/opencv4/opencv2/core/cv_cpu_dispatch.h \
  /path/to/install/opencv/include/opencv4/opencv2/core/base.hpp \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/climits \
@@ -277,13 +318,19 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/struct_sched_param.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/cpu-set.h \
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/time.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/time.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/timex.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/struct_tm.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/struct_itimerspec.h \
+<<<<<<< HEAD
 >>>>>>> 2f0fdd5 (brushing)
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/setjmp.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/loongarch64-linux-gnu/bits/atomic_word.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/string_view \
@@ -373,12 +420,18 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/bits/unordered_map.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/mutex \
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/chrono \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/ratio \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/ctime \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/bits/parse_numbers.h \
+<<<<<<< HEAD
 >>>>>>> 2f0fdd5 (brushing)
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/c++/8.3.0/bits/std_mutex.h \
  /path/to/install/opencv/include/opencv4/opencv2/core/optim.hpp \
  /path/to/install/opencv/include/opencv4/opencv2/core/ovx.hpp \
@@ -499,16 +552,22 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /path/to/install/opencv/include/opencv4/opencv2/video/background_segm.hpp \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/sys/stat.h \
 <<<<<<< HEAD
+<<<<<<< HEAD
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/statx.h \
  /home/chan/Documents/smartcar/project/user/../code/socket.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/sys/socket.h \
 =======
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/stat.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/statx.h \
  /home/chan/Documents/smartcar/project/user/../code/socket.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/sys/socket.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/types/struct_iovec.h \
+<<<<<<< HEAD
 >>>>>>> 2f0fdd5 (brushing)
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/socket.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/socket_type.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/sockaddr.h \
@@ -521,14 +580,20 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/netinet/in.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/in.h \
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/unistd.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/posix_opt.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/environments.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/confname.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/getopt_posix.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/getopt_core.h \
+<<<<<<< HEAD
 >>>>>>> 2f0fdd5 (brushing)
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /home/chan/Documents/smartcar/project/user/../code/Pers.h \
  /home/chan/Documents/smartcar/project/user/../../libraries/zf_common/zf_common_font.h \
  /home/chan/Documents/smartcar/project/user/../../libraries/zf_common/zf_common_typedef.h \
@@ -541,9 +606,13 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/asm-generic/ioctl.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/ioctl-types.h \
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/sys/ttydefaults.h \
 >>>>>>> 2f0fdd5 (brushing)
+=======
+ /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/sys/ttydefaults.h \
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/linux/fb.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/linux/types.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/asm/types.h \
@@ -557,12 +626,18 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/asm-generic/posix_types.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/linux/i2c.h \
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/fcntl.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/fcntl.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/fcntl-linux.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/linux/falloc.h \
+<<<<<<< HEAD
 >>>>>>> 2f0fdd5 (brushing)
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/signal.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/signum.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/signum-generic.h \
@@ -612,10 +687,16 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: \
  /home/chan/Documents/smartcar/project/user/../../libraries/zf_components/seekfree_assistant_interface.h \
  /home/chan/Documents/smartcar/project/user/../code/cameratest.h \
 <<<<<<< HEAD
+<<<<<<< HEAD
  /home/chan/Documents/smartcar/project/user/../code/imu.h
 =======
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /home/chan/Documents/smartcar/project/user/../code/imu.h \
  /home/chan/Documents/smartcar/project/user/../code/brush.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/termios.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/termios.h
+<<<<<<< HEAD
 >>>>>>> 2f0fdd5 (brushing)
+=======
+>>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
