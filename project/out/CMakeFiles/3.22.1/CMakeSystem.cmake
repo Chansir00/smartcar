@@ -1,6 +1,12 @@
+<<<<<<< HEAD
+set(CMAKE_HOST_SYSTEM "Linux-6.8.0-58-generic")
+set(CMAKE_HOST_SYSTEM_NAME "Linux")
+set(CMAKE_HOST_SYSTEM_VERSION "6.8.0-58-generic")
+=======
 set(CMAKE_HOST_SYSTEM "Linux-6.8.0-59-generic")
 set(CMAKE_HOST_SYSTEM_NAME "Linux")
 set(CMAKE_HOST_SYSTEM_VERSION "6.8.0-59-generic")
+>>>>>>> 2f0fdd5 (brushing)
 set(CMAKE_HOST_SYSTEM_PROCESSOR "x86_64")
 
 

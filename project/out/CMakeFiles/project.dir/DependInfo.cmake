@@ -29,7 +29,10 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp" "CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp.o" "gcc" "CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp.o.d"
   "/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp" "CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp.o" "gcc" "CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp.o.d"
   "/home/chan/Documents/smartcar/project/code/Pers.cpp" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/Pers.cpp.o" "gcc" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/Pers.cpp.o.d"
+<<<<<<< HEAD
+=======
   "/home/chan/Documents/smartcar/project/code/brush.cpp" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.o" "gcc" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.o.d"
+>>>>>>> 2f0fdd5 (brushing)
   "/home/chan/Documents/smartcar/project/code/camera.cpp" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o" "gcc" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o.d"
   "/home/chan/Documents/smartcar/project/code/imu.cpp" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o" "gcc" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o.d"
   "/home/chan/Documents/smartcar/project/code/pid.cpp" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o" "gcc" "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o.d"

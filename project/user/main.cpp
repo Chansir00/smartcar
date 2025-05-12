@@ -31,7 +31,7 @@ int main()
         if(!detector.lost){
 
         ctrl.pit_callback();
-        ctrl.motor_control(400, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
         }
         else
         {

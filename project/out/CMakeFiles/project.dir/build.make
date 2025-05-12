@@ -97,6 +97,12 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/Pers.cpp.s: cma
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/Pers.cpp.s"
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/chan/Documents/smartcar/project/code/Pers.cpp -o CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/Pers.cpp.s
 
+<<<<<<< HEAD
+CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o: CMakeFiles/project.dir/flags.make
+CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o: /home/chan/Documents/smartcar/project/code/camera.cpp
+CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o"
+=======
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.o: /home/chan/Documents/smartcar/project/code/brush.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
@@ -115,6 +121,7 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o: C
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o: /home/chan/Documents/smartcar/project/code/camera.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o -c /home/chan/Documents/smartcar/project/code/camera.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.i: cmake_force
@@ -128,7 +135,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.s: c
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o: /home/chan/Documents/smartcar/project/code/imu.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o -c /home/chan/Documents/smartcar/project/code/imu.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.i: cmake_force
@@ -142,7 +153,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.s: cmak
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: /home/chan/Documents/smartcar/project/code/pid.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o -c /home/chan/Documents/smartcar/project/code/pid.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.i: cmake_force
@@ -156,7 +171,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.s: cmak
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.o: /home/chan/Documents/smartcar/project/code/socket.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.o -c /home/chan/Documents/smartcar/project/code/socket.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.i: cmake_force
@@ -170,7 +189,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/socket.cpp.s: c
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.o: /home/chan/Documents/smartcar/project/code/test2.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.o -c /home/chan/Documents/smartcar/project/code/test2.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.i: cmake_force
@@ -184,7 +207,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/test2.cpp.s: cm
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_fifo.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_fifo.cpp.o: /home/chan/Documents/smartcar/libraries/zf_common/zf_common_fifo.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_fifo.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_fifo.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_fifo.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_fifo.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_fifo.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_fifo.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_common/zf_common_fifo.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_fifo.cpp.i: cmake_force
@@ -198,7 +225,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_commo
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_font.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_font.cpp.o: /home/chan/Documents/smartcar/libraries/zf_common/zf_common_font.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_font.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_font.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_font.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_font.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_font.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_font.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_common/zf_common_font.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_font.cpp.i: cmake_force
@@ -212,7 +243,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_commo
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_function.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_function.cpp.o: /home/chan/Documents/smartcar/libraries/zf_common/zf_common_function.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_function.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_function.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_function.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_function.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_function.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_function.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_common/zf_common_function.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_common_function.cpp.i: cmake_force
@@ -226,7 +261,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_common/zf_commo
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660ra.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660ra.cpp.o: /home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660ra.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660ra.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660ra.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660ra.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660ra.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660ra.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660ra.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660ra.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660ra.cpp.i: cmake_force
@@ -240,7 +279,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_devic
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660rb.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660rb.cpp.o: /home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660rb.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660rb.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660rb.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660rb.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660rb.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660rb.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660rb.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660rb.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu660rb.cpp.i: cmake_force
@@ -254,7 +297,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_devic
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu963ra.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu963ra.cpp.o: /home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu963ra.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu963ra.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu963ra.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu963ra.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu963ra.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu963ra.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu963ra.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu963ra.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu963ra.cpp.i: cmake_force
@@ -268,7 +315,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_devic
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu_core.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu_core.cpp.o: /home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu_core.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu_core.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu_core.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu_core.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu_core.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu_core.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu_core.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu_core.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_imu_core.cpp.i: cmake_force
@@ -282,7 +333,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_devic
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_ips200_fb.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_ips200_fb.cpp.o: /home/chan/Documents/smartcar/libraries/zf_device/zf_device_ips200_fb.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_ips200_fb.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_ips200_fb.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_ips200_fb.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_ips200_fb.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_ips200_fb.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_ips200_fb.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_device/zf_device_ips200_fb.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_ips200_fb.cpp.i: cmake_force
@@ -296,7 +351,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_devic
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_uvc.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_uvc.cpp.o: /home/chan/Documents/smartcar/libraries/zf_device/zf_device_uvc.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_uvc.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_uvc.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_uvc.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_uvc.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_uvc.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_uvc.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_device/zf_device_uvc.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_device_uvc.cpp.i: cmake_force
@@ -310,7 +369,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_device/zf_devic
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_adc.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_adc.cpp.o: /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_adc.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_adc.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_adc.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_adc.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_adc.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_adc.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_adc.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_adc.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_adc.cpp.i: cmake_force
@@ -324,7 +387,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_drive
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_delay.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_delay.cpp.o: /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_delay.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_delay.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_delay.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_delay.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_delay.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_delay.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_delay.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_delay.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_delay.cpp.i: cmake_force
@@ -338,7 +405,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_drive
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_encoder.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_encoder.cpp.o: /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_encoder.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_encoder.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_encoder.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_encoder.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_encoder.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_encoder.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_encoder.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_encoder.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_encoder.cpp.i: cmake_force
@@ -352,7 +423,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_drive
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_file.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_file.cpp.o: /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_file.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_file.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_file.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_file.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_file.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_file.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_file.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_file.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_file.cpp.i: cmake_force
@@ -366,7 +441,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_drive
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_gpio.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_gpio.cpp.o: /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_gpio.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_gpio.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_gpio.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_gpio.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_gpio.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_gpio.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_gpio.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_gpio.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_gpio.cpp.i: cmake_force
@@ -380,7 +459,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_drive
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pit.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pit.cpp.o: /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pit.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pit.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pit.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pit.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pit.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pit.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pit.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pit.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pit.cpp.i: cmake_force
@@ -394,7 +477,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_drive
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pwm.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pwm.cpp.o: /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pwm.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pwm.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pwm.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pwm.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pwm.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pwm.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pwm.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pwm.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_pwm.cpp.i: cmake_force
@@ -408,7 +495,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_drive
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp.o: /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_tcp_client.cpp.i: cmake_force
@@ -422,7 +513,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_drive
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp.o: /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp.i: cmake_force
@@ -436,7 +531,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_drive
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant.cpp.o: /home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant.cpp.i: cmake_force
@@ -450,7 +549,11 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seek
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant_interface.cpp.o: CMakeFiles/project.dir/flags.make
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant_interface.cpp.o: /home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant_interface.cpp
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant_interface.cpp.o: CMakeFiles/project.dir/compiler_depend.ts
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant_interface.cpp.o"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building CXX object CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant_interface.cpp.o"
+>>>>>>> 2f0fdd5 (brushing)
 	/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/bin/loongarch64-linux-gnu-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant_interface.cpp.o -MF CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant_interface.cpp.o.d -o CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant_interface.cpp.o -c /home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant_interface.cpp
 
 CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seekfree_assistant_interface.cpp.i: cmake_force
@@ -465,7 +568,10 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_components/seek
 project_OBJECTS = \
 "CMakeFiles/project.dir/main.cpp.o" \
 "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/Pers.cpp.o" \
+<<<<<<< HEAD
+=======
 "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.o" \
+>>>>>>> 2f0fdd5 (brushing)
 "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o" \
 "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o" \
 "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o" \
@@ -497,7 +603,10 @@ project_EXTERNAL_OBJECTS =
 
 project: CMakeFiles/project.dir/main.cpp.o
 project: CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/Pers.cpp.o
+<<<<<<< HEAD
+=======
 project: CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.o
+>>>>>>> 2f0fdd5 (brushing)
 project: CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o
 project: CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o
 project: CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/pid.cpp.o
@@ -577,7 +686,11 @@ project: /path/to/install/opencv/lib/libopencv_photo.so.4.10.0
 project: /path/to/install/opencv/lib/libopencv_imgproc.so.4.10.0
 project: /path/to/install/opencv/lib/libopencv_core.so.4.10.0
 project: CMakeFiles/project.dir/link.txt
+<<<<<<< HEAD
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Linking CXX executable project"
+=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Linking CXX executable project"
+>>>>>>> 2f0fdd5 (brushing)
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/project.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
