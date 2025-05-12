@@ -633,6 +633,30 @@ home/chan/Documents/smartcar/project/code/Pers.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/Pers.cpp.s
 .PHONY : home/chan/Documents/smartcar/project/code/Pers.cpp.s
 
+home/chan/Documents/smartcar/project/code/brush.o: home/chan/Documents/smartcar/project/code/brush.cpp.o
+.PHONY : home/chan/Documents/smartcar/project/code/brush.o
+
+# target to build an object file
+home/chan/Documents/smartcar/project/code/brush.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.o
+.PHONY : home/chan/Documents/smartcar/project/code/brush.cpp.o
+
+home/chan/Documents/smartcar/project/code/brush.i: home/chan/Documents/smartcar/project/code/brush.cpp.i
+.PHONY : home/chan/Documents/smartcar/project/code/brush.i
+
+# target to preprocess a source file
+home/chan/Documents/smartcar/project/code/brush.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.i
+.PHONY : home/chan/Documents/smartcar/project/code/brush.cpp.i
+
+home/chan/Documents/smartcar/project/code/brush.s: home/chan/Documents/smartcar/project/code/brush.cpp.s
+.PHONY : home/chan/Documents/smartcar/project/code/brush.s
+
+# target to generate assembly for a file
+home/chan/Documents/smartcar/project/code/brush.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.s
+.PHONY : home/chan/Documents/smartcar/project/code/brush.cpp.s
+
 home/chan/Documents/smartcar/project/code/camera.o: home/chan/Documents/smartcar/project/code/camera.cpp.o
 .PHONY : home/chan/Documents/smartcar/project/code/camera.o
 
@@ -849,6 +873,9 @@ help:
 	@echo "... home/chan/Documents/smartcar/project/code/Pers.o"
 	@echo "... home/chan/Documents/smartcar/project/code/Pers.i"
 	@echo "... home/chan/Documents/smartcar/project/code/Pers.s"
+	@echo "... home/chan/Documents/smartcar/project/code/brush.o"
+	@echo "... home/chan/Documents/smartcar/project/code/brush.i"
+	@echo "... home/chan/Documents/smartcar/project/code/brush.s"
 	@echo "... home/chan/Documents/smartcar/project/code/camera.o"
 	@echo "... home/chan/Documents/smartcar/project/code/camera.i"
 	@echo "... home/chan/Documents/smartcar/project/code/camera.s"

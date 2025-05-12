@@ -10,21 +10,9 @@ const unsigned int SEND_INTERVAL = 20;
 bool LOSTLINE;
 
 int main()
-{
-    ips200_init("/dev/fb0");
-    // 打开摄像头
-    VideoCapture cap(camera, CAP_V4L2); // 0 表示默认摄像头，如果有多个摄像头可以尝试 1, 2, ...
-    if (!cap.isOpened())
-    {
-        cerr << "错误：无法打开摄像头！" << endl;
-        return -1;
-    }
-    // 设置摄像头分辨率
-    cap.set(CAP_PROP_FRAME_WIDTH, 160);
-    cap.set(CAP_PROP_FRAME_HEIGHT, 120);
-    //cap.set(CAP_PROP_FPS, 60);
-    cerr<<"摄像头分辨率: " << cap.get(CAP_PROP_FRAME_WIDTH) << "x" << cap.get(CAP_PROP_FRAME_HEIGHT) << endl;
-
+{   
+    VideoCapture cap= cap_init(camera);
+    //brush_init(600); // 初始化
     // 创建车道检测器    }
     LaneProcessor detector;
     detector.initializeVariables(image_w, image_h);
@@ -38,26 +26,18 @@ int main()
      //Kalman滤波器初始化
     Kalman kf_roll;
     Kalman_Init(&kf_roll);
+
     pit_ms_init(5, [&ctrl, &detector](){ 
         if(!detector.lost){
-        // imu963ra_get_acc();
-        // imu963ra_get_gyro();
-    
-        // // 2. 从加速度计计算Roll角度 (rad)
-        // float acc_roll = atan2(imu963ra_acc_y, imu963ra_acc_z);
-    
-        // // 3. 卡尔曼滤波更新
-        // float dt = 0.01f; // 10ms
-        // float estimated_roll = Kalman_Update(&kf_roll, acc_roll, imu963ra_gyro_x, dt);
-        //cerr << "Estimated Roll: " << estimated_roll << endl;
-        //float current_error = ctrl.get_shared_error();
-        //ctrl.set_servo_angle(current_error);
+
         ctrl.pit_callback();
-        ctrl.motor_control(100, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(400, 0, 0);  // 将控制逻辑移到定时器回调200
         }
         else
         {
             ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
+            brush_off();
+
         }
     });
     //pwm_set_duty(SERVO_MOTOR1_PWM, 3870);

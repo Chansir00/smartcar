@@ -21,7 +21,8 @@ void cleanup()
     // 关闭电机
     pwm_set_duty(SERVO_MOTOR1_PWM, 0);   
     pwm_set_duty(MOTOR1_PWM, 0);   
-    pwm_set_duty(MOTOR2_PWM, 0);  
+    pwm_set_duty(MOTOR2_PWM, 0);
+    brush_off();  
     gpio_set_level(BEEP, 0x0);  
 }
 
