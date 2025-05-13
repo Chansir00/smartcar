@@ -67,7 +67,7 @@ void MotionController::motor_control(int speed, float k, int limit) {
     pidLeft.actual =  encoder_left;
     pidRight.actual = -encoder_right;
 
-    cerr << "left: " << pidLeft.actual << " right: " << pidRight.actual << endl;
+    //cerr << "left: " << pidLeft.actual << " right: " << pidRight.actual << endl;
     // PID计算
 
     //pidLeft.target = speed1;
@@ -92,7 +92,7 @@ void MotionController::motor_control(int speed, float k, int limit) {
     // 设置电机输出
     pwm_set_duty(MOTOR1_PWM, outL);
     pwm_set_duty(MOTOR2_PWM, outR);
-    cerr << "dutyl: " << outL <<"dutyr: " <<  outR << endl;
+    //cerr << "dutyl: " << outL <<"dutyr: " <<  outR << endl;
 }
 
 // float MotionController::Err_sum(const vector<Point> &centerline) {
@@ -139,7 +139,7 @@ float MotionController::Err_sum(const vector<Point> &centerline)
     // 3. 计算实际可用的步数
     const int total_steps = 38; // 默认需要计算的步数
     const int start_idx = centerline.size(); // 起始索引
-    const int start = 48;     //430 52  440 50
+    const int start = 63;     //430 52  440 50
     //cerr<<start_idx<<endl;
     const int steps_used = min(total_steps, start_idx + 1); // 实际计算的步数
     
