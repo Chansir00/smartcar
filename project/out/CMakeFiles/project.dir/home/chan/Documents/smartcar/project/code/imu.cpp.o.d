@@ -507,20 +507,8 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o: \
  /home/chan/Documents/smartcar/project/user/../../libraries/zf_components/seekfree_assistant.h \
  /home/chan/Documents/smartcar/project/user/../../libraries/zf_components/seekfree_assistant_interface.h \
  /home/chan/Documents/smartcar/project/user/../code/pid.hpp \
-<<<<<<< HEAD
-<<<<<<< HEAD
- /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/termios.h \
- /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/termios.h \
- /home/chan/Documents/smartcar/project/user/../code/cameratest.h
-=======
-=======
->>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
  /home/chan/Documents/smartcar/project/user/../code/camera.hpp \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/termios.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/termios.h \
  /home/chan/Documents/smartcar/project/user/../code/cameratest.h \
  /home/chan/Documents/smartcar/project/user/../code/brush.h
-<<<<<<< HEAD
->>>>>>> 2f0fdd5 (brushing)
-=======
->>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d

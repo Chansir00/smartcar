@@ -41,16 +41,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/project.dir/home/chan/Documents/smartcar/libraries/zf_driver/zf_driver_udp.cpp.o.d"
   "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/Pers.cpp.o"
   "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/Pers.cpp.o.d"
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
   "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.o"
   "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.o.d"
->>>>>>> 2f0fdd5 (brushing)
-=======
-  "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.o"
-  "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.o.d"
->>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
   "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o"
   "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/camera.cpp.o.d"
   "CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/imu.cpp.o"

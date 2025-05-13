@@ -81,28 +81,12 @@ clean: CMakeFiles/project.dir/clean
 CMakeFiles/project.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/build
-<<<<<<< HEAD
-<<<<<<< HEAD
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28 "Built target project"
-=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29 "Built target project"
->>>>>>> 2f0fdd5 (brushing)
-=======
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/chan/Documents/smartcar/project/out/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29 "Built target project"
->>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
 .PHONY : CMakeFiles/project.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/project.dir/rule: cmake_check_build_system
-<<<<<<< HEAD
-<<<<<<< HEAD
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/chan/Documents/smartcar/project/out/CMakeFiles 28
-=======
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/chan/Documents/smartcar/project/out/CMakeFiles 29
->>>>>>> 2f0fdd5 (brushing)
-=======
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/chan/Documents/smartcar/project/out/CMakeFiles 29
->>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/project.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/chan/Documents/smartcar/project/out/CMakeFiles 0
 .PHONY : CMakeFiles/project.dir/rule

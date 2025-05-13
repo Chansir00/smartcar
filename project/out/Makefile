@@ -633,11 +633,6 @@ home/chan/Documents/smartcar/project/code/Pers.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/Pers.cpp.s
 .PHONY : home/chan/Documents/smartcar/project/code/Pers.cpp.s
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
 home/chan/Documents/smartcar/project/code/brush.o: home/chan/Documents/smartcar/project/code/brush.cpp.o
 .PHONY : home/chan/Documents/smartcar/project/code/brush.o
 
@@ -662,10 +657,6 @@ home/chan/Documents/smartcar/project/code/brush.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/project.dir/build.make CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.s
 .PHONY : home/chan/Documents/smartcar/project/code/brush.cpp.s
 
-<<<<<<< HEAD
->>>>>>> 2f0fdd5 (brushing)
-=======
->>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
 home/chan/Documents/smartcar/project/code/camera.o: home/chan/Documents/smartcar/project/code/camera.cpp.o
 .PHONY : home/chan/Documents/smartcar/project/code/camera.o
 
@@ -882,18 +873,9 @@ help:
 	@echo "... home/chan/Documents/smartcar/project/code/Pers.o"
 	@echo "... home/chan/Documents/smartcar/project/code/Pers.i"
 	@echo "... home/chan/Documents/smartcar/project/code/Pers.s"
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 	@echo "... home/chan/Documents/smartcar/project/code/brush.o"
 	@echo "... home/chan/Documents/smartcar/project/code/brush.i"
 	@echo "... home/chan/Documents/smartcar/project/code/brush.s"
->>>>>>> 2f0fdd5 (brushing)
-=======
-	@echo "... home/chan/Documents/smartcar/project/code/brush.o"
-	@echo "... home/chan/Documents/smartcar/project/code/brush.i"
-	@echo "... home/chan/Documents/smartcar/project/code/brush.s"
->>>>>>> 2f0fdd54560259301c19f8e0b7725b6b03220e3d
 	@echo "... home/chan/Documents/smartcar/project/code/camera.o"
 	@echo "... home/chan/Documents/smartcar/project/code/camera.i"
 	@echo "... home/chan/Documents/smartcar/project/code/camera.s"

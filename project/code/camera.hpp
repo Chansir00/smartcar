@@ -143,7 +143,8 @@ public:
     );
     Point findSuddenChangePoint(const vector<TrackPoint>& points,bool isLeftLane,int y);
     Point findInflectionPoint(const vector<TrackPoint>& points);
-
+    float calculateLaneSlope(const std::vector<TrackPoint>& lane);
+    bool isStraightLane(const std::vector<TrackPoint>& lane,int trend);
     private:
     ControlParams current_params;
 
