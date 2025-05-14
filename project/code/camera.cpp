@@ -44,7 +44,6 @@ DetectionResult LaneProcessor::detect(const Mat &inputImage)
     // 检测斑马线
     // result.hasZebraCrossing = detectZebraCrossing(whitePixels, leftMissedRadius, rightMissedRadius);
     // 绘制检测结果
-
     drawLanes(result.outputImage, roiHeight, leftLane, rightLane, centerLine);
 
     // 如果检测到斑马线，添加文本标注
@@ -73,7 +72,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     {
         countcircle++;
     }
-    int img_devided = 85;
+    int img_devided = 90;
     findrightInflectionPoints(rightLane, rightJumpPointA, rightJumpPointB, isrightJumpvalid);
     findleftInflectionPoints(LeftLane, leftJumpPointA, leftJumpPointB, isleftJumpvalid);
     isleftLanecontinuous = isLaneContinuous(LeftLane, -1);
@@ -82,8 +81,8 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     Point lefthemisphere = Point(-1, -1);
     bool isleftstraight = false;
     bool isrightstraight = false;
-    isleftstraight = isStraightLane(LeftLane,-1);
-    isrightstraight = isStraightLane(RightLane,1);
+    isleftstraight = isStraightLane(LeftLane, -1);
+    isrightstraight = isStraightLane(RightLane, 1);
     // float leftscope = 0;
     // float rightscope = 0;
     // leftscope = calculateLaneSlope(LeftLane);
@@ -114,11 +113,11 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     {
         gpio_set_level(BEEP, 0x0);
         // 先通过左车道单调性和右车道丢点率判断是否可能进入环岛
-        if (isleftstraight&&!isrightstraight&&rightJumpPointB.x != -1 && rightJumpPointA.x != -1 && isleftLanecontinuous && !isrightLanecontinuous && leftMissedRadius < 0.4 && rightMissedRadius < 0.7 && centerLine.size() > img_devided)
+        if (leftJumpPointB.x==-1&&isleftstraight && !isrightstraight &&isrightJumpvalid  && isleftLanecontinuous&&!isrightLanecontinuous && rightMissedRadius < 0.7 && centerLine.size() > 100)
         {
             circleState = RIGHT_CIRCLE_DETECTED;
         }
-        else if (isrightstraight&&!isleftstraight&&leftJumpPointB.x != -1 && leftJumpPointA.x != -1 && isrightLanecontinuous && !isleftLanecontinuous && rightMissedRadius < 0.4 && leftMissedRadius < 0.7 && centerLine.size() > img_devided)
+        else if (rightJumpPointB.x==-1&&isrightstraight && !isleftstraight && isleftJumpvalid  && isrightLanecontinuous&&!isleftLanecontinuous && leftMissedRadius < 0.7 && centerLine.size() > 100)
         {
             circleState = LEFT_CIRCLE_DETECTED;
         }
@@ -317,7 +316,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     break;
     case CROSSING:
     {
-        if ((rightJumpPointB.x == -1 && leftJumpPointB.x == -1) || (rightJumpPointB.y > 105 || leftJumpPointB.y > 105) || (isleftLanecontinuous && isrightLanecontinuous))
+        if ((rightJumpPointB.x == -1 && leftJumpPointB.x == -1) || (rightJumpPointB.y > 100 || leftJumpPointB.y > 100) || (isleftLanecontinuous && isrightLanecontinuous))
         {
             circleState = CIRCLE_INACTIVE;
             break;
@@ -326,59 +325,23 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             leftJumpPointA = leftJumpPointA;
         }
-        else if (isrightJumpvalid)
+        else if (isrightJumpvalid && !isleftJumpvalid)
         {
-            // 如果左边A点存在，根据右边两点差值推算左边B点
-            if (leftJumpPointA.x != -1)
-            {
-                float deltaX = rightJumpPointB.x - rightJumpPointA.x;
-                float deltaY = rightJumpPointB.y - rightJumpPointA.y;
-                leftJumpPointB.x = leftJumpPointA.x + deltaX;
-                leftJumpPointB.y = leftJumpPointA.y + deltaY;
-            }
-            // 如果左边B点存在，根据右边两点差值推算左边A点
-            else if (leftJumpPointB.x != -1)
-            {
-                float deltaX = rightJumpPointA.x - rightJumpPointB.x;
-                float deltaY = rightJumpPointA.y - rightJumpPointB.y;
-                leftJumpPointA.x = leftJumpPointB.x + deltaX;
-                leftJumpPointA.y = leftJumpPointB.y + deltaY;
-            }
-            // 如果左右点都不存在，使用原来的固定偏移方法
-            else
-            {
-                leftJumpPointA.x = rightJumpPointA.x - 75;
-                leftJumpPointA.y = rightJumpPointA.y;
-                leftJumpPointB.x = rightJumpPointB.x - 40;
-                leftJumpPointB.y = rightJumpPointB.y;
-            }
+            float widthA = getTrackWIdthFormY(rightJumpPointA.y);
+            float widthB = getTrackWIdthFormY(rightJumpPointB.y);
+            leftJumpPointA.x = rightJumpPointA.x - widthA;
+            leftJumpPointA.y = rightJumpPointA.y;
+            leftJumpPointB.x = rightJumpPointB.x - widthB;
+            leftJumpPointB.y = rightJumpPointB.y ;
         }
-        else if (isleftJumpvalid)
+        else if (isleftJumpvalid && !isrightJumpvalid)
         {
-            // 如果右边A点存在，根据左边两点差值推算右边B点
-            if (rightJumpPointA.x != -1)
-            {
-                float deltaX = leftJumpPointB.x - leftJumpPointA.x;
-                float deltaY = leftJumpPointB.y - leftJumpPointA.y;
-                rightJumpPointB.x = rightJumpPointA.x + deltaX;
-                rightJumpPointB.y = rightJumpPointA.y + deltaY;
-            }
-            // 如果右边B点存在，根据左边两点差值推算右边A点
-            else if (rightJumpPointB.x != -1)
-            {
-                float deltaX = leftJumpPointA.x - leftJumpPointB.x;
-                float deltaY = leftJumpPointA.y - leftJumpPointB.y;
-                rightJumpPointA.x = rightJumpPointB.x + deltaX;
-                rightJumpPointA.y = rightJumpPointB.y + deltaY;
-            }
-            // 如果右点都不存在，使用原来的固定偏移方法
-            else
-            {
-                rightJumpPointA.x = leftJumpPointA.x + 70;
-                rightJumpPointA.y = leftJumpPointA.y;
-                rightJumpPointB.x = leftJumpPointB.x + 40;
-                rightJumpPointB.y = leftJumpPointB.y;
-            }
+            float widthA = getTrackWIdthFormY(leftJumpPointA.y);
+            float widthB = getTrackWIdthFormY(leftJumpPointB.y);
+            rightJumpPointA.x = leftJumpPointA.x + widthA;
+            rightJumpPointA.y = leftJumpPointA.y;
+            rightJumpPointB.x = leftJumpPointB.x + widthB;
+            rightJumpPointB.y = leftJumpPointB.y ;
         }
         else
         {
@@ -410,12 +373,6 @@ void LaneProcessor::initializeVariables(int image_w, int image_h)
 
     // 初始化 rightLane，大小为 image_h，每个元素为 TrackPoint{Point(-1, -1), 0}
     rightLane = std::vector<TrackPoint>(image_h, {Point{-1, -1}, 0});
-
-    // 初始化 rightcicle，大小为 5，每个元素为 TrackPoint{Point(-1, -1), 0}
-    rightcicle = std::vector<TrackPoint>(5, {Point{-1, -1}, 0});
-
-    // 初始化 leftcicle，大小为 5，每个元素为 TrackPoint{Point(-1, -1), 0}
-    leftcicle = std::vector<TrackPoint>(5, {Point{-1, -1}, 0});
 
     // 初始化 centerLine，大小为 image_h，每个元素为 TrackPoint{Point(-1, -1), 0}
     centerLine = std::vector<Point>(image_h, Point{0, 0});
@@ -776,7 +733,7 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
     int error = 0;
 
     size_t candidateCIndex = 40;
-    int maxJumpC = 5;
+    int maxJumpC = 7;
     // cerr << candidateCIndex << endl;
     for (size_t i = startline; i < 119; i++)
     {
@@ -879,7 +836,7 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
     // 得到 C 点位置
     if (pointA_found && pointB_found)
     {
-        if (pointA.x != -1 && pointB.x != -1 && abs(pointA.y - pointB.y) >= 3 && pointA.y > 20 && pointB.y > 20)
+        if (pointA.x >= 50 && pointB.x >= 50 && abs(pointA.y - pointB.y) >= 3 && pointA.y > 10 && pointB.y > 10)
             isvalid = true;
     }
 }
@@ -900,7 +857,7 @@ void LaneProcessor::findleftInflectionPoints(const vector<TrackPoint> &lane,
 
     // 找 B 点（C 点）
     size_t candidateCIndex = 20;
-    int maxJumpC = 5;
+    int maxJumpC = 7;
 
     for (size_t i = startline; i < 119; i++)
     {
@@ -986,7 +943,7 @@ void LaneProcessor::findleftInflectionPoints(const vector<TrackPoint> &lane,
 
     if (pointA_found && pointB_found)
     {
-        if (pointA.x != -1 && pointB.x != -1 && abs(pointA.y - pointB.y) >= 3 && pointA.y > 20 && pointB.y > 20)
+        if (pointA.x <= 110 && pointB.x <= 110 && abs(pointA.y - pointB.y) >= 3 && pointA.y > 10 && pointB.y > 10)
             isvalid = true;
     }
 }
@@ -1234,26 +1191,31 @@ Point LaneProcessor::findSuddenChangePoint(const vector<TrackPoint> &points, boo
     }
     return {-1, -1}; // 没找到突变点
 }
-float LaneProcessor::calculateLaneSlope(const std::vector<TrackPoint>& lane) 
+float LaneProcessor::calculateLaneSlope(const std::vector<TrackPoint> &lane)
 {
-    if (lane.size() < 2) return 0.0f;
+    if (lane.size() < 2)
+        return 0.0f;
 
     // 统计有效点用于线性拟合
     std::vector<float> xs, ys;
 
-    for (const auto& pt : lane) {
+    for (const auto &pt : lane)
+    {
         // 左车道排除x==1，右车道排除x==159
-        if (pt.position.x == 1.0f || pt.position.x == 159.0f) continue;
+        if (pt.position.x == 1.0f || pt.position.x == 159.0f)
+            continue;
         xs.push_back(pt.position.x);
         ys.push_back(pt.position.y);
     }
 
     int n = xs.size();
-    if (n < 2) return 0.0f;  // 点数不足以拟合斜率
+    if (n < 2)
+        return 0.0f; // 点数不足以拟合斜率
 
     // 最小二乘法拟合直线 y = kx + b，求斜率 k
     float sum_x = 0, sum_y = 0, sum_xy = 0, sum_xx = 0;
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i)
+    {
         sum_x += xs[i];
         sum_y += ys[i];
         sum_xy += xs[i] * ys[i];
@@ -1261,29 +1223,80 @@ float LaneProcessor::calculateLaneSlope(const std::vector<TrackPoint>& lane)
     }
 
     float denominator = n * sum_xx - sum_x * sum_x;
-    if (denominator == 0.0f) return 0.0f;  // 避免除以零
+    if (denominator == 0.0f)
+        return 0.0f; // 避免除以零
 
     float k = (n * sum_xy - sum_x * sum_y) / denominator;
-    return std::fabs(k);  // 返回斜率绝对值
+    return std::fabs(k); // 返回斜率绝对值
 }
-bool LaneProcessor::isStraightLane(const std::vector<TrackPoint>& lane,int trend) {
-    if (lane.size() <= 80) return false;
+bool LaneProcessor::isStraightLane(const std::vector<TrackPoint> &lane, int trend)
+{
+    if (lane.size() <= 80)
+        return false;
 
-
-    for (int i = 21; i < 80; ++i) {
+    for (int i = 21; i < 80; ++i)
+    {
         float dx = lane[i].position.x - lane[i - 1].position.x;
 
-        if (dx == 0) continue;  // x 不变不影响趋势判断
+        if (dx == 0)
+            continue; // x 不变不影响趋势判断
 
-        if (trend == 0) {
-            trend = (dx > 0) ? 1 : -1;  // 设置初始趋势
-        } else {
+        if (trend == 0)
+        {
+            trend = (dx > 0) ? 1 : -1; // 设置初始趋势
+        }
+        else
+        {
             // 检查趋势是否一致
-            if ((dx > 0 && trend < 0) || (dx < 0 && trend > 0)) {
-                return false;  // 方向改变，说明不是直道
+            if ((dx > 0 && trend < 0) || (dx < 0 && trend > 0))
+            {
+                return false; // 方向改变，说明不是直道
             }
         }
     }
 
-    return true;  // 所有变化趋势一致
+    return true; // 所有变化趋势一致
+}
+map<int, float> LaneProcessor::calculateTrackWidthsByY(
+    const std::vector<TrackPoint>& leftLane,
+    const std::vector<TrackPoint>& rightLane)
+{
+    std::map<int, float> widths;
+    std::map<int, float> leftMap;
+    std::map<int, float> rightMap;
+
+    // 将左车道的点按 y 坐标映射
+    for (const auto& p : leftLane) {
+        int y = static_cast<int>(p.position.y + 0.5f);  // 四舍五入到 int
+        leftMap[y] = p.position.x;
+    }
+
+    // 将右车道的点按 y 坐标映射
+    for (const auto& p : rightLane) {
+        int y = static_cast<int>(p.position.y + 0.5f);
+        rightMap[y] = p.position.x;
+    }
+
+    // 遍历所有出现过的 y 坐标
+    for (const auto& [y, leftX] : leftMap) {
+        if (rightMap.count(y)) {
+            float rightX = rightMap[y];
+            widths[y] = rightX - leftX;  // 赛道宽度
+        }
+        // 若缺失右边界，也可以选择记录为 -1 或跳过，这里选择跳过
+    }
+
+    for (const auto& [y, width] : widths) {
+        cerr << "y: " << y << ", 宽度: " << width << endl;
+    }
+    return widths;
+}
+
+float LaneProcessor::getTrackWIdthFormY(int y)
+{
+    const double a = 0.0001;
+    const double b = -0.0123;
+    const double c = 1.234;
+    const double d = -5.6700;
+    return a * y * y *y+ b *y*y + c*y+ d;
 }

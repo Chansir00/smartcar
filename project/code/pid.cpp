@@ -139,7 +139,7 @@ float MotionController::Err_sum(const vector<Point> &centerline)
     // 3. 计算实际可用的步数
     const int total_steps = 38; // 默认需要计算的步数
     const int start_idx = centerline.size(); // 起始索引
-    const int start = 63;     //430 52  440 50
+    const int start = 50;     //430 52  440 50
     //cerr<<start_idx<<endl;
     const int steps_used = min(total_steps, start_idx + 1); // 实际计算的步数
     

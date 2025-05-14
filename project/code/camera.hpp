@@ -87,8 +87,6 @@ public:
     vector<int> whitePixels;                       // 白点分布
     vector<TrackPoint> leftLane;  // 左车道
     vector<TrackPoint> rightLane; // 右车道
-    vector<TrackPoint> rightcicle;      // right_circle
-    vector<TrackPoint> leftcicle;
     vector<Point> centerLine; // 中线
 
 
@@ -145,6 +143,11 @@ public:
     Point findInflectionPoint(const vector<TrackPoint>& points);
     float calculateLaneSlope(const std::vector<TrackPoint>& lane);
     bool isStraightLane(const std::vector<TrackPoint>& lane,int trend);
+    map<int, float> calculateTrackWidthsByY(
+    const std::vector<TrackPoint>& leftLane,
+    const std::vector<TrackPoint>& rightLane);
+    float getTrackWIdthFormY(int y);
+
     private:
     ControlParams current_params;
 
