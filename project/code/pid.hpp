@@ -420,7 +420,7 @@ explicit MotionController(LaneProcessor* lp) : laneProcessor(lp) {  // 通过构
         // 初始化PID参数
         init_pid(pidLeft, 1.25f, 0.245f, 0.10f, PWM_MAX,DELTA_PID);       //you
         init_pid(pidRight, 1.25f, 0.205f, 0.18f, PWM_MAX,DELTA_PID);    //zuo
-        init_pid(pidservo, 10.0f, 0.0f, 28.0f, 367.0f, FUZZY_PID);//
+        init_pid(pidservo, 18.0f, 0.0f, 28.0f, 367.0f, FUZZY_PID);//
         init_serial();
         
     }

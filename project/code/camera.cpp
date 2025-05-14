@@ -87,8 +87,8 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     // float rightscope = 0;
     // leftscope = calculateLaneSlope(LeftLane);
     // rightscope = calculateLaneSlope(RightLane);
-    righthemisphere = findSuddenChangePoint(RightLane, 0, rightJumpPointA.y);
-    lefthemisphere = findSuddenChangePoint(LeftLane, 0, leftJumpPointA.y);
+    // righthemisphere = findSuddenChangePoint(RightLane, 0, rightJumpPointA.y);
+    // lefthemisphere = findSuddenChangePoint(LeftLane, 0, leftJumpPointA.y);
     cerr << "circleflag: " << circleflag << endl;
     cerr << "isleftJumpvalid: " << isleftJumpvalid << endl;
     cerr << "isrightJumpvalid: " << isrightJumpvalid << endl;
@@ -121,11 +121,11 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = LEFT_CIRCLE_DETECTED;
         }
-        else if (rightMissedRadius > 0.9 && leftMissedRadius < 0.1 && numPoints < img_devided)
+        else if (isleftLanecontinuous && leftMissedRadius < 0.1 && numPoints < img_devided)
         {
             circleState = RIGHT_TURN;
         }
-        else if (rightMissedRadius < 0.1 && leftMissedRadius > 0.9 && numPoints < img_devided)
+        else if (isrightLanecontinuous && leftMissedRadius > 0.9 && numPoints < img_devided)
         {
             circleState = LEFT_TURN;
         }
@@ -400,8 +400,8 @@ bool binaryThreshold(const Mat &input, Mat &binary, Mat &output)
     output = resizedImage.clone();
     Mat img, blurred;
     cvtColor(resizedImage, img, COLOR_BGR2GRAY);
-    GaussianBlur(img, blurred, Size(3, 3), 0);
-    threshold(blurred, binary, 0, 255, THRESH_BINARY | THRESH_OTSU);
+    //GaussianBlur(img, blurred, Size(3, 3), 0);
+    threshold(img, binary, 0, 255, THRESH_BINARY | THRESH_OTSU);
     return true;
 }
 // 检测每列白色像素数量
@@ -836,7 +836,7 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
     // 得到 C 点位置
     if (pointA_found && pointB_found)
     {
-        if (pointA.x >= 50 && pointB.x >= 50 && abs(pointA.y - pointB.y) >= 3 && pointA.y > 10 && pointB.y > 10)
+        if (pointA.x >= 50 && pointB.x >= 50 && pointA.y - pointB.y>=3 && pointA.y > 10 && pointB.y > 10)
             isvalid = true;
     }
 }
@@ -943,7 +943,7 @@ void LaneProcessor::findleftInflectionPoints(const vector<TrackPoint> &lane,
 
     if (pointA_found && pointB_found)
     {
-        if (pointA.x <= 110 && pointB.x <= 110 && abs(pointA.y - pointB.y) >= 3 && pointA.y > 10 && pointB.y > 10)
+        if (pointA.x <= 110 && pointB.x <= 110 && pointA.y - pointB.y>= 3 && pointA.y > 10 && pointB.y > 10)
             isvalid = true;
     }
 }

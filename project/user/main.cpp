@@ -26,12 +26,12 @@ int main()
      //Kalman滤波器初始化
     Kalman kf_roll;
     Kalman_Init(&kf_roll);
-
+    
     pit_ms_init(5, [&ctrl, &detector](){ 
         if(!detector.lost){
 
         ctrl.pit_callback();
-        ctrl.motor_control(350, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(430, 0, 0);  // 将控制逻辑移到定时器回调200
         }
         else
         {
@@ -89,15 +89,7 @@ int main()
         // cerr << "Forward countl: " << encoder_get_count(ENCODER_1) <<"Forward countr: " << encoder_get_count(ENCODER_2) << endl;
         if (debugmode==1)
         {
-            // imshow("原始帧", frame);
-            imshow("二值化图像", result.binaryImage);
-            imshow("车道检测结果", result.warpedImage);
-            // 按下 ESC 键退出
-            if (waitKey(30) == 27)
-            {
-                cout << "程序已退出。" << endl;
-                break;
-            }
+            continue;
         }
         else if(debugmode == 2)
         {
