@@ -616,11 +616,12 @@ private:
             float delta_kp = Fuzzy_Kp(pid);
             cerr<<"ΔKp:"<<delta_kp<<endl;
             float delta_kd = Fuzzy_Kd(pid);
+            cerr<<"ΔKd:"<<delta_kd<<endl;
 
             // 计算最终输出
             float P = (pid.fuzzy_pd.Kp0 + delta_kp) * error; // 直接使用模糊调整后的Kp
             //float D = pid.Kd * ec;
-            float D = pid.fuzzy_pd.Kd0 * ec;
+            float D = pid.fuzzy_pd.Kd0 + delta_kd;
             float output = P + D;
             //float output = (pid.fuzzy_pd.Kp0 + delta_kp) * error / 100.0f;
             //output += (pid.fuzzy_pd.Kd0 + delta_kd) * ec / 100.0f;
