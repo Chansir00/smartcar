@@ -131,8 +131,8 @@ typedef struct {
 #define SERVO_MOTOR_FREQ            (servo_pwm_info.freq)
 #define PWM_DUTY_MAX                (servo_pwm_info.duty_max)
 #define SERVO_MOTOR_MID             (4360 )    
-#define SERVO_MOTOR_L_MAX           (4840 )                       
-#define SERVO_MOTOR_R_MAX           (3870)
+#define SERVO_MOTOR_L_MAX           (4800 )//4840                       
+#define SERVO_MOTOR_R_MAX           (3940)//3860
 //((float)PWM_DUTY_MAX/(1000.0/(float)SERVO_MOTOR_FREQ)*(0.5+(float)(x)/90.0))
 //#define SERVO_MOTOR_DUTY(x) ((float)PWM_DUTY_MAX/(1000.0/(float)SERVO_MOTOR_FREQ)*(0.5+(float)(x)/90.0))
 
@@ -212,6 +212,9 @@ private:
 
     float lim_cs = 0.9; //差速限幅
     float chasu_k = 1.0; //差速
+    float p1 = 0;
+    float i1 = 0;
+    float d1 = 0;
 
     float shared_error;
     std::mutex error_mutex;  // 新增互斥锁声明
@@ -382,15 +385,15 @@ private:
         //AK 1  
         const float L = 200.0f, W = 150.0f;
         //float angle1 = (current_servo_pwm / 3000 /0.96 - 0.5)*90;
-        //float angle2 = abs(angle1 - 90);
+        //float angle2 = abs(angle1 - 90);g
         //angle2 = max(0.0f, min(angle2, 89.9f));
         float angle1 =abs((4360 - current_servo_pwm) * 0.09278f);
         float angle_rad = angle1 * M_PI / 180.0f;
         float tn = tan(angle_rad);
         cerr<<"tn"<<tn<<endl;
         // 基础几何模型
-        float outer_factor = 1.0f + 0.10*(W/2)*tn/L; //0.15
-        float inner_factor = 1.0f - 0.90*(W/2)*tn/L; //0.75
+        float outer_factor = 1.0f + 0.17*(W/2)*tn/L; //0.10
+        float inner_factor = 1.0f - 0.83*(W/2)*tn/L; //0.90
 
         inner_factor = max(0.8f, min(inner_factor, 1.2f));  // 限制在 0.9~1.1 范围内
         outer_factor = max(0.8f, min(outer_factor, 1.2f));   // 可选：对称限幅
@@ -420,7 +423,7 @@ explicit MotionController(LaneProcessor* lp) : laneProcessor(lp) {  // 通过构
         // 初始化PID参数
         init_pid(pidLeft, 1.25f, 0.245f, 0.10f, PWM_MAX,DELTA_PID);       //you
         init_pid(pidRight, 1.25f, 0.205f, 0.18f, PWM_MAX,DELTA_PID);    //zuo
-        init_pid(pidservo, 18.0f, 0.0f, 28.0f, 367.0f, FUZZY_PID);//
+        init_pid(pidservo, 10.0f, 0.0f, 28.0f, 367.0f, FUZZY_PID);//
         init_serial();
         
     }
@@ -505,7 +508,7 @@ explicit MotionController(LaneProcessor* lp) : laneProcessor(lp) {  // 通过构
     void set_servo_angle(int error) {
         // 死区处理 (±4像素不响应)
         static int error_last = 0;
-        if(abs(error_last - error) >30) error = error_last;
+        //if(abs(error_last - error) >30) error = error_last;
 
         if(abs(error) < 4) {
             pwm_set_duty(SERVO_MOTOR1_PWM, 4360);
@@ -546,20 +549,20 @@ private:
         
         if (mode == FUZZY_PID) {
             // 初始化模糊参数
-            pid.fuzzy_pd = {6.0f, 12.0f, 4.0, 35.0, -25.0, 1.0f};
+            pid.fuzzy_pd = {6.0f, 15.0f, 1.0, 35.0, 6.0, 1.0f};
     /* Kp0 */ 
     /* Kd0 */ 
-    /* threshold */ 
+    /* deltakp threshold */ 
     /* maximum */ 
     /* minimum */ 
     /* factor *///假设误差范围为 ±160 像素，缩放因子 factor=0.5 后为 ±80
-            float uff_p_max = 18.0f, uff_d_max = 48.0f;
+            float uff_p_max = 16.0f, uff_d_max= 70.0f;
             for(int i=0; i<7; ++i) {
                 pid.uff.UFF_P[i] = uff_p_max * (i-3.0f)/3.0f;
                 pid.uff.UFF_D[i] = uff_d_max * (i-3.0f)/3.0f;
-                pid.EFF[i] = 66.0f * (i-3.0f)/3.0f;//21f误差范围
+                pid.EFF[i] = 60.0f * (i-3.0f)/3.0f;//21f误差范围
                 if(i == 3) pid.EFF[i] = 20.0f;
-                pid.DFF[i] = 40.0f * (i-3.0f)/3.0f;//18f变化率范围
+                pid.DFF[i] = 20.0f * (i-3.0f)/3.0f;//18f变化率范围
             }
             pid.fuzzy_initialized = true;
         }
@@ -616,7 +619,8 @@ private:
 
             // 计算最终输出
             float P = (pid.fuzzy_pd.Kp0 + delta_kp) * error; // 直接使用模糊调整后的Kp
-            float D = pid.Kd * ec;
+            //float D = pid.Kd * ec;
+            float D = pid.fuzzy_pd.Kd0 * ec;
             float output = P + D;
             //float output = (pid.fuzzy_pd.Kp0 + delta_kp) * error / 100.0f;
             //output += (pid.fuzzy_pd.Kd0 + delta_kd) * ec / 100.0f;
@@ -678,3 +682,8 @@ void cleanup();
 void sigint_handler(int signum);
 
 #endif
+
+
+//加线性
+
+

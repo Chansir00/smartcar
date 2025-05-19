@@ -138,11 +138,18 @@ float MotionController::Err_sum(const vector<Point> &centerline)
     
     // 3. 计算实际可用的步数
     const int total_steps = 38; // 默认需要计算的步数
-    const int start = 56;     //430 52  440 50
+    const int start = 60;     //430 52  440 50
     const int start_idx = centerline.size() - start; // 起始索引
+    const int start2 = centerline.size() - 39;
+    const int force_start = max(start2,0);
+    int steps_used = 0;
     //cerr<<start_idx<<endl;
-    const int steps_used = min(total_steps, start_idx); // 实际计算的步数
-    
+    if(start_idx > 0){
+    steps_used = min(total_steps, start_idx + 1); // 实际计算的步数
+    }else{
+    steps_used =  (centerline.size() >= 39) ? 39 : centerline.size();
+    }
+    //const int steps_used = (centerline.size() >= total_steps) ? total_steps : centerline.size();
     // 4. 检查权重数组是否足够
     const int weight_size = sizeof(weight) / sizeof(weight[0]);
     if (weight_size < steps_used) {
@@ -155,12 +162,21 @@ float MotionController::Err_sum(const vector<Point> &centerline)
     float error = 0.0f;
     float weight_count = 0.0f;
 if(params.weight_case == 1.0f){
+    if(start_idx <= 0){
+    for (int i = 0; i < steps_used; ++i) 
+    {
+        //int idx = start_idx - i; // 自动确保 idx >= 0
+        error += (centerline[i+force_start].x - 80) * weight1[i];
+        weight_count += weight1[i];
+    }
+}else{
     for (int i = 0; i < steps_used; ++i) 
     {
         //int idx = start_idx - i; // 自动确保 idx >= 0
         error += (centerline[i+start].x - 80) * weight1[i];
         weight_count += weight1[i];
     }
+}
 }
 else{
     for (int i = 0; i < steps_used; ++i) 

@@ -89,20 +89,20 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     // rightscope = calculateLaneSlope(RightLane);
     // righthemisphere = findSuddenChangePoint(RightLane, 0, rightJumpPointA.y);
     // lefthemisphere = findSuddenChangePoint(LeftLane, 0, leftJumpPointA.y);
-    cerr << "circleflag: " << circleflag << endl;
-    cerr << "isleftJumpvalid: " << isleftJumpvalid << endl;
-    cerr << "isrightJumpvalid: " << isrightJumpvalid << endl;
-    cerr << "leftJumpPointA: " << leftJumpPointA << endl;
-    cerr << "leftJumpPointB: " << leftJumpPointB << endl;
-    cerr << "rightJumpPointA: " << rightJumpPointA << endl;
-    cerr << "rightJumpPointB: " << rightJumpPointB << endl;
-    cerr << "isleftLanecontinuous: " << isleftLanecontinuous << endl;
-    cerr << "isrightLanecontinuous: " << isrightLanecontinuous << endl;
-    cerr << circleState << endl;
-    cerr << "rightMissedRadius: " << rightMissedRadius << endl;
-    cerr << "leftMissedRadius: " << leftMissedRadius << endl;
-    cerr << "isleftstraight: " << isleftstraight << endl;
-    cerr << "isrightstraight: " << isrightstraight << endl;
+    // cerr << "circleflag: " << circleflag << endl;
+    // cerr << "isleftJumpvalid: " << isleftJumpvalid << endl;
+    // cerr << "isrightJumpvalid: " << isrightJumpvalid << endl;
+    // cerr << "leftJumpPointA: " << leftJumpPointA << endl;
+    // cerr << "leftJumpPointB: " << leftJumpPointB << endl;
+    // cerr << "rightJumpPointA: " << rightJumpPointA << endl;
+    // cerr << "rightJumpPointB: " << rightJumpPointB << endl;
+    // cerr << "isleftLanecontinuous: " << isleftLanecontinuous << endl;
+    // cerr << "isrightLanecontinuous: " << isrightLanecontinuous << endl;
+    // cerr << circleState << endl;
+    // cerr << "rightMissedRadius: " << rightMissedRadius << endl;
+    // cerr << "leftMissedRadius: " << leftMissedRadius << endl;
+    // cerr << "isleftstraight: " << isleftstraight << endl;
+    // cerr << "isrightstraight: " << isrightstraight << endl;
     // cerr << "leftscope: " << leftscope << endl;
     // cerr << "rightscope: " << rightscope << endl;
     if (centerLine.size() < 5)
@@ -121,11 +121,11 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = LEFT_CIRCLE_DETECTED;
         }
-        else if (isleftLanecontinuous && leftMissedRadius < 0.1 && numPoints < img_devided)
+        else if (isleftLanecontinuous && leftMissedRadius < 0.5 && rightMissedRadius>=0.9&& numPoints < img_devided)
         {
             circleState = RIGHT_TURN;
         }
-        else if (isrightLanecontinuous && leftMissedRadius > 0.9 && numPoints < img_devided)
+        else if (isrightLanecontinuous && leftMissedRadius > 0.9 &&rightMissedRadius<=0.5&& numPoints < img_devided)
         {
             circleState = LEFT_TURN;
         }
@@ -614,7 +614,7 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
     }
 
     // cerr<<"numPoints"<<numPoints<<endl;
-    const int estimatedLaneWidth = 0; // 假设车道宽度为 100 像素，你可以动态计算
+    const int estimatedLaneWidth = 40; // 假设车道宽度为 100 像素，你可以动态计算
     // 清空之前的中线数据
     centerLine.clear();
 
@@ -662,19 +662,24 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
             if (circleState == RIGHT_TURN)
             {
                 Point center(
-                    (leftPoint.x + estimatedLaneWidth),
+                    (leftPoint.x + rightPoint.x)/2 + estimatedLaneWidth,
                     (leftPoint.y));
-                if (center.x < image.cols)
-                    centerLine.push_back(center);
+                if (center.x >= image.cols)
+                {
+                    center.x = image.cols - 1;
+                }
+                centerLine.push_back(center);
             }
             // 计算中点
             else if (circleState == LEFT_TURN)
             {
                 Point center(
-                    (rightPoint.x - estimatedLaneWidth),
+                    (leftPoint.x +rightPoint.x)/2 - estimatedLaneWidth,
                     (rightPoint.y));
-                if (center.x > 0)
-                    centerLine.push_back(center);
+                if (center.x <= 0){
+                    center.x=0;
+                }
+                centerLine.push_back(center);
             }
             else if (circleState == CROSSING)
             {
