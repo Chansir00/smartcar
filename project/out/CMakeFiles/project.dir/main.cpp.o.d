@@ -509,6 +509,5 @@ CMakeFiles/project.dir/main.cpp.o: \
  /home/chan/Documents/smartcar/project/user/../code/camera.hpp \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/termios.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/termios.h \
- /home/chan/Documents/smartcar/project/user/../code/cameratest.h \
  /home/chan/Documents/smartcar/project/user/../code/imu.h \
  /home/chan/Documents/smartcar/project/user/../code/brush.h

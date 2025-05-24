@@ -62,6 +62,7 @@ struct DetectionResult
 // 图像预处理：二值化
 bool binaryThreshold(const Mat &input, Mat &binary,Mat &output);
 VideoCapture cap_init(int camera);
+
 // 车道线处理类
 class LaneProcessor
 {

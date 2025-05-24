@@ -138,7 +138,7 @@
 
 //===================================================用户自定义文件===================================================
 #include "pid.hpp"
-#include "cameratest.h"
+#include "camera.hpp"
 #include "socket.h"
 #include "Pers.h"
 #include "imu.h"

@@ -31,7 +31,7 @@ int main()
         if(!detector.lost){
 
         ctrl.pit_callback();
-        ctrl.motor_control(430, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(300, 0, 0);  // 将控制逻辑移到定时器回调200
         }
         else
         {
@@ -45,6 +45,7 @@ int main()
 
     while (true)
     {
+        clock_t start = clock();
         Mat frame;
         cap >> frame; // 从摄像头读取一帧
         if (frame.empty())
@@ -52,7 +53,11 @@ int main()
             cerr << "错误：读取帧失败！" << endl;
             break;
         }
+        
+
         DetectionResult result = detector.detect(frame);
+        
+
         if(detector.lost)
         {
             break;
@@ -64,16 +69,12 @@ int main()
             error+=0;
             break;
             case RIGHT_CIRCLE_INTRY:
-            error =50;
             break;
             case LEFT_CIRCLE_INTRY:
-            error =-50;
             break;
             case RIGHT_CIRCLE_EXITING:
-            error = 50;
             break;
             case LEFT_CIRCLE_EXITING:
-            error = -50;
             break;
             default:
             break;
@@ -89,7 +90,7 @@ int main()
         // cerr << "Forward countl: " << encoder_get_count(ENCODER_1) <<"Forward countr: " << encoder_get_count(ENCODER_2) << endl;
         if (debugmode==1)
         {
-            continue;
+            flag=1;
         }
         else if(debugmode == 2)
         {
@@ -121,6 +122,10 @@ int main()
             send_counter = 0;
             ctrl.send_debug2();  // 调用数据发送函数
         }
+        clock_t end = clock();
+        double duration = double(end - start) / CLOCKS_PER_SEC * 1000; // 转为毫秒
+        
+        std::cout << "函数耗时: " << duration << " 毫秒" << std::endl;
         
     }
 
@@ -131,3 +136,4 @@ int main()
 
     return 0;
 }
+

@@ -1,20 +1,29 @@
 #include "camera.hpp"
 
+
 VideoCapture cap_init(int camera)
 {
     ips200_init("/dev/fb0");
-    // 打开摄像头
-    VideoCapture cap(camera, CAP_V4L2); // 0 表示默认摄像头，如果有多个摄像头可以尝试 1, 2, ...
-    if (!cap.isOpened())
+    VideoCapture cap;
+    
+    // 最多尝试 2 次（例如 camera=0 失败后尝试 camera=1）
+    for (int i = 0; i < 2; ++i) 
     {
-        cerr << "错误：无法打开摄像头！" << endl;
+        cap.open(camera + i, CAP_V4L2); // 尝试打开 camera+i
+        if (cap.isOpened()) 
+        {
+            // 成功打开，设置分辨率
+            cap.set(CAP_PROP_FRAME_WIDTH, 160);
+            cap.set(CAP_PROP_FRAME_HEIGHT, 120);
+            // cap.set(CAP_PROP_FPS, 60);
+            return cap; // 返回成功打开的摄像头
+        }
     }
-    // 设置摄像头分辨率
-    cap.set(CAP_PROP_FRAME_WIDTH, 160);
-    cap.set(CAP_PROP_FRAME_HEIGHT, 120);
-    // cap.set(CAP_PROP_FPS, 60);
-    return cap;
+
+    // 如果全部尝试失败，输出错误信息
+    return cap; // 返回未成功打开的 cap（isOpened() 为 false）
 }
+
 // 车道检测逻辑
 DetectionResult LaneProcessor::detect(const Mat &inputImage)
 {
@@ -72,7 +81,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     {
         countcircle++;
     }
-    int img_devided = 90;
+    int img_devided = 95;
     findrightInflectionPoints(rightLane, rightJumpPointA, rightJumpPointB, isrightJumpvalid);
     findleftInflectionPoints(LeftLane, leftJumpPointA, leftJumpPointB, isleftJumpvalid);
     isleftLanecontinuous = isLaneContinuous(LeftLane, -1);
@@ -87,25 +96,26 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     // float rightscope = 0;
     // leftscope = calculateLaneSlope(LeftLane);
     // rightscope = calculateLaneSlope(RightLane);
-    // righthemisphere = findSuddenChangePoint(RightLane, 0, rightJumpPointA.y);
-    // lefthemisphere = findSuddenChangePoint(LeftLane, 0, leftJumpPointA.y);
-    // cerr << "circleflag: " << circleflag << endl;
-    // cerr << "isleftJumpvalid: " << isleftJumpvalid << endl;
-    // cerr << "isrightJumpvalid: " << isrightJumpvalid << endl;
-    // cerr << "leftJumpPointA: " << leftJumpPointA << endl;
-    // cerr << "leftJumpPointB: " << leftJumpPointB << endl;
-    // cerr << "rightJumpPointA: " << rightJumpPointA << endl;
-    // cerr << "rightJumpPointB: " << rightJumpPointB << endl;
-    // cerr << "isleftLanecontinuous: " << isleftLanecontinuous << endl;
-    // cerr << "isrightLanecontinuous: " << isrightLanecontinuous << endl;
-    // cerr << circleState << endl;
-    // cerr << "rightMissedRadius: " << rightMissedRadius << endl;
-    // cerr << "leftMissedRadius: " << leftMissedRadius << endl;
-    // cerr << "isleftstraight: " << isleftstraight << endl;
-    // cerr << "isrightstraight: " << isrightstraight << endl;
+    //map<int, float>lenth = calculateTrackWidthsByY(LeftLane, RightLane);
+    righthemisphere = findSuddenChangePoint(RightLane, 0, rightJumpPointA.y);
+    lefthemisphere = findSuddenChangePoint(LeftLane, 1, leftJumpPointA.y);
+    cerr << "circleflag: " << circleflag << endl;
+    cerr << "isleftJumpvalid: " << isleftJumpvalid << endl;
+    cerr << "isrightJumpvalid: " << isrightJumpvalid << endl;
+    cerr << "leftJumpPointA: " << leftJumpPointA << endl;
+    cerr << "leftJumpPointB: " << leftJumpPointB << endl;
+    cerr << "rightJumpPointA: " << rightJumpPointA << endl;
+    cerr << "rightJumpPointB: " << rightJumpPointB << endl;
+    cerr << "isleftLanecontinuous: " << isleftLanecontinuous << endl;
+    cerr << "isrightLanecontinuous: " << isrightLanecontinuous << endl;
+    cerr << circleState << endl;
+    cerr << "rightMissedRadius: " << rightMissedRadius << endl;
+    cerr << "leftMissedRadius: " << leftMissedRadius << endl;
+    cerr << "isleftstraight: " << isleftstraight << endl;
+    cerr << "isrightstraight: " << isrightstraight << endl;
     // cerr << "leftscope: " << leftscope << endl;
     // cerr << "rightscope: " << rightscope << endl;
-    if (centerLine.size() < 5)
+    if (centerLine.size() < 10)
         lost = true;
     switch (circleState)
     {
@@ -113,24 +123,24 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     {
         gpio_set_level(BEEP, 0x0);
         // 先通过左车道单调性和右车道丢点率判断是否可能进入环岛
-        if (leftJumpPointB.x==-1&&isleftstraight && !isrightstraight &&isrightJumpvalid  && isleftLanecontinuous&&!isrightLanecontinuous && rightMissedRadius < 0.7 && centerLine.size() > 100)
+        if (circleflag==1&&leftJumpPointA.x==-1&&leftJumpPointB.x==-1&&rightJumpPointA.y>=40&&leftMissedRadius<0.4&&isleftstraight && !isrightstraight&& isleftLanecontinuous&&!isrightLanecontinuous && rightMissedRadius < 0.7 && centerLine.size() > 100)
         {
             circleState = RIGHT_CIRCLE_DETECTED;
         }
-        else if (rightJumpPointB.x==-1&&isrightstraight && !isleftstraight && isleftJumpvalid  && isrightLanecontinuous&&!isleftLanecontinuous && leftMissedRadius < 0.7 && centerLine.size() > 100)
+        else if (circleflag==1&&rightJumpPointA.x==-1&&rightJumpPointB.x==-1&&leftJumpPointA.y>=40&&rightMissedRadius<0.4&&isrightstraight && !isleftstraight && isleftJumpvalid  && isrightLanecontinuous&&!isleftLanecontinuous && leftMissedRadius < 0.7 && centerLine.size() > 100)
         {
             circleState = LEFT_CIRCLE_DETECTED;
         }
-        else if (isleftLanecontinuous && leftMissedRadius < 0.5 && rightMissedRadius>=0.9&& numPoints < img_devided)
+        else if (isleftstraight && rightMissedRadius>=0.9&& numPoints < img_devided)
         {
             circleState = RIGHT_TURN;
         }
-        else if (isrightLanecontinuous && leftMissedRadius > 0.9 &&rightMissedRadius<=0.5&& numPoints < img_devided)
+        else if (isrightstraight && leftMissedRadius >= 0.9 && numPoints < img_devided)
         {
             circleState = LEFT_TURN;
         }
 
-        else if (((isrightJumpvalid && isleftJumpvalid) || (isrightJumpvalid && leftJumpPointB.x != -1) || (isleftJumpvalid && rightJumpPointB.x != -1) || (rightJumpPointB.y >= 50 && leftJumpPointB.y >= 50)) && centerLine.size() > img_devided)
+        else if (((isrightJumpvalid && isleftJumpvalid) || (isrightJumpvalid && leftJumpPointA.x != -1) || (isleftJumpvalid && rightJumpPointA.x != -1) || (rightJumpPointB.y >30 && leftJumpPointB.y >= 30)) && centerLine.size() > img_devided)
         {
             circleState = CROSSING;
         }
@@ -157,13 +167,24 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         //      circleState = CIRCLE_INACTIVE;
         //      break;
         //  }
-
         circle(output, righthemisphere, 2, Scalar(0, 0, 0), 2);
-        generateVirtualPath(RightLane[RightLane.size() - 1].position, rightJumpPointB, rightvirtualPath, true);
+        if(rightJumpPointB.x==-1||rightJumpPointB.x>rightJumpPointA.x){
+            if(righthemisphere.x!=-1 &&righthemisphere.x<rightJumpPointA.x)
+            {
+                generateVirtualPath(rightJumpPointA,righthemisphere, rightvirtualPath, true);
+            }
+            else
+            {
+                generateVirtualPath(rightJumpPointB, rightLane[startline+1].position, rightvirtualPath, true);
+            }
+        }
+        else{
+            generateVirtualPath(rightJumpPointB, rightLane[117].position, rightvirtualPath, true);
+        }
         mergeVirtualPath(RightLane, rightvirtualPath, -1);
-        if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 40)
+        if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 27)
         {
-            circleState = CIRCLE_INACTIVE;
+            circleState = RIGHT_CIRCLE_INTRY;
         }
     }
     break;
@@ -179,13 +200,14 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = RIGHT_CIRCLE_INSIDE;
         }
-        // generateVirtualPath(leftLane[119].position, rightJumpPointB, leftvirtualPath, true);
-        // mergeVirtualPath(LeftLane, leftvirtualPath, rightJumpPointB.y);
+        generateVirtualPath(leftLane[118].position, rightJumpPointB, leftvirtualPath, true);
+        mergeVirtualPath(LeftLane, leftvirtualPath, rightJumpPointB.y);
+        // mergeVirtualPath(RightLane, rightvirtualPath, rightJumpPointB.y);
     }
     break;
     case RIGHT_CIRCLE_INSIDE:
     {
-        if (leftJumpPointA.x != -1 && !isleftLanecontinuous)
+        if (leftJumpPointA.x != -1 && !isleftstraight)
         {
             circleState = RIGHT_CIRCLE_EXITING;
         }
@@ -195,7 +217,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case RIGHT_CIRCLE_EXITING:
     {
 
-        Point2f endPoint(179, 60); // 初始化为无效值
+        Point2f endPoint(179, 0); // 初始化为无效值
         // for (const auto& point : RightLane) {
         //     if (point.position.x >= 158) {
         //         endPoint = point.position;
@@ -203,18 +225,18 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         //     }
         // }
         circle(img, endPoint, 2, Scalar(0, 0, 0), 2);
-        if (leftJumpPointA.y >= 50 && leftJumpPointA.x != 0)
+        if (leftJumpPointA.y !=-1 && leftJumpPointA.x != 0)
         {
             generateVirtualPath(endPoint, leftJumpPointA, leftvirtualPath, true);
         }
         else
         {
-            generateVirtualPath(endPoint, leftLane[leftLane.size() - 1].position, leftvirtualPath, true);
+            generateVirtualPath(endPoint, leftLane[leftLane.size() - 2].position, leftvirtualPath, true);
         }
 
         mergeVirtualPath(LeftLane, leftvirtualPath, endPoint.y);
 
-        if (numPoints >= img_devided && !isrightLanecontinuous)
+        if (numPoints >= img_devided &&isleftLanecontinuous&&rightJumpPointA.x!=-1)
         {
             circleState = CIRCLE_INACTIVE;
             circleflag = 0;
@@ -236,11 +258,23 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         //  }
 
         circle(output, lefthemisphere, 2, Scalar(0, 0, 0), 2);
-        generateVirtualPath(LeftLane[LeftLane.size() - 1].position, leftJumpPointB, leftvirtualPath, true);
+        if(leftJumpPointB.x==-1 ||leftJumpPointB.x<leftJumpPointA.x){
+            if(lefthemisphere.x!=-1 &&lefthemisphere.x>leftJumpPointA.x)
+            {
+                generateVirtualPath(leftJumpPointA,lefthemisphere, leftvirtualPath, true);
+            }
+            else
+            {
+                generateVirtualPath(leftJumpPointB, leftLane[startline+1].position, leftvirtualPath, true);
+            }
+        }
+        else{
+            generateVirtualPath(leftJumpPointB, leftLane[117].position, leftvirtualPath, true);
+        }
         mergeVirtualPath(LeftLane, leftvirtualPath, -1);
-        if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 43)
+        if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 27)
         {
-            circleState = CIRCLE_INACTIVE;
+            circleState = LEFT_CIRCLE_INTRY;
         }
     }
     break;
@@ -252,17 +286,17 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         //     generateVirtualPath(LeftLane[LeftLane.size() - 1].position, hemisphere, leftvirtualPath, true);
         //     mergeVirtualPath(LeftLane, leftvirtualPath,-1);
         // }
-        if (numPoints < 0.65 * image_h && leftJumpPointB.x == -1 && leftJumpPointA.x == -1 && isrightLanecontinuous)
+        if (numPoints < img_devided && leftJumpPointB.x == -1 && leftJumpPointA.x == -1 && isrightLanecontinuous)
         {
             circleState = LEFT_CIRCLE_INSIDE;
         }
-        // generateVirtualPath(rightLane[119].position, leftJumpPointB, rightvirtualPath, true);
-        // mergeVirtualPath(RightLane, rightvirtualPath, leftJumpPointB.y);
+        generateVirtualPath(rightLane[118].position, leftJumpPointB, rightvirtualPath, true);
+        mergeVirtualPath(RightLane, rightvirtualPath, leftJumpPointB.y);
     }
     break;
     case LEFT_CIRCLE_INSIDE:
     {
-        if (rightJumpPointA.x != -1 && !isrightLanecontinuous)
+        if (rightJumpPointA.x != -1 && !isrightstraight)
         {
             circleState = LEFT_CIRCLE_EXITING;
         }
@@ -271,7 +305,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
 
     case LEFT_CIRCLE_EXITING:
     {
-        Point2f endPoint(0, 60); // 初始化为无效值
+        Point2f endPoint(0, 0); // 初始化为无效值
         // for (const auto& point : LeftLane) {
         //     if (point.position.x <= (image_w - 158)) {
         //         endPoint = point.position;
@@ -279,18 +313,18 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         //     }
         // }
         circle(img, endPoint, 2, Scalar(0, 0, 0), 2);
-        if (rightJumpPointA.y >= 50 && rightJumpPointA.x != (image_w - 1))
+        if (rightJumpPointA.y !=-1 && rightJumpPointA.x != (image_w - 1))
         {
             generateVirtualPath(endPoint, rightJumpPointA, rightvirtualPath, true);
         }
         else
         {
-            generateVirtualPath(endPoint, rightLane[rightLane.size() - 1].position, rightvirtualPath, true);
+            generateVirtualPath(endPoint, rightLane[rightLane.size() - 2].position, rightvirtualPath, true);
         }
 
         mergeVirtualPath(RightLane, rightvirtualPath, endPoint.y);
 
-        if (numPoints >= 0.6 * image_h && !isleftLanecontinuous)
+        if (numPoints >= img_devided && isrightLanecontinuous&&leftJumpPointA.x!=-1)
         {
             circleState = CIRCLE_INACTIVE;
             circleflag = 0;
@@ -316,7 +350,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     break;
     case CROSSING:
     {
-        if ((rightJumpPointB.x == -1 && leftJumpPointB.x == -1) || (rightJumpPointB.y > 100 || leftJumpPointB.y > 100) || (isleftLanecontinuous && isrightLanecontinuous))
+        if ((rightJumpPointB.x == -1 && leftJumpPointB.x == -1) || (rightJumpPointB.y > 100 || leftJumpPointB.y > 100) || (isleftLanecontinuous || isrightLanecontinuous))
         {
             circleState = CIRCLE_INACTIVE;
             break;
@@ -333,6 +367,11 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             leftJumpPointA.y = rightJumpPointA.y;
             leftJumpPointB.x = rightJumpPointB.x - widthB;
             leftJumpPointB.y = rightJumpPointB.y ;
+            // float deltax = rightJumpPointA.x-rightJumpPointB.x;
+            // float deltay = rightJumpPointA.y-rightJumpPointB.y;
+            // leftJumpPointB.x = leftJumpPointA.x + deltax;
+            // leftJumpPointB.y = leftJumpPointA.y - deltay;
+
         }
         else if (isleftJumpvalid && !isrightJumpvalid)
         {
@@ -342,12 +381,20 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             rightJumpPointA.y = leftJumpPointA.y;
             rightJumpPointB.x = leftJumpPointB.x + widthB;
             rightJumpPointB.y = leftJumpPointB.y ;
+            // float deltax = leftJumpPointA.x-leftJumpPointB.x;
+            // float deltay = leftJumpPointA.y-leftJumpPointB.y;
+            // rightJumpPointB.x = rightJumpPointA.x + deltax;
+            // rightJumpPointB.y = rightJumpPointA.y - deltay;
         }
         else
         {
             leftJumpPointA = leftLane[leftLane.size() - 1].position;
             rightJumpPointA = rightLane[rightLane.size() - 1].position;
         }
+        cerr << "leftJumpPointA: " << leftJumpPointA << endl;
+        cerr << "leftJumpPointB: " << leftJumpPointB << endl;
+        cerr << "rightJumpPointA: " << rightJumpPointA << endl;
+        cerr << "rightJumpPointB: " << rightJumpPointB << endl;
         generateVirtualPath(rightJumpPointA, rightJumpPointB, rightvirtualPath, true);
         generateVirtualPath(leftJumpPointA, leftJumpPointB, leftvirtualPath, true);
         mergeVirtualPath(LeftLane, leftvirtualPath, -1);
@@ -392,14 +439,14 @@ bool binaryThreshold(const Mat &input, Mat &binary, Mat &output)
         cerr << "错误：输入图像为空！" << endl;
         return false;
     }
-    Rect roi(0, 30, image_w, image_h - 30);
-    Mat croppedImage = input(roi);
+    //Rect roi(0, 30, image_w, image_h - 30);
+    //Mat croppedImage = input(roi);
     // 调整大小为160x120
-    Mat resizedImage;
-    resize(croppedImage, resizedImage, cv::Size(160, 120));
-    output = resizedImage.clone();
+    //Mat resizedImage;
+    //resize(croppedImage, resizedImage, cv::Size(160, 120));
+    output = input.clone();
     Mat img, blurred;
-    cvtColor(resizedImage, img, COLOR_BGR2GRAY);
+    cvtColor(input, img, COLOR_BGR2GRAY);
     //GaussianBlur(img, blurred, Size(3, 3), 0);
     threshold(img, binary, 0, 255, THRESH_BINARY | THRESH_OTSU);
     return true;
@@ -506,7 +553,7 @@ void LaneProcessor::detectLanePoints(const Mat &binaryImage, int roiHeight,
     int maxLeft[2] = {-1, -1}, maxRight[2] = {-1, -1};
 
     // 寻找最长左白条
-    for (size_t i = 30; i < whitePixels.size() - 30; i++)
+    for (size_t i = 1; i < whitePixels.size() - 1; i++)
     {
         if (whitePixels[i] > maxLeft[1])
         {
@@ -516,7 +563,7 @@ void LaneProcessor::detectLanePoints(const Mat &binaryImage, int roiHeight,
     }
 
     // 寻找最长右白条
-    for (int i = whitePixels.size() - 30; i >= 30; i--)
+    for (int i = whitePixels.size() - 1; i >= 1; i--)
     {
         if (whitePixels[i] > maxRight[1])
         {
@@ -540,6 +587,10 @@ void LaneProcessor::detectLanePoints(const Mat &binaryImage, int roiHeight,
     int LeftTrackLength = maxLeft[1];
     int RightTrackLength = maxRight[1];
     numPoints = min(LeftTrackLength, RightTrackLength);
+    if(numPoints >110)
+    {
+        numPoints = 110;
+    }
     startline = roiHeight - numPoints + 1;
     // 初始化 leftLane 和 rightLane
     leftLane.clear();
@@ -548,7 +599,7 @@ void LaneProcessor::detectLanePoints(const Mat &binaryImage, int roiHeight,
     rightLane.resize(roiHeight - 1, {Point(-1, -1), 0});
 
     // 检测左车道点
-    for (int y = roiHeight - 1; y >= roiHeight - LeftTrackLength; y--)
+    for (int y = roiHeight - 1; y >= roiHeight - numPoints; y--)
     {
         bool pointFound = false;
 
@@ -574,7 +625,7 @@ void LaneProcessor::detectLanePoints(const Mat &binaryImage, int roiHeight,
     }
 
     // 检测右车道点
-    for (int y = roiHeight - 1; y >= roiHeight - RightTrackLength; y--)
+    for (int y = roiHeight - 1; y >= roiHeight - numPoints; y--)
     {
         bool pointFound = false;
 
@@ -603,9 +654,9 @@ void LaneProcessor::detectLanePoints(const Mat &binaryImage, int roiHeight,
 }
 // 绘制车道线
 void LaneProcessor::drawLanes(Mat &image, int roiHeight,
-                              vector<TrackPoint> &leftLane,
-                              vector<TrackPoint> &rightLane,
-                              vector<Point> &centerLine)
+                             vector<TrackPoint> &leftLane,
+                             vector<TrackPoint> &rightLane,
+                             vector<Point> &centerLine)
 {
     if (leftLane.empty() || rightLane.empty())
     {
@@ -667,7 +718,7 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
                 if (center.x >= image.cols)
                 {
                     center.x = image.cols - 1;
-                }
+            }
                 centerLine.push_back(center);
             }
             // 计算中点
@@ -694,8 +745,8 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
                     (leftPoint.x + rightPoint.x) / 2,
                     (leftPoint.y + rightPoint.y) / 2);
                 centerLine.push_back(center);
+                }
             }
-        }
 
         cerr << "centerLine size: " << centerLine.size() << endl;
         // 只有当中线有点时才绘制
@@ -737,10 +788,10 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
     int pre_error = 0;
     int error = 0;
 
-    size_t candidateCIndex = 40;
+    size_t candidateCIndex = 10;
     int maxJumpC = 7;
     // cerr << candidateCIndex << endl;
-    for (size_t i = startline; i < 119; i++)
+    for (size_t i = startline+5; i < 119; i++)
     {
         // cerr << i << endl;
         if (lane[i].position.x == -1)
@@ -749,20 +800,19 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
         int jump = lane[i].position.x - lane[i + 1].position.x;
         if (jump < -maxJumpC)
         {
-            cerr << "跳变点数" << jump << endl;
             // 检查右侧五个点的跳变点数是否很小
             bool isSmallJump = true;
             // cerr << isSmallJump << endl;
-            for (size_t j = i; j > i - SLOPE_CHECK_WINDOW; j--)
-            {
-                if (lane[i - 1].position.x == -1)
-                    continue;
-                if (abs(lane[j].position.x - lane[j - 1].position.x) > SMALL_JUMP_THRESHOLD)
-                {
-                    isSmallJump = false;
-                    break;
-                }
-            }
+            // for (size_t j = i; j > i - SLOPE_CHECK_WINDOW; j--)
+            // {
+            //     if (lane[i - 1].position.x == -1)
+            //         continue;
+            //     if (abs(lane[j].position.x - lane[j - 1].position.x) > SMALL_JUMP_THRESHOLD)
+            //     {
+            //         isSmallJump = false;
+            //         break;
+            //     }
+            // }
 
             if (isSmallJump)
             {
@@ -777,7 +827,7 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
 
     if (!pointA_found)
     {
-        for (int i = startIndex - 2; i > candidateCIndex; i--)
+        for (int i = startIndex - 1; i > candidateCIndex; i--)
         {
             // cerr<<lane[i].position<<endl;
             //  计算当前点的跳变点数
@@ -864,7 +914,7 @@ void LaneProcessor::findleftInflectionPoints(const vector<TrackPoint> &lane,
     size_t candidateCIndex = 20;
     int maxJumpC = 7;
 
-    for (size_t i = startline; i < 119; i++)
+    for (size_t i = startline+5; i < 119; i++)
     {
         if (lane[i].position.x == -1)
             continue;
@@ -874,14 +924,14 @@ void LaneProcessor::findleftInflectionPoints(const vector<TrackPoint> &lane,
         if (jump < -maxJumpC)
         {
             bool isSmallJump = true;
-            for (size_t j = i; j > i - SLOPE_CHECK_WINDOW; j--)
-            {
-                if (abs(lane[j].position.x - lane[j - 1].position.x) > SMALL_JUMP_THRESHOLD)
-                {
-                    isSmallJump = false;
-                    break;
-                }
-            }
+            // for (size_t j = i; j > i - SLOPE_CHECK_WINDOW; j--)
+            // {
+            //     if (abs(lane[j].position.x - lane[j - 1].position.x) > SMALL_JUMP_THRESHOLD)
+            //     {
+            //         isSmallJump = false;
+            //         break;
+            //     }
+            // }
 
             if (isSmallJump)
             {
@@ -1028,35 +1078,46 @@ void LaneProcessor::smoothPath(vector<Point> &path)
 }
 
 void LaneProcessor::mergeVirtualPath(vector<TrackPoint> &lane,
-                                     const vector<Point> &virtualPath,
-                                     float minY = -1.0f) // 新增参数：最小 y 值，默认不裁剪
+                                    const vector<Point> &virtualPath,
+                                    float minY = -1.0f) 
 {
-    if (virtualPath.empty())
+    // 情况1：virtualPath 为空，直接裁剪 lane 中 y < minY 的点
+    if (virtualPath.empty()) 
     {
-        return;
+        if (minY >= -1.0f) 
+        {
+            // 使用 erase-remove 惯用法高效删除 y < minY 的点
+            lane.erase(
+                std::remove_if(lane.begin(), lane.end(),
+                    [minY](const TrackPoint &tp) {
+                        return tp.position.y < minY;
+                    }),
+                lane.end()
+            );
+        }
+        return; // 无需后续处理
     }
 
-    // origin=true：仅替换 y 相同的点
-    for (const auto &virtualPoint : virtualPath)
+    // 情况2：virtualPath 非空，合并数据
+    for (const auto &virtualPoint : virtualPath) 
     {
         auto it = std::find_if(lane.begin(), lane.end(),
-                               [&virtualPoint](const TrackPoint &tp)
-                               {
-                                   return tp.position.y == virtualPoint.y;
-                               });
+                            [&virtualPoint](const TrackPoint &tp) {
+                                return tp.position.y == virtualPoint.y;
+                            });
 
-        if (it != lane.end())
+        if (it != lane.end()) 
         {
             it->position = (virtualPoint.y >= minY) ? virtualPoint : Point(-1, -1); // 裁剪
         }
     }
 
     // 额外处理原车道中 y < minY 的点（如果 minY 有效）
-    if (minY > -1.0f)
+    if (minY >= -1.0f) 
     {
-        for (auto &tp : lane)
+        for (auto &tp : lane) 
         {
-            if (tp.position.y < minY)
+            if (tp.position.y <= minY) 
             {
                 tp.position = Point(-1, -1); // 裁剪
             }
@@ -1169,28 +1230,27 @@ void LaneProcessor::linearRegression(
 Point LaneProcessor::findSuddenChangePoint(const vector<TrackPoint> &points, bool isLeftLane, int y)
 {
     // 从第2个点到倒数第3个点遍历（因为要访问 i-2 和 i+2）
-    int n = points.size();
-    for (int i = y; i <= n; i++)
+
+    for (int i = y-1; i >startline+1; i--)
     {
         if (points[i].position.x == 119 || points[i].position.x == 0)
         {
             continue; // 跳过无效点
         }
-        double x_prev2 = points[i - 3].position.x;
-        double x_next2 = points[i + 3].position.x;
+        double x_prev2 = points[i - 1].position.x;
+        double x_next2 = points[i + 1].position.x;
         double x_curr = points[i].position.x;
         if (isLeftLane)
         {
-            if (x_prev2 <= x_curr && x_next2 <= x_curr)
+            if (x_prev2 <= x_curr && x_next2 < x_curr)
             {
                 return points[i].position; // 当前点是突变点
             }
         }
         else
         {
-            if (x_prev2 >= x_curr && x_next2 >= x_curr)
-            {
-                return points[i].position; // 当前点是突变点
+            if (x_prev2 >= x_curr && x_next2 > x_curr){
+                return points[i].position;
             }
         }
     }
@@ -1239,8 +1299,11 @@ bool LaneProcessor::isStraightLane(const std::vector<TrackPoint> &lane, int tren
     if (lane.size() <= 80)
         return false;
 
-    for (int i = 21; i < 80; ++i)
+    for (int i = 40; i < 80; ++i)
     {
+        // 跳过无效点（x=-1或其他标志）
+        if (lane[i-1].position.x < 0)
+            continue;
         float dx = lane[i].position.x - lane[i - 1].position.x;
 
         if (dx == 0)
@@ -1297,11 +1360,21 @@ map<int, float> LaneProcessor::calculateTrackWidthsByY(
     return widths;
 }
 
-float LaneProcessor::getTrackWIdthFormY(int y)
+float LaneProcessor::getTrackWIdthFormY(int y) 
 {
-    const double a = 0.0001;
-    const double b = -0.0123;
-    const double c = 1.234;
-    const double d = -5.6700;
-    return a * y * y *y+ b *y*y + c*y+ d;
+    if (y <= 80) {
+        // 线性部分（y∈[12,80]）：宽度 = 2.092*y - 11.62
+        return 2.092f * y - 11.62f;
+    } 
+    else {
+        // 三次函数部分（y>80）：限制宽度不超过159
+        const float a = -0.000267f;
+        const float b = 0.0468f;
+        const float c = -0.817f;
+        const float d = 22.93f;
+        float width = a * y * y * y + b * y * y + c * y + d;
+        return (width > 159.0f) ? 159.0f : width;  // 强制上限
+    }
 }
+
+
