@@ -16,7 +16,7 @@ struct Kalman
     float R_measure;  // 观测噪声（加速度计）
 };
 
-
+void imu_data_get(void);
 void Kalman_Init(Kalman *kf);
 float Kalman_Update(Kalman *kf, float acc_angle, float gyro_rate, float dt) ;
 float rotation(float gyro_z, float dt);

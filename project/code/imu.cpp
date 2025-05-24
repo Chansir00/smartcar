@@ -1,5 +1,13 @@
 #include<imu.h>
 
+void imu_data_get(void) {
+    // 获取加速度计数据
+    imu963ra_get_acc();
+    // 获取陀螺仪数据
+    imu963ra_get_gyro();
+    // 获取磁力计数据
+    imu963ra_get_mag();
+}
 
 // 初始化卡尔曼滤波器
 void Kalman_Init(Kalman *kf) {

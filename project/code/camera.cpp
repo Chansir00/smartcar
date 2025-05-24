@@ -99,35 +99,40 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     //map<int, float>lenth = calculateTrackWidthsByY(LeftLane, RightLane);
     righthemisphere = findSuddenChangePoint(RightLane, 0, rightJumpPointA.y);
     lefthemisphere = findSuddenChangePoint(LeftLane, 1, leftJumpPointA.y);
-    cerr << "circleflag: " << circleflag << endl;
-    cerr << "isleftJumpvalid: " << isleftJumpvalid << endl;
-    cerr << "isrightJumpvalid: " << isrightJumpvalid << endl;
-    cerr << "leftJumpPointA: " << leftJumpPointA << endl;
-    cerr << "leftJumpPointB: " << leftJumpPointB << endl;
-    cerr << "rightJumpPointA: " << rightJumpPointA << endl;
-    cerr << "rightJumpPointB: " << rightJumpPointB << endl;
-    cerr << "isleftLanecontinuous: " << isleftLanecontinuous << endl;
-    cerr << "isrightLanecontinuous: " << isrightLanecontinuous << endl;
-    cerr << circleState << endl;
-    cerr << "rightMissedRadius: " << rightMissedRadius << endl;
-    cerr << "leftMissedRadius: " << leftMissedRadius << endl;
-    cerr << "isleftstraight: " << isleftstraight << endl;
-    cerr << "isrightstraight: " << isrightstraight << endl;
+    // cerr << "circleflag: " << circleflag << endl;
+    // cerr << "isleftJumpvalid: " << isleftJumpvalid << endl;
+    // cerr << "isrightJumpvalid: " << isrightJumpvalid << endl;
+    // cerr << "leftJumpPointA: " << leftJumpPointA << endl;
+    // cerr << "leftJumpPointB: " << leftJumpPointB << endl;
+    // cerr << "rightJumpPointA: " << rightJumpPointA << endl;
+    // cerr << "rightJumpPointB: " << rightJumpPointB << endl;
+    // cerr << "isleftLanecontinuous: " << isleftLanecontinuous << endl;
+    // cerr << "isrightLanecontinuous: " << isrightLanecontinuous << endl;
+    // cerr << circleState << endl;
+    // cerr << "rightMissedRadius: " << rightMissedRadius << endl;
+    // cerr << "leftMissedRadius: " << leftMissedRadius << endl;
+    // cerr << "isleftstraight: " << isleftstraight << endl;
+    // cerr << "isrightstraight: " << isrightstraight << endl;
     // cerr << "leftscope: " << leftscope << endl;
     // cerr << "rightscope: " << rightscope << endl;
-    if (centerLine.size() < 10)
+    cerr << "imu963ra_acc_z: " << imu963ra_acc_z << endl;
+    if (centerLine[119].x ==-1||centerLine.size()<5)
         lost = true;
     switch (circleState)
     {
     case CIRCLE_INACTIVE:
     {
         gpio_set_level(BEEP, 0x0);
+        if(imu963ra_acc_z>1)
+        {
+            circleState = UP;
+        }
         // 先通过左车道单调性和右车道丢点率判断是否可能进入环岛
-        if (circleflag==1&&leftJumpPointA.x==-1&&leftJumpPointB.x==-1&&rightJumpPointA.y>=40&&leftMissedRadius<0.4&&isleftstraight && !isrightstraight&& isleftLanecontinuous&&!isrightLanecontinuous && rightMissedRadius < 0.7 && centerLine.size() > 100)
+        else if (circleflag==1&&leftJumpPointA.x==-1&&leftJumpPointB.x==-1&&rightJumpPointB.x!=-1&&leftMissedRadius<0.4&&isleftstraight && !isrightstraight&& isleftLanecontinuous&&!isrightLanecontinuous && rightMissedRadius < 0.7 && centerLine.size() > 100)
         {
             circleState = RIGHT_CIRCLE_DETECTED;
         }
-        else if (circleflag==1&&rightJumpPointA.x==-1&&rightJumpPointB.x==-1&&leftJumpPointA.y>=40&&rightMissedRadius<0.4&&isrightstraight && !isleftstraight && isleftJumpvalid  && isrightLanecontinuous&&!isleftLanecontinuous && leftMissedRadius < 0.7 && centerLine.size() > 100)
+        else if (circleflag==1&&rightJumpPointA.x==-1&&rightJumpPointB.x==-1&&leftJumpPointB.x!=-1&&rightMissedRadius<0.4&&isrightstraight && !isleftstraight && isleftJumpvalid  && isrightLanecontinuous&&!isleftLanecontinuous && leftMissedRadius < 0.7 && centerLine.size() > 100)
         {
             circleState = LEFT_CIRCLE_DETECTED;
         }
@@ -401,6 +406,13 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         mergeVirtualPath(RightLane, rightvirtualPath, -1);
     }
     break;
+    case UP:
+    {
+        if (imu963ra_acc_z < 0.5)
+        {
+            circleState = CIRCLE_INACTIVE;
+        }
+    }
     default:
         break;
     }
@@ -791,7 +803,7 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
     size_t candidateCIndex = 10;
     int maxJumpC = 7;
     // cerr << candidateCIndex << endl;
-    for (size_t i = startline+5; i < 119; i++)
+    for (size_t i = startline; i < 119; i++)
     {
         // cerr << i << endl;
         if (lane[i].position.x == -1)
@@ -914,7 +926,7 @@ void LaneProcessor::findleftInflectionPoints(const vector<TrackPoint> &lane,
     size_t candidateCIndex = 20;
     int maxJumpC = 7;
 
-    for (size_t i = startline+5; i < 119; i++)
+    for (size_t i = startline; i < 119; i++)
     {
         if (lane[i].position.x == -1)
             continue;
@@ -1299,7 +1311,7 @@ bool LaneProcessor::isStraightLane(const std::vector<TrackPoint> &lane, int tren
     if (lane.size() <= 80)
         return false;
 
-    for (int i = 40; i < 80; ++i)
+    for (int i = 20; i < 80; ++i)
     {
         // 跳过无效点（x=-1或其他标志）
         if (lane[i-1].position.x < 0)

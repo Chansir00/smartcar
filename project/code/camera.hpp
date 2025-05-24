@@ -46,6 +46,7 @@ enum CircleState
     RIGHT_TURN,
     STRAIGHT,
     CROSSING,
+    UP,
 };
 
 struct DetectionResult

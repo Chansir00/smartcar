@@ -1,7 +1,8 @@
 #include "zf_device_imu963ra.h"
 #include "zf_device_imu_core.h"
+#include <iostream>
 
-
+using namespace std;
 int16 imu963ra_acc_x, imu963ra_acc_y, imu963ra_acc_z;
 int16 imu963ra_gyro_x, imu963ra_gyro_y, imu963ra_gyro_z;
 int16 imu963ra_mag_x, imu963ra_mag_y, imu963ra_mag_z;
@@ -11,6 +12,8 @@ void imu963ra_get_acc(void)
 	imu963ra_acc_x = imu_get_raw(imu_file_path[ACC_X_RAW]);
 	imu963ra_acc_y = imu_get_raw(imu_file_path[ACC_Y_RAW]);
 	imu963ra_acc_z = imu_get_raw(imu_file_path[ACC_Z_RAW]);
+	cerr << "imu963ra_acc_x: " << imu963ra_acc_x << endl;
+	// cerr<<"imu963ra_acc_z: " << imu963ra_acc_z << endl;
 }
 
 void imu963ra_get_gyro(void)

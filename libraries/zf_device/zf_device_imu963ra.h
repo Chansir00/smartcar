@@ -1,7 +1,7 @@
 #ifndef _zf_device_imu963ra_h
 #define _zf_device_imu963ra_h
 
-
+#include <stdio.h>
 #include "zf_common_typedef.h"
 
 extern int16 imu963ra_acc_x, imu963ra_acc_y, imu963ra_acc_z;  

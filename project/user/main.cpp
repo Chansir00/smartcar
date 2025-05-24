@@ -7,7 +7,6 @@ const int camera = 0;
 int flag = 0 ;
 unsigned int send_counter = 0;
 const unsigned int SEND_INTERVAL = 20;
-bool LOSTLINE;
 
 int main()
 {   
@@ -29,9 +28,9 @@ int main()
     
     pit_ms_init(5, [&ctrl, &detector](){ 
         if(!detector.lost){
-
+            
         ctrl.pit_callback();
-        ctrl.motor_control(300, 0, 0);  // 将控制逻辑移到定时器回调200
+        ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
         }
         else
         {
@@ -53,8 +52,8 @@ int main()
             cerr << "错误：读取帧失败！" << endl;
             break;
         }
-        
 
+        imu_data_get();
         DetectionResult result = detector.detect(frame);
         
 
