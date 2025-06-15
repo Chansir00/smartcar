@@ -38,10 +38,12 @@ enum CircleState
     RIGHT_CIRCLE_INTRY, // 右环岛入口
     RIGHT_CIRCLE_INSIDE,      // 正在环岛内循迹
     RIGHT_CIRCLE_EXITING,     // 正在离开环岛
+    RIGHT_CIRCLE_DONE,
     LEFT_CIRCLE_DETECTED,       // 检测到环岛入口
     LEFT_CIRCLE_INTRY, // 左环岛入口
     LEFT_CIRCLE_INSIDE,       // 正在环岛内循迹
     LEFT_CIRCLE_EXITING,      // 正在离开环岛
+    LEFT_CIRCLE_DONE,
     LEFT_TURN,
     RIGHT_TURN,
     STRAIGHT,
@@ -142,7 +144,6 @@ public:
         float& k, float& b, float& r_squared
     );
     Point findSuddenChangePoint(const vector<TrackPoint>& points,bool isLeftLane,int y);
-    Point findInflectionPoint(const vector<TrackPoint>& points);
     float calculateLaneSlope(const std::vector<TrackPoint>& lane);
     bool isStraightLane(const std::vector<TrackPoint>& lane,int trend);
     map<int, float> calculateTrackWidthsByY(
@@ -180,4 +181,4 @@ public:
 
 // 逆透视变换类
 
-#endif
+#endif;

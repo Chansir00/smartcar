@@ -556,7 +556,7 @@ private:
     /* maximum */ 
     /* minimum */ 
     /* factor *///假设误差范围为 ±160 像素，缩放因子 factor=0.5 后为 ±80
-            float uff_p_max = 16.0f, uff_d_max= 70.0f;
+            float uff_p_max = 12.0f, uff_d_max= 60.0f;
             for(int i=0; i<7; ++i) {
                 pid.uff.UFF_P[i] = uff_p_max * (i-3.0f)/3.0f;
                 pid.uff.UFF_D[i] = uff_d_max * (i-3.0f)/3.0f;
@@ -608,6 +608,7 @@ private:
 
         else if (pid.mode == FUZZY_PID && pid.fuzzy_initialized) {
             float ec = error - pid.last_error;
+            float A = 0.045;
             pid.last_error = error;
             float error_abs = fabs(error);
             //pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f; 
@@ -620,13 +621,14 @@ private:
 
             // 计算最终输出
             float P = (pid.fuzzy_pd.Kp0 + delta_kp) * error; // 直接使用模糊调整后的Kp
+            //float P = pid.fuzzy_pd.Kp0 + abs(error)*delta_kp * error + ;
             //float D = pid.Kd * ec;
-            float D = pid.fuzzy_pd.Kd0 + delta_kd;
-            float output = P + D;
+            float D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec;
+            //float output = P + D;
+            float output = error*(pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0 ;  // imu963ra_gyro_z * delta_kd;
             //float output = (pid.fuzzy_pd.Kp0 + delta_kp) * error / 100.0f;
             //output += (pid.fuzzy_pd.Kd0 + delta_kd) * ec / 100.0f;
             //output *= -0.7f;
-
             // 输出限幅
             output = clamp(output, -pid.max_output, pid.max_output);
             //cerr<<"pwm"<<output<<endl;

@@ -510,4 +510,5 @@ CMakeFiles/project.dir/home/chan/Documents/smartcar/project/code/brush.cpp.o: \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/termios.h \
  /opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4/loongarch64-linux-gnu/sysroot/usr/include/bits/termios.h \
  /home/chan/Documents/smartcar/project/user/../code/imu.h \
- /home/chan/Documents/smartcar/project/user/../code/brush.h
+ /home/chan/Documents/smartcar/project/user/../code/brush.h \
+ /home/chan/Documents/smartcar/project/user/../code/home.hpp

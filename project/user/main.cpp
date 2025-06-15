@@ -25,20 +25,22 @@ int main()
      //Kalman滤波器初始化
     Kalman kf_roll;
     Kalman_Init(&kf_roll);
-    
-    pit_ms_init(5, [&ctrl, &detector](){ 
-        if(!detector.lost){
+    if(readFlag(start_file))
+    {
+        pit_ms_init(5, [&ctrl, &detector](){ 
+            if(!detector.lost){
             
-        ctrl.pit_callback();
-        ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
-        }
-        else
-        {
-            ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
-            brush_off();
+            ctrl.pit_callback();
+            ctrl.motor_control(400, 0, 0);  // 将控制逻辑移到定时器回调200
+            }
+            else
+            {
+                ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
+                brush_off();
 
-        }
-    });
+            }
+        });
+    }
     //pwm_set_duty(SERVO_MOTOR1_PWM, 3870);
 
 
