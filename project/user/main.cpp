@@ -11,17 +11,20 @@ const unsigned int SEND_INTERVAL = 20;
 int main()
 {   
     VideoCapture cap= cap_init(camera);
-    //brush_init(600); // 初始化
+
     // 创建车道检测器    }
     LaneProcessor detector;
     detector.initializeVariables(image_w, image_h);
+    MotionController ctrl(&detector);
+    ctrl.motor_control(0, 0, 0); // 初始化电机控制
+    brush_init(0); // 初始化
     // 主循环：读取帧并处理
     int new_socket = sendImageOverSocket();
     //int new_socket = 0;
     atexit(cleanup);
     // 注册SIGINT信号的处理函数
     signal(SIGINT, sigint_handler);
-    MotionController ctrl(&detector);
+    //brush_init(700); // 初始化
      //Kalman滤波器初始化
     Kalman kf_roll;
     Kalman_Init(&kf_roll);
@@ -31,7 +34,7 @@ int main()
             if(!detector.lost){
             
             ctrl.pit_callback();
-            ctrl.motor_control(400, 0, 0);  // 将控制逻辑移到定时器回调200
+            ctrl.motor_control(440, 0, 0);  // 将控制逻辑移到定时器回调200
             }
             else
             {

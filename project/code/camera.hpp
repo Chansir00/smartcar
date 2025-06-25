@@ -76,6 +76,7 @@ public:
     int startline ; // 起始线
     int numPoints;
     bool lost = false;
+    int roiHeight = image_h-5;
 // member variables
     Point leftJumpPointA;
     Point rightJumpPointA;
