@@ -20,7 +20,6 @@ int main()
     brush_init(0); // 初始化
     // 主循环：读取帧并处理
     int new_socket = sendImageOverSocket();
-    //int new_socket = 0;
     atexit(cleanup);
     // 注册SIGINT信号的处理函数
     signal(SIGINT, sigint_handler);
@@ -34,7 +33,7 @@ int main()
             if(!detector.lost){
             
             ctrl.pit_callback();
-            ctrl.motor_control(440, 0, 0);  // 将控制逻辑移到定时器回调200
+            ctrl.motor_control(400, 0, 0);  // 将控制逻辑移到定时器回调200
             }
             else
             {
@@ -96,7 +95,7 @@ int main()
         {
             flag=1;
         }
-        else if(debugmode == 2)
+        else if(debugmode == 2&&readFlag(start_file))
         {
             vector<uchar> buf;
             vector<int> params = {cv::IMWRITE_JPEG_QUALITY, 90};

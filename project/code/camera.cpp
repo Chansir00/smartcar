@@ -113,7 +113,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     cerr << "isleftstraight: " << isleftstraight << endl;
     cerr << "isrightstraight: " << isrightstraight << endl;
     cerr << "imu963ra_acc_z: " << imu963ra_acc_z << endl;
-    if (centerLine[119].x == -1 || centerLine.size() < 5)
+    if (centerLine.size() < 3)
         lost = true;
     switch (circleState)
     {
@@ -676,6 +676,7 @@ void LaneProcessor::detectLanePoints(const Mat &binaryImage, int roiHeight,
             rightLane[y] = {Point(cols - 1, y), 0};
             rightMissedPoints++;
         }
+        //err<<"rightLane["<<y<<"].position: "<<rightLane[y].position<<endl;
     }
     leftMissedRadius = float(leftMissedPoints) / LeftTrackLength;
     rightMissedRadius = float(rightMissedPoints) / RightTrackLength;
@@ -727,7 +728,7 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
     {
         // 确保左右车道点的数量一致
 
-        for (size_t i = roiHeight - 1; i > roiHeight - numPoints; i--)
+        for (size_t i = startline; i < roiHeight; i++)
         {
             const Point &leftPoint = leftLane[i].position;
             const Point &rightPoint = rightLane[i].position;
@@ -759,13 +760,6 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
                 {
                     center.x = 0;
                 }
-                centerLine.push_back(center);
-            }
-            else if (circleState == CROSSING)
-            {
-                Point center(
-                    (leftPoint.x + rightPoint.x) / 2,
-                    (leftPoint.y + rightPoint.y) / 2);
                 centerLine.push_back(center);
             }
             else

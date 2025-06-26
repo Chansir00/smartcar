@@ -118,95 +118,181 @@ void MotionController::motor_control(int speed, float k, int limit)
 //     }
 //     return error / weight_sum;
 // }
-float MotionController::Err_sum(const vector<Point> &centerline)
-{
+// float MotionController::Err_sum(const vector<Point> &centerline)
+// {
+//     auto params = laneProcessor->getControlParams();
+//     // cerr<<params.weight_case<<endl;
+//     // cerr<<params.speed_factor<<endl;
+//     //  1. 检查输入有效性
+//     if (centerline.empty())
+//     {
+//         cerr << "错误：centerline 是空的！" << endl;
+//         return 0.0f;
+//     }
+
+//     // 2. 检查 centerline 是否至少包含 5 个点
+//     const int min_required_size = 5;
+//     if (centerline.size() < min_required_size)
+//     {
+//         cerr << "错误：centerline 长度不足（至少需要 " << min_required_size
+//              << " 个点，实际 " << centerline.size() << "）" << endl;
+//         return 0.0f;
+//     }
+
+//     // 3. 计算实际可用的步数
+//     const int total_steps = 38;                      // 默认需要计算的步数
+//     const int start = 30;                            // 430 52  440 50
+//     const int start_idx = centerline.size() - start; // 起始索引
+//     const int start2 = centerline.size() - 39;
+//     const int force_start = max(start2, 0);
+//     int steps_used = 0;
+//     if(start2 >= 0){
+//         steps_used = total_steps; // 实际计算的步数
+//     }
+//     else 
+//     {
+//         if(start_idx <= 0){
+//             steps_used = centerline.size();
+//         }else{
+//             start = 10;
+//         }
+//     }
+//     // cerr<<start_idx<<endl;
+//     if (start_idx > 0)
+//     {
+//         steps_used = min(total_steps, start_idx + 1); // 实际计算的步数
+//     }
+//     else
+//     {
+//         steps_used = (centerline.size() >= 39) ? 39 : centerline.size();
+//     }
+//     // const int steps_used = (centerline.size() >= total_steps) ? total_steps : centerline.size();
+//     //  4. 检查权重数组是否足够
+//     const int weight_size = sizeof(weight) / sizeof(weight[0]);
+//     if (weight_size < steps_used)
+//     {
+//         cerr << "错误：权重数组尺寸不足（需要 " << steps_used
+//              << "，实际 " << weight_size << "）" << endl;
+//         return 0.0f;
+//     }
+
+//     // 5. 计算加权误差
+//     float error = 0.0f;
+//     float weight_count = 0.0f;
+//     if (params.weight_case == 1.0f)
+//     {
+//         if (start_idx <= 0)
+//         {
+//             for (int i = 0; i < steps_used; ++i)
+//             {
+//                 // int idx = start_idx - i; // 自动确保 idx >= 0
+//                 error += (centerline[i + force_start].x - 80) * weight1[i];
+//                 weight_count += weight1[i];
+//             }
+//         }
+//         else
+//         {
+//             for (int i = 0; i < steps_used; ++i)
+//             {
+//                 // int idx = start_idx - i; // 自动确保 idx >= 0
+//                 error += (centerline[i + start].x - 80) * weight1[i];
+//                 weight_count += weight1[i];
+//             }
+//         }
+//     }
+//     else
+//     {
+//         for (int i = 0; i < steps_used; ++i)
+//         {
+//             // int idx = i - i; // 自动确保 idx >= 0
+//             error += (centerline[i + start].x - 80) * weight[i];
+//             weight_count += weight[i];
+//         }
+//     }
+//     // 6. 检查权重和是否为0（避免除零）
+//     if (fabs(weight_count) < 1e-6f)
+//     {
+//         cerr << "错误：权重和为0！" << endl;
+//         return 0.0f;
+//     }
+
+//     return error / weight_count;
+// }
+
+
+float MotionController::Err_sum(const vector<Point> &centerline) {
     auto params = laneProcessor->getControlParams();
-    // cerr<<params.weight_case<<endl;
-    // cerr<<params.speed_factor<<endl;
-    //  1. 检查输入有效性
-    if (centerline.empty())
-    {
+    const int N = centerline.size(); // 中心线总点数
+
+    // 1. 检查输入有效性
+    if (N == 0) {
         cerr << "错误：centerline 是空的！" << endl;
         return 0.0f;
     }
 
-    // 2. 检查 centerline 是否至少包含 5 个点
-    const int min_required_size = 5;
-    if (centerline.size() < min_required_size)
-    {
-        cerr << "错误：centerline 长度不足（至少需要 " << min_required_size
-             << " 个点，实际 " << centerline.size() << "）" << endl;
-        return 0.0f;
+    // 2. 定义关键参数
+    const int total_steps = 39;  // 需要计算的步数（39行）
+    const int start_row = 5;     // 目标起始行（图像上方第5行）
+    int actual_steps = total_steps; // 实际计算步数
+    int start_index = 0;        // 实际起始索引
+
+    // 3. 确定起始索引和计算步数
+    if (N > start_row) {
+        // 情况1：足够从第5行开始取39行
+        if (N - start_row >= total_steps) {
+            start_index = start_row;
+            actual_steps = total_steps;
+        } 
+        // 情况2：能取到起始行但不足39行
+        else {
+            start_index = 10;
+            actual_steps = N - start_row;
+        }
+    }
+    // 情况3：不够起始行（总行数≤5）
+    else {
+        start_index = 0;
+        actual_steps = N; // 有多少取多少
     }
 
-    // 3. 计算实际可用的步数
-    const int total_steps = 38;                      // 默认需要计算的步数
-    const int start = 56;                            // 430 52  440 50
-    const int start_idx = centerline.size() - start; // 起始索引
-    const int start2 = centerline.size() - 39;
-    const int force_start = max(start2, 0);
-    int steps_used = 0;
-    // cerr<<start_idx<<endl;
-    if (start_idx > 0)
-    {
-        steps_used = min(total_steps, start_idx + 1); // 实际计算的步数
-    }
-    else
-    {
-        steps_used = (centerline.size() >= 39) ? 39 : centerline.size();
-    }
-    // const int steps_used = (centerline.size() >= total_steps) ? total_steps : centerline.size();
-    //  4. 检查权重数组是否足够
+    // 4. 检查权重数组尺寸
     const int weight_size = sizeof(weight) / sizeof(weight[0]);
-    if (weight_size < steps_used)
-    {
-        cerr << "错误：权重数组尺寸不足（需要 " << steps_used
-             << "，实际 " << weight_size << "）" << endl;
-        return 0.0f;
+    if (weight_size < actual_steps) {
+        cerr << "警告：权重尺寸不足（需要" << actual_steps 
+             << "，实际" << weight_size << "），使用默认权重" << endl;
+        // 使用简单均值代替
+        float sum = 0.0f;
+        for (int i = start_index; i < start_index + actual_steps; ++i) {
+            sum += (centerline[i].x - 80);
+        }
+        return sum / actual_steps;
     }
 
     // 5. 计算加权误差
     float error = 0.0f;
-    float weight_count = 0.0f;
-    if (params.weight_case == 1.0f)
-    {
-        if (start_idx <= 0)
-        {
-            for (int i = 0; i < steps_used; ++i)
-            {
-                // int idx = start_idx - i; // 自动确保 idx >= 0
-                error += (centerline[i + force_start].x - 80) * weight1[i];
-                weight_count += weight1[i];
-            }
-        }
-        else
-        {
-            for (int i = 0; i < steps_used; ++i)
-            {
-                // int idx = start_idx - i; // 自动确保 idx >= 0
-                error += (centerline[i + start].x - 80) * weight1[i];
-                weight_count += weight1[i];
-            }
-        }
-    }
-    else
-    {
-        for (int i = 0; i < steps_used; ++i)
-        {
-            // int idx = i - i; // 自动确保 idx >= 0
-            error += (centerline[i + start].x - 80) * weight[i];
-            weight_count += weight[i];
-        }
-    }
-    // 6. 检查权重和是否为0（避免除零）
-    if (fabs(weight_count) < 1e-6f)
-    {
-        cerr << "错误：权重和为0！" << endl;
-        return 0.0f;
+    float weight_sum = 0.0f;
+    //const float* weights = params.weight_case == 1.0f ? weight1 : weight;
+
+    for (int i = 0; i < actual_steps; ++i) {
+        const int idx = start_index + i;
+        error += (centerline[idx].x - 80) * weight[i];
+        weight_sum += weight[i];
     }
 
-    return error / weight_count;
+    // 6. 处理权重和为零的情况
+    if (fabs(weight_sum) < 1e-6f) {
+        cerr << "警告：权重和接近零，使用未加权均值" << endl;
+        float sum = 0.0f;
+        for (int i = start_index; i < start_index + actual_steps; ++i) {
+            sum += (centerline[i].x - 80);
+        }
+        return sum / actual_steps;
+    }
+
+    return error / weight_sum;
 }
+
+
 
 void MotionController::update_shared_error(float err)
 {

@@ -19,9 +19,9 @@ class LaneProcessor;
 //车尾向前
 constexpr uint8_t weight[39] = {  // 将数组长度调整为38
 1,1,1,1,1,1,1,              //0-7
-1,1,1,1,11,12,12,13,13, //8-16
-15,15,13,13,12,12,11,11,12,   //17-25
-1,1,1,1,1,1,1,1,1,1,1,1,1,1        //26-39   
+1,1,1,1,1,12,12,13,13, //8-16
+15,15,13,13,12,12,12,12,12,   //17-25
+12,1,1,1,1,1,1,1,1,1,1,1,1,1        //26-39   
 };
 
 
@@ -425,7 +425,7 @@ explicit MotionController(LaneProcessor* lp) : laneProcessor(lp) {  // 通过构
         // 初始化PID参数
         init_pid(pidLeft, 1.25f, 0.245f, 0.10f, PWM_MAX,DELTA_PID);       //you
         init_pid(pidRight, 1.25f, 0.205f, 0.18f, PWM_MAX,DELTA_PID);    //zuo
-        init_pid(pidservo, 10.0f, 0.0f, 28.0f, 367.0f, FUZZY_PID);//
+        init_pid(pidservo, 10.0f, 0.0f, 28.0f, 441.0f, FUZZY_PID);//
         init_serial();
         
     }
@@ -558,7 +558,7 @@ private:
     /* maximum */ 
     /* minimum */ 
     /* factor *///假设误差范围为 ±160 像素，缩放因子 factor=0.5 后为 ±80
-            float uff_p_max = 25.0f, uff_d_max= 45.0f;
+            float uff_p_max = 28.0f, uff_d_max= 24.0f;
             for(int i=0; i<7; ++i) {
                 pid.uff.UFF_P[i] = uff_p_max * (i-3.0f)/3.0f;
                 pid.uff.UFF_D[i] = uff_d_max * (i-3.0f)/3.0f;
@@ -610,7 +610,8 @@ private:
 
         else if (pid.mode == FUZZY_PID && pid.fuzzy_initialized) {
             float ec = error - pid.last_error;
-            float A = 0.045;
+            //float A = 0.045;
+            float A = 0.01;
             // 在 pid 结构体或函数外定义
             static float filtered_output = 0.0f;  // 上一轮的滤波输出
 
@@ -626,21 +627,28 @@ private:
             cerr<<"ΔKd:"<<delta_kd<<endl;
 
             // 计算最终输出
-            float P = (pid.fuzzy_pd.Kp0 + delta_kp) * error; // 直接使用模糊调整后的Kp
+            //float P = (pid.fuzzy_pd.Kp0 + delta_kp) * error; // 直接使用模糊调整后的Kp
             //float P = pid.fuzzy_pd.Kp0 + abs(error)*delta_kp * error + ;
             //float D = pid.Kd * ec;
-            float D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec;
+            //float D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec;
             //float output = P + D;
-            float output = error*(pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0 ;  // imu963ra_gyro_z * delta_kd;
+            float output = 0.0f;
+            if(error_abs < 15) {
+               output  = error * (pid.fuzzy_pd.Kp0 + delta_kp) + (pid.fuzzy_pd.Kd0 + delta_kd) * ec;
+            }
+            else {
+                output = error*(pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0 ;  // imu963ra_gyro_z * delta_kd; 
+            }
             //float output = (pid.fuzzy_pd.Kp0 + delta_kp) * error / 100.0f;
             //output += (pid.fuzzy_pd.Kd0 + delta_kd) * ec / 100.0f;
             //output *= -0.7f;
             // 一阶低通滤波
-            filtered_output = alpha * output + (1.0f - alpha) * filtered_output;
+            //filtered_output = alpha * output + (1.0f - alpha) * filtered_output;
             // 输出限幅
-            filtered_output = clamp(filtered_output, -pid.max_output, pid.max_output);
+            //filtered_output = clamp(filtered_output, -pid.max_output, pid.max_output);
             //cerr<<"pwm"<<output<<endl;
-            return filtered_output;  // 返回滤波后的输出
+            //return filtered_output;  // 返回滤波后的输出
+            pid.output = output;  // 直接使用模糊输出
         } 
 
         return pid.output;
