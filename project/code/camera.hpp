@@ -65,7 +65,7 @@ struct DetectionResult
 // 图像预处理：二值化
 bool binaryThreshold(const Mat &input, Mat &binary,Mat &output);
 VideoCapture cap_init(int camera);
-
+//cv::Mat getLatestFrame(cv::VideoCapture& cap) ;
 // 车道线处理类
 class LaneProcessor
 {
@@ -75,6 +75,7 @@ public:
     bool isMapInitialized = false;  // 是否已初始化映射表
     int startline ; // 起始线
     int numPoints;
+    int lastnumPoints; // 上一帧的点数
     bool lost = false;
     int roiHeight = image_h-5;
 // member variables
@@ -159,11 +160,11 @@ public:
         switch(circleState) {
             case RIGHT_CIRCLE_DETECTED:
             case RIGHT_CIRCLE_INTRY:
-                current_params = {1.0f, 25, 0.0f};
+                current_params = {1.0f, 25, 1.0f};
                 break;
             case LEFT_CIRCLE_DETECTED:
             case LEFT_CIRCLE_INTRY:
-                current_params = {1.0f, 25, 0.0f};
+                current_params = {1.0f, 25, 1.0f};
                 break;
             case CROSSING:
                 current_params = {1.0f, 15, 0.0f};
