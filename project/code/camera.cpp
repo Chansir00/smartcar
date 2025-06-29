@@ -134,7 +134,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         // 先通过左车道单调性和右车道丢点率判断是否可能进入环岛
         if (((isrightJumpvalid && isleftJumpvalid) || (isrightJumpvalid && leftJumpPointA.x != -1) || (isleftJumpvalid && rightJumpPointA.x != -1) || (rightJumpPointB.y > 30 && leftJumpPointB.y >= 30)) && numPoints > img_devided)
         {
-            //circleState = CROSSING;
+            circleState = CROSSING;
         }
         else if (circleflag == 1 && leftJumpPointA.x == -1 && leftJumpPointA.x == -1 && leftMissedRadius < 0.8 && isrightJumpvalid && isleftstraight && !isrightstraight && isleftLanecontinuous && !isrightLanecontinuous && rightMissedRadius < 0.7 && numPoints > 100)
         {
@@ -189,9 +189,10 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             generateVirtualPath(rightJumpPointB, rightLane[rightLane.size() - 1].position, rightvirtualPath, true);
         }
         mergeVirtualPath(RightLane, rightvirtualPath, -1);
-        if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 25)
+        if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 23)
         {
-            circleState = RIGHT_CIRCLE_INTRY;
+            //circleState = RIGHT_CIRCLE_INTRY;
+            circleState = CIRCLE_INACTIVE;
         }
     }
     break;
@@ -294,9 +295,10 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             generateVirtualPath(leftJumpPointB, leftLane[leftLane.size() - 1].position, leftvirtualPath, true);
         }
         mergeVirtualPath(LeftLane, leftvirtualPath, -1);
-        if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 25)
+        if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 23)
         {
-            circleState = LEFT_CIRCLE_INTRY;
+            //circleState = LEFT_CIRCLE_INTRY;
+            circleState = CIRCLE_INACTIVE;
         }
     }
     break;
@@ -358,9 +360,13 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         if (leftJumpPointB.x != -1)
         {
             generateVirtualPath(leftJumpPointB, leftLane[leftLane.size() - 1].position, leftvirtualPath, true);
+            mergeVirtualPath(leftLane, leftvirtualPath, -1);
         }
-        if (leftJumpPointB.x == -1 || leftJumpPointB.y >= 100)
+        if (leftJumpPointB.x == -1 || leftJumpPointB.y >= 100){
             circleState = CIRCLE_INACTIVE;
+            circleflag = 0;
+            leftvirtualPath.clear();
+        }
     }
     break;
     case LEFT_TURN:
@@ -381,7 +387,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     break;
     case CROSSING:
     {
-        if ((rightJumpPointB.x == -1 && leftJumpPointB.x == -1) || (rightJumpPointB.y > 100 || leftJumpPointB.y > 100) || (isleftLanecontinuous || isrightLanecontinuous))
+        if (rightJumpPointB.x == -1 || leftJumpPointB.x == -1 || (rightJumpPointB.y > 100 || leftJumpPointB.y > 100) || (isleftLanecontinuous || isrightLanecontinuous))
         {
             circleState = CIRCLE_INACTIVE;
             break;
@@ -836,7 +842,7 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
     size_t candidateCIndex = 20;
     int maxJumpC = 7;
     // find pointB
-    for (size_t i = startline + 2; i < roiHeight - 1; i++)
+    for (size_t i = startline ; i < roiHeight - 1; i++)
     {
         // cerr << i << endl;
         if (lane[i].position.x == -1)
@@ -950,7 +956,7 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
     // 得到 C 点位置
     if (pointA_found && pointB_found)
     {
-        if (pointA.x >= 50 && pointB.x >= 50 && pointA.y - pointB.y >= 3 && pointA.y > 10 && pointB.y > 10)
+        if (pointA.x >= 80 && pointB.x >= 80 && pointA.y - pointB.y >= 3 && pointA.y > 10 && pointB.y > 10 && pointB.x < pointA.x)
             isvalid = true;
     }
 }
@@ -973,7 +979,7 @@ void LaneProcessor::findleftInflectionPoints(const vector<TrackPoint> &lane,
     size_t candidateCIndex = startline;
     int maxJumpC = 7;
 
-    for (size_t i = startline + 2; i < roiHeight - 1; i++)
+    for (size_t i = startline ; i < roiHeight - 1; i++)
     {
         if (lane[i].position.x == -1)
             continue;
@@ -1073,7 +1079,7 @@ void LaneProcessor::findleftInflectionPoints(const vector<TrackPoint> &lane,
 
     if (pointA_found && pointB_found)
     {
-        if (pointA.x <= 110 && pointB.x <= 110 && pointA.y - pointB.y >= 3 && pointA.y > 10 && pointB.y > 10)
+        if (pointA.x <= 80 && pointB.x <= 80 && pointA.y - pointB.y >= 3 && pointA.y > 10 && pointB.y > 10 && pointB.x > pointA.x)
             isvalid = true;
     }
 }

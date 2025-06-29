@@ -2,7 +2,7 @@
 
 // g++ -g -o main main.cpp src/camera.cpp -Iinclude/ `pkg-config --cflags --libs opencv4`;./main
 
-int debugmode = 2;
+int debugmode = readFlag("./debugmode");
 const int camera = 0;
 int flag = 0;
 unsigned int send_counter = 0;
@@ -23,18 +23,19 @@ int main()
     // Kalman滤波器初始化
     Kalman kf_roll;
     Kalman_Init(&kf_roll);
+    brush_off();
     ctrl.motor_control(0, 0, 0);
-    brush_init(700); // 初始化
     int new_socket = sendImageOverSocket();
-    if (readFlag(start_file))
+    if (!debugmode)
     {
+        brush_init(800); // 初始化
         pit_ms_init(5, [&ctrl, &detector]()
                     { 
             if (!detector.lost && ready_count > 15)
             {
                 ctrl.pit_callback();
                 if (!slow_down)
-                    ctrl.motor_control(430, 0, 0); // 将控制逻辑移到定时器回调200
+                    ctrl.motor_control(510, 0, 0); // 将控制逻辑移到定时器回调200
                 else
                     ctrl.motor_control(200, 0, 0); // 将控制逻辑移
             }
@@ -93,11 +94,11 @@ int main()
         // pwm_set_duty(MOTOR2_PWM, 1000); // 小占空比
         // gpio_set_level(MOTOR2_DIR, 0);
         // cerr << "Forward countl: " << encoder_get_count(ENCODER_1) <<"Forward countr: " << encoder_get_count(ENCODER_2) << endl;
-        if (debugmode == 1)
+        if (debugmode == 0)
         {
             flag = 1;
         }
-        else if (debugmode == 2 && readFlag(show_file))
+        else if (debugmode == 1 )
         {
             vector<uchar> buf;
             vector<int> params = {cv::IMWRITE_JPEG_QUALITY, 90};

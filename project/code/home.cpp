@@ -3,7 +3,7 @@
 using namespace std;
 #include <fstream>
 
-bool readFlag(const std::string& filename)
+int readFlag(const std::string& filename)
 {
     std::ifstream file(filename);
     int flag = 0;

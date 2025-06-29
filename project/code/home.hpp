@@ -5,7 +5,7 @@
 
 using namespace std;
 
-bool readFlag(const std::string& filename);
+int readFlag(const std::string& filename);
 const std::string start_file = "./start";
 const std::string brush_file = "./brush";
 const std::string show_file = "./show";
