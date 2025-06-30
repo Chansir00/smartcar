@@ -18,11 +18,11 @@ void sigint_handler(int signum)
 void cleanup()
 {
     printf("程序异常退出，执行清理操作\n");
+    brush_off();
     // 关闭电机
     pwm_set_duty(SERVO_MOTOR1_PWM, 0);
     pwm_set_duty(MOTOR1_PWM, 0);
     pwm_set_duty(MOTOR2_PWM, 0);
-    brush_off();
     gpio_set_level(BEEP, 0x0);
 }
 

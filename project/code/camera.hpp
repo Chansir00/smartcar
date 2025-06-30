@@ -20,7 +20,8 @@ const int CIRCLE_ACCURACY = 10;         // 圆环检测精度
 const int WIDTH_EXTEND = 90;            // 宽度扩展量
 const int WIDTH_EXTEND2 = 70;           // 辅助宽度扩展
 extern int debugmode;                  // true调试模式
-
+extern int speed;
+extern int ready_count; // 准备计数器
 
 
 // 数据结构
@@ -49,6 +50,7 @@ enum CircleState
     STRAIGHT,
     CROSSING,
     UP,
+    ZEBRA, // 斑马线
 };
 
 struct DetectionResult

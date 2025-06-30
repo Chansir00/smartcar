@@ -6,8 +6,10 @@ int debugmode = readFlag("./debugmode");
 const int camera = 0;
 int flag = 0;
 unsigned int send_counter = 0;
+int speed = 540; // 车速
 const unsigned int SEND_INTERVAL = 20;
-static int ready_count = 0;
+int ready_count = 0;
+int control_circle;
 extern bool slow_down;
 int main()
 {
@@ -15,11 +17,11 @@ int main()
     //  创建车道检测器    }
     LaneProcessor detector;
     detector.initializeVariables(image_w, image_h);
+    MotionController ctrl(&detector);
     // int new_socket = 0;
     atexit(cleanup);
     // 注册SIGINT信号的处理函数
     signal(SIGINT, sigint_handler);
-    MotionController ctrl(&detector);
     // Kalman滤波器初始化
     Kalman kf_roll;
     Kalman_Init(&kf_roll);
@@ -35,7 +37,7 @@ int main()
             {
                 ctrl.pit_callback();
                 if (!slow_down)
-                    ctrl.motor_control(510, 0, 0); // 将控制逻辑移到定时器回调200
+                    ctrl.motor_control(speed, 0, 0); // 将控制逻辑移到定时器回调200
                 else
                     ctrl.motor_control(200, 0, 0); // 将控制逻辑移
             }
@@ -50,7 +52,7 @@ int main()
 
     while (true)
     {
-        if (ready_count < 20)
+        if (ready_count < 300)
             ready_count++;
         clock_t start = clock();
         Mat frame;
@@ -63,28 +65,12 @@ int main()
 
         imu_data_get();
         DetectionResult result = detector.detect(frame);
-
+        control_circle = detector.circleState;
         if (detector.lost)
         {
             break;
         }
         float error = ctrl.Err_sum(detector.centerLine);
-        switch (detector.circleState)
-        {
-        case RIGHT_CIRCLE_DETECTED:
-            error += 0;
-            break;
-        case RIGHT_CIRCLE_INTRY:
-            break;
-        case LEFT_CIRCLE_INTRY:
-            break;
-        case RIGHT_CIRCLE_EXITING:
-            break;
-        case LEFT_CIRCLE_EXITING:
-            break;
-        default:
-            break;
-        }
         flag = 1;
         // ctrl.update_shared_error(error);
         cerr << "error: " << error << endl;

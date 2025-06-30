@@ -18,10 +18,10 @@
 class LaneProcessor;
 // 车尾向前
 constexpr float weight[39] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 1,
-    1, 1, 1, 1, 1, 1, 17, 18, 19, 20,
-    20, 19, 18, 17, 16, 15, 14, 13, 12, 11,
-    10, 9, 8, 7, 6, 5, 4, 3, 2};
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 2, 3, 3, 3, 3, 5, 6,
+    16, 16, 18, 18, 18, 18, 18, 17, 17, 17,
+    15, 8, 8, 7, 6, 5, 4, 3, 2};
 
 constexpr float weight1[39] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -149,7 +149,7 @@ extern int16 encoder_left;
 extern int16 encoder_right;
 extern float servo_motor_duty; // 舵机zhongzhi
 extern float servo_motor_dir;
-
+extern int control_circle; // 环岛状态
 enum PID_Mode
 {
     POSITION_PID,
@@ -423,15 +423,15 @@ private:
         float angle1 = abs((4360 - current_servo_pwm) * 0.09278f);
         float angle_rad = angle1 * M_PI / 180.0f;
         float tn = tan(angle_rad);
-        cerr << "tn" << tn << endl;
+        //cerr << "tn" << tn << endl;
         // 基础几何模型
         float outer_factor = 1.0f + 0.17 * (W / 2) * tn / L; // 0.10
         float inner_factor = 1.0f - 0.83 * (W / 2) * tn / L; // 0.90
 
         inner_factor = max(0.8f, min(inner_factor, 1.2f)); // 限制在 0.9~1.1 范围内
         outer_factor = max(0.8f, min(outer_factor, 1.2f)); // 可选：对称限幅
-        cerr << "in:" << inner_factor << endl;
-        cerr << "out:" << outer_factor << endl;
+        //cerr << "in:" << inner_factor << endl;
+        //cerr << "out:" << outer_factor << endl;
         // float outer_factor = (A*(K+0.5*W*tn/L*AK));
         // float inner_factor = (A*(K-0.5*W*tn/L*AK));
         //  应用差速
@@ -598,14 +598,14 @@ private:
         if (mode == FUZZY_PID)
         {
             // 初始化模糊参数
-            pid.fuzzy_pd = {6.0f, 18.0f, 1.0, 35.0, 6.0, 1.0f};
+            pid.fuzzy_pd = {6.0f, 28.0f, 1.0, 35.0, 6.0, 1.0f};
             /* Kp0 */
             /* Kd0 */
             /* deltakp threshold */
             /* maximum */
             /* minimum */
             /* factor */ // 假设误差范围为 ±160 像素，缩放因子 factor=0.5 后为 ±80
-            float uff_p_max = 30.0f, uff_d_max = 60.0f;
+            float uff_p_max = 15.0f, uff_d_max = 40.0f;
             for (int i = 0; i < 7; ++i)
             {
                 pid.uff.UFF_P[i] = uff_p_max * (i - 3.0f) / 3.0f;
@@ -664,30 +664,32 @@ private:
         else if (pid.mode == FUZZY_PID && pid.fuzzy_initialized)
         {
             float ec = error - pid.last_error;
-            float A = 0.03;
+            float A = 0.04;
             pid.last_error = error;
             float error_abs = fabs(error);
             // pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f;
             //  执行模糊推理
             count_DMF(pid, error * pid.fuzzy_pd.factor, ec * pid.fuzzy_pd.factor * EC_FACTOR);
             float delta_kp = Fuzzy_Kp(pid);
-            cerr << "ΔKp:" << delta_kp << endl;
+            //cerr << "ΔKp:" << delta_kp << endl;
             float delta_kd = Fuzzy_Kd(pid);
-            cerr << "ΔKd:" << delta_kd << endl;
+            //cerr << "ΔKd:" << delta_kd << endl;
 
             // 计算最终输出
             float P = (pid.fuzzy_pd.Kp0 + delta_kp) * error; // 直接使用模糊调整后的Kp
             // float P = pid.fuzzy_pd.Kp0 + abs(error)*delta_kp * error + ;
             // float D = pid.Kd * ec;
             float D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec;
+            //cerr << "kd0:" << pid.fuzzy_pd.Kd0 <<endl;
             float output = 0;
             if (error_abs >= 15)
             {
-                output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; // imu963ra_gyro_z * delta_kd;
+                output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; //(pid.fuzzy_pd.Kd0 + delta_kd); // imu963ra_gyro_z * delta_kd;
             }
-            else
+            else if(error_abs <15 || control_circle ==13 ||control_circle==1||control_circle==6)
             {
-                output = error * (pid.fuzzy_pd.Kp0 + 0.1 * delta_kp) + ec * pid.fuzzy_pd.Kd0; // imu963ra_gyro_z * delta_kd;
+                output = error * (pid.fuzzy_pd.Kp0 + 0.1 * delta_kp) + ec * (pid.fuzzy_pd.Kd0 + delta_kd);//pid.fuzzy_pd.Kd0; //(pid.fuzzy_pd.Kd0 + delta_kd); // imu963ra_gyro_z * delta_kd;
+                cerr<<"output"<<output<<endl;
             }
             // float output = (pid.fuzzy_pd.Kp0 + delta_kp) * error / 100.0f;
             // output += (pid.fuzzy_pd.Kd0 + delta_kd) * ec / 100.0f;
@@ -696,7 +698,7 @@ private:
             filtered_output = alpha * output + (1.0f - alpha) * filtered_output;
             filtered_output = clamp(filtered_output, -pid.max_output, pid.max_output);
             // output = clamp(output, -pid.max_output, pid.max_output);
-            // cerr<<"pwm"<<output<<endl;
+
             return filtered_output;
         }
 
