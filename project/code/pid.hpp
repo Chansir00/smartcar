@@ -17,11 +17,12 @@
 #include <cmath>
 class LaneProcessor;
 // 车尾向前
-constexpr float weight[39] = {
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 2, 3, 3, 3, 3, 5, 6,
-    16, 16, 18, 18, 18, 18, 18, 17, 17, 17,
-    15, 8, 8, 7, 6, 5, 4, 3, 2};
+//最大88-105
+constexpr float weight[39] = {    //64
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,           //73
+    1, 1, 1, 2, 3, 3, 3, 15, 16, 16,     //83
+    16, 16, 18, 18, 20 ,20, 22, 22, 25, 25,   //93
+    8, 8, 7, 7, 6, 5, 4, 3, 2};  
 
 constexpr float weight1[39] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -58,14 +59,23 @@ using namespace std;
 
 // 模糊规则表   kp kd
 static const int rule_p[7][7] = {
-    // 误差\误差变化率 | NB   NM    NS    ZO    PS    PM    PB
-    /* NB */ {PB, PB, PM, PM, PS, ZO, ZO},
-    /* NM */ {PB, PB, PM, PS, PS, ZO, PS},
-    /* NS */ {PM, PM, PM, PS, ZO, PS, PS},
-    /* ZO */ {PS, PS, PS, ZO, PS, PS, PS}, //{PM, PM, PS, ZO, PS, PM, PM},
-    /* PS */ {PS, PS, ZO, PS, PS, PM, PM},
-    /* PM */ {ZO, ZO, PS, PM, PM, PM, PB},
-    /* PB */ {PB, PB, PB, PB, PM, PB, PB}
+    //      NB      NM      NS      ZO      PS      PM      PB
+    /*NB*/ {PB,     PB,     PM,     PM,     PS,     ZO,     ZO},
+    /*NM*/ {PB,     PM,     PM,     PS,     ZO,     ZO,     PS},
+    /*NS*/ {PM,     PM,     PS,     ZO,     ZO,     PS,     PM},
+    /*ZO*/ {PS,     PS,     ZO,     PS,     PS,     PS,     PS},  // ZO可以考虑设为PM来提升响应
+    /*PS*/ {PM,     PS,     ZO,     PS,     PS,     PM,     PM},
+    /*PM*/ {ZO,     ZO,     PS,     PM,     PM,     PM,     PB},
+    /*PB*/ {PB,     PM,     PM,     PM,     PM,     PB,     PB}
+
+    // // 误差\误差变化率 | NB   NM    NS    ZO    PS    PM    PB
+    // /* NB */ {PB, PB, PM, PM, PS, ZO, ZO},
+    // /* NM */ {PB, PB, PM, PS, PS, ZO, PS},
+    // /* NS */ {PM, PM, PM, PS, ZO, PS, PS},
+    // /* ZO */ {PS, PS, PS, ZO, PS, PS, PS}, //{PM, PM, PS, ZO, PS, PM, PM},
+    // /* PS */ {PS, PS, ZO, PS, PS, PM, PM},
+    // /* PM */ {ZO, ZO, PS, PM, PM, PM, PB},
+    // /* PB */ {PB, PB, PB, PB, PM, PB, PB}
     // // 误差\误差变化率 | NB   NM    NS    ZO    PS    PM    PB
     // /* NB (极左) */ {PB, PB, PM, PM, PS, ZO, ZO},  // 需强右转（负输出）
     // /* NM (中左) */ {PB, PB, PM, PS, PS, ZO, NS},
@@ -605,7 +615,7 @@ private:
             /* maximum */
             /* minimum */
             /* factor */ // 假设误差范围为 ±160 像素，缩放因子 factor=0.5 后为 ±80
-            float uff_p_max = 15.0f, uff_d_max = 40.0f;
+            float uff_p_max = 20.0f, uff_d_max = 40.0f;
             for (int i = 0; i < 7; ++i)
             {
                 pid.uff.UFF_P[i] = uff_p_max * (i - 3.0f) / 3.0f;
@@ -664,7 +674,7 @@ private:
         else if (pid.mode == FUZZY_PID && pid.fuzzy_initialized)
         {
             float ec = error - pid.last_error;
-            float A = 0.04;
+            float A = 0.03;
             pid.last_error = error;
             float error_abs = fabs(error);
             // pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f;

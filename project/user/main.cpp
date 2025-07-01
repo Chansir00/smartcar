@@ -6,7 +6,7 @@ int debugmode = readFlag("./debugmode");
 const int camera = 0;
 int flag = 0;
 unsigned int send_counter = 0;
-int speed = 540; // 车速
+int speed = 550; // 车速
 const unsigned int SEND_INTERVAL = 20;
 int ready_count = 0;
 int control_circle;
@@ -30,16 +30,13 @@ int main()
     int new_socket = sendImageOverSocket();
     if (!debugmode)
     {
-        brush_init(800); // 初始化
+        brush_init(900); // 初始化
         pit_ms_init(5, [&ctrl, &detector]()
                     { 
-            if (!detector.lost && ready_count > 15)
+            if (!detector.lost && ready_count > 30)
             {
                 ctrl.pit_callback();
-                if (!slow_down)
-                    ctrl.motor_control(speed, 0, 0); // 将控制逻辑移到定时器回调200
-                else
-                    ctrl.motor_control(200, 0, 0); // 将控制逻辑移
+                ctrl.motor_control(speed, 0, 0); // 将控制逻辑移到定时器回调200
             }
             else if(detector.lost)
             {
@@ -52,7 +49,7 @@ int main()
 
     while (true)
     {
-        if (ready_count < 300)
+        if (ready_count < 330)
             ready_count++;
         clock_t start = clock();
         Mat frame;

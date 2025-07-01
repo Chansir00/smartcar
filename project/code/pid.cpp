@@ -76,7 +76,7 @@ void MotionController::motor_control(int speed, float k, int limit)
     pidLeft.actual = encoder_left;
     pidRight.actual = -encoder_right;
 
-    // cerr << "left: " << pidLeft.actual << " right: " << pidRight.actual << endl;
+    cerr << "left: " << pidLeft.actual << " right: " << pidRight.actual << endl;
     //  PID计算
 
     // pidLeft.target = speed1;

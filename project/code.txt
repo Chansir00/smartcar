@@ -132,7 +132,12 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     {
         gpio_set_level(BEEP, 0x0);
         // 先通过左车道单调性和右车道丢点率判断是否可能进入环岛
-        if (((isrightJumpvalid && isleftJumpvalid) || (isrightJumpvalid && leftJumpPointA.x != -1) || (isleftJumpvalid && rightJumpPointA.x != -1) || (rightJumpPointB.y > 30 && leftJumpPointB.y >= 30 && rightJumpPointB.x - leftJumpPointB.x > 30)) && numPoints > img_devided)
+        if (((rightJumpPointA.x > rightJumpPointB.x && rightJumpPointB.x > 1 && leftMissedRadius > 0.6)                               // 右两点，一边丢线
+             || (leftJumpPointB.x > leftJumpPointA.x && leftJumpPointA.x > 1 && rightMissedRadius > 0.6)                              // 左两点，右丢线
+             || (rightJumpPointB.y >= 10 && leftJumpPointB.y >= 10 && abs(rightJumpPointB.y - leftJumpPointB.y) < 20)                 // 有两上拐点
+             || (rightJumpPointB.x != -1 && rightJumpPointA.x != -1 && leftJumpPointA.x != -1 && !isleftstraight && !isrightstraight) // 右2+左1
+             || (leftJumpPointA.x != -1 && leftJumpPointB.x != -1 && rightJumpPointA.x != -1 && !isleftstraight && !isrightstraight)) // 左2+右1
+            && numPoints > img_devided)
         {
             circleState = CROSSING;
         }
@@ -391,54 +396,66 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     break;
     case CROSSING:
     {
-        if (rightJumpPointB.x == -1 || leftJumpPointB.x == -1 || (rightJumpPointB.y > 100 || leftJumpPointB.y > 100) || (isleftLanecontinuous || isrightLanecontinuous))
+        if ((isrightstraight && isleftstraight) || (isleftLanecontinuous && isrightLanecontinuous) || (rightJumpPointB.x == -1 && leftJumpPointB.x == -1) || numPoints < img_devided)
         {
             circleState = CIRCLE_INACTIVE;
             break;
         }
-        if (isrightJumpvalid && isleftJumpvalid)
+
+        if (rightJumpPointB.x != -1 && leftJumpPointB.x != -1 && rightJumpPointA.x != -1 && leftJumpPointA.x != -1) // all have
         {
-            leftJumpPointA = leftJumpPointA;
+            generateVirtualPath(rightJumpPointA, rightJumpPointB, rightvirtualPath, true);
+            generateVirtualPath(leftJumpPointA, leftJumpPointB, leftvirtualPath, true);
+            mergeVirtualPath(LeftLane, leftvirtualPath, -1);
+            mergeVirtualPath(RightLane, rightvirtualPath, -1);
         }
-        else if (isrightJumpvalid && !isleftJumpvalid)
+        else if ((rightJumpPointB.x != -1 && rightJumpPointA.x != -1 && leftJumpPointA.x != -1 && !isleftstraight && !isrightstraight)) // rightx2+leftx1
         {
-            float widthA = getTrackWIdthFormY(rightJumpPointA.y);
-            float widthB = getTrackWIdthFormY(rightJumpPointB.y);
-            leftJumpPointA.x = rightJumpPointA.x - widthA;
-            leftJumpPointA.y = rightJumpPointA.y;
-            leftJumpPointB.x = rightJumpPointB.x - widthB;
-            leftJumpPointB.y = rightJumpPointB.y;
-            // float deltax = rightJumpPointA.x-rightJumpPointB.x;
-            // float deltay = rightJumpPointA.y-rightJumpPointB.y;
-            // leftJumpPointB.x = leftJumpPointA.x + deltax;
-            // leftJumpPointB.y = leftJumpPointA.y - deltay;
+            if (rightJumpPointA.x - rightJumpPointB.x < rightJumpPointB.x - leftJumpPointA.x)
+            {
+                leftJumpPointB = leftJumpPointA;
+                leftJumpPointB.y = rightJumpPointB.y;
+                generateVirtualPath(rightJumpPointA, rightJumpPointB, rightvirtualPath, true);
+                generateVirtualPath(leftJumpPointA, leftJumpPointB, leftvirtualPath, true);
+                mergeVirtualPath(LeftLane, leftvirtualPath, -1);
+                mergeVirtualPath(RightLane, rightvirtualPath, -1);
+            }
         }
-        else if (isleftJumpvalid && !isrightJumpvalid)
+        else if (rightJumpPointA.x > rightJumpPointB.x && rightJumpPointB.x > 1 && leftMissedRadius > 0.6) // rightx2
         {
-            float widthA = getTrackWIdthFormY(leftJumpPointA.y);
-            float widthB = getTrackWIdthFormY(leftJumpPointB.y);
-            rightJumpPointA.x = leftJumpPointA.x + widthA;
-            rightJumpPointA.y = leftJumpPointA.y;
-            rightJumpPointB.x = leftJumpPointB.x + widthB;
-            rightJumpPointB.y = leftJumpPointB.y;
-            // float deltax = leftJumpPointA.x-leftJumpPointB.x;
-            // float deltay = leftJumpPointA.y-leftJumpPointB.y;
-            // rightJumpPointB.x = rightJumpPointA.x + deltax;
-            // rightJumpPointB.y = rightJumpPointA.y - deltay;
+            generateVirtualPath(rightJumpPointA, rightJumpPointB, rightvirtualPath, true);
+            mergeVirtualPath(RightLane, rightvirtualPath, -1);
         }
-        else
+        else if (leftJumpPointA.x != -1 && leftJumpPointB.x != -1 && rightJumpPointA.x != -1 && !isleftstraight && !isrightstraight) //  leftx2rightx1
+        {
+            if (leftJumpPointA.x - leftJumpPointB.x > leftJumpPointB.x - rightJumpPointA.x)
+            {
+                rightJumpPointB = rightJumpPointA;
+                rightJumpPointB.y = leftJumpPointB.y;
+                generateVirtualPath(rightJumpPointA, rightJumpPointB, rightvirtualPath, true);
+                generateVirtualPath(leftJumpPointA, leftJumpPointB, leftvirtualPath, true);
+                mergeVirtualPath(LeftLane, leftvirtualPath, -1);
+                mergeVirtualPath(RightLane, rightvirtualPath, -1);
+            }
+        }
+        else if (leftJumpPointB.x > leftJumpPointA.x && leftJumpPointA.x > 1 && rightMissedRadius > 0.6) // leftx2
+        {
+            generateVirtualPath(leftJumpPointA, leftJumpPointB, leftvirtualPath, true);
+            mergeVirtualPath(LeftLane, leftvirtualPath, -1);
+        }
+        else if (leftJumpPointA.x == -1 && rightJumpPointA.x == -1 && leftJumpPointB.x != -1 && rightJumpPointB.x != -1)
         {
             leftJumpPointA = leftLane[leftLane.size() - 1].position;
             rightJumpPointA = rightLane[rightLane.size() - 1].position;
+            generateVirtualPath(rightJumpPointA, rightJumpPointB, rightvirtualPath, true);
+            generateVirtualPath(leftJumpPointA, leftJumpPointB, leftvirtualPath, true);
+            mergeVirtualPath(LeftLane, leftvirtualPath, -1);
+            mergeVirtualPath(RightLane, rightvirtualPath, -1);
         }
         cerr << "leftJumpPointA: " << leftJumpPointA << endl;
         cerr << "leftJumpPointB: " << leftJumpPointB << endl;
         cerr << "rightJumpPointA: " << rightJumpPointA << endl;
         cerr << "rightJumpPointB: " << rightJumpPointB << endl;
-        generateVirtualPath(rightJumpPointA, rightJumpPointB, rightvirtualPath, true);
-        generateVirtualPath(leftJumpPointA, leftJumpPointB, leftvirtualPath, true);
-        mergeVirtualPath(LeftLane, leftvirtualPath, -1);
-        mergeVirtualPath(RightLane, rightvirtualPath, -1);
     }
     break;
     case UP:
