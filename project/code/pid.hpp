@@ -17,12 +17,12 @@
 #include <cmath>
 class LaneProcessor;
 // 车尾向前
-//最大88-105
-constexpr float weight[39] = {    //64
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,           //73
-    1, 1, 1, 2, 3, 3, 3, 15, 16, 16,     //83
-    16, 16, 18, 18, 20 ,20, 22, 22, 25, 25,   //93
-    8, 8, 7, 7, 6, 5, 4, 3, 2};  
+//60-90
+constexpr float weight[39] = {    //50
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,           //60
+    1, 1, 1, 2, 3, 3, 3, 15, 16, 16,     //70
+    16, 16, 18, 18, 20 ,20, 20, 23, 23, 23,   //80
+    25, 25, 17, 17, 6, 5, 4, 3, 2};  //89
 
 constexpr float weight1[39] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -196,9 +196,8 @@ struct PID_Controller
 
 class MotionController
 {
+public:
     friend class LaneProcessor;
-
-private:
     LaneProcessor *laneProcessor;                            // 改用原始指针
     int serial_fd = -1;                                      // 串口文件描述符
     std::chrono::steady_clock::time_point last_serial_retry; // 最后重试时间
@@ -468,10 +467,10 @@ public:
         gpio_set_level(MOTOR1_DIR, 0);
         gpio_set_level(MOTOR2_DIR, 0); // yuan 1
         // 初始化PID参数
-        // init_pid(pidLeft, 1.25f, 0.245f, 0.10f, PWM_MAX,DELTA_PID);       //you
-        // init_pid(pidRight, 1.25f, 0.205f, 0.18f, PWM_MAX,DELTA_PID);    //zuo
-        init_pid(pidLeft, 0.8f, 0.245f, 0.10f, PWM_MAX, DELTA_PID);  // you
-        init_pid(pidRight, 0.9f, 0.205f, 0.18f, PWM_MAX, DELTA_PID); // zuo
+         init_pid(pidLeft, 28.0f, 2.845f, -0.2f, PWM_MAX,DELTA_PID);       //you  10.0 1.245
+         init_pid(pidRight, 30.0f, 2.805f, 0.18f, PWM_MAX,DELTA_PID);    //zuo
+        //init_pid(pidLeft, 2.0f, 2.0f, 0.0f, PWM_MAX, DELTA_PID);  // you
+        //init_pid(pidRight, 2.0f, 2.0f, 0.0f, PWM_MAX, DELTA_PID); // zuo
         init_pid(pidservo, 6.0f, 0.0f, 14.0f, 441.0f, FUZZY_PID);   //
         init_serial();
     }
@@ -615,7 +614,7 @@ private:
             /* maximum */
             /* minimum */
             /* factor */ // 假设误差范围为 ±160 像素，缩放因子 factor=0.5 后为 ±80
-            float uff_p_max = 20.0f, uff_d_max = 40.0f;
+            float uff_p_max = 12.0f, uff_d_max = 40.0f;
             for (int i = 0; i < 7; ++i)
             {
                 pid.uff.UFF_P[i] = uff_p_max * (i - 3.0f) / 3.0f;

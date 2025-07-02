@@ -132,7 +132,10 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     {
         gpio_set_level(BEEP, 0x0);
         // 先通过左车道单调性和右车道丢点率判断是否可能进入环岛
-        if (((isrightJumpvalid && isleftJumpvalid) || (isrightJumpvalid && leftJumpPointA.x != -1) || (isleftJumpvalid && rightJumpPointA.x != -1) || (rightJumpPointB.y > 30 && leftJumpPointB.y >= 30 && rightJumpPointB.x - leftJumpPointB.x > 30)) && numPoints > img_devided)
+        if (((leftJumpPointA.x != -1 && leftJumpPointB.x != -1 && rightJumpPointA.x != -1 && rightJumpPointB.x != -1&&rightJumpPointB.x>leftJumpPointB.x) 
+        || (rightJumpPointB.x<rightJumpPointA.x&&rightJumpPointA.x>1 && (leftJumpPointA.x != -1||leftJumpPointB.x!=-1)) 
+        || (leftJumpPointA.x<leftJumpPointB.x&&leftJumpPointA.x>1 && (rightJumpPointA.x != -1||rightJumpPointB.x!=-1))
+        || (rightJumpPointB.y > 30 && leftJumpPointB.y >= 30 && rightJumpPointB.x - leftJumpPointB.x > 30)) && numPoints > img_devided)
         {
             circleState = CROSSING;
         }
@@ -140,7 +143,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = RIGHT_CIRCLE_DETECTED;
         }
-        else if (circleflag == 1 && rightJumpPointA.x == -1 && rightJumpPointA.x == -1 && rightMissedRadius < 0.6 && isleftJumpvalid && isrightstraight && !isleftstraight && isleftJumpvalid && isrightLanecontinuous && !isleftLanecontinuous && leftMissedRadius < 0.7 && numPoints > 100)
+        else if (circleflag == 1 && rightJumpPointA.x == -1 && rightJumpPointA.x == -1 && rightMissedRadius < 0.6 && isrightstraight && !isleftstraight && isleftJumpvalid && isrightLanecontinuous && !isleftLanecontinuous && leftMissedRadius < 0.7 && numPoints > 100)
         {
             circleState = LEFT_CIRCLE_DETECTED;
         }
@@ -152,11 +155,11 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = LEFT_TURN;
         }
-        else if (ready_count > 300 && rightJumpPointB.x - leftJumpPointB.x < 30 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && numPoints > 100)
+        else if (ready_count > 500 && rightJumpPointB.x - leftJumpPointB.x < 10 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && numPoints > 100)
         {
             circleState = ZEBRA;
         }
-        else if (small_count > 0.85 * numPoints && numPoints > 101)
+        else if (small_count > 0.85 * numPoints && numPoints > 101&&leftMissedRadius<0.5&&rightMissedRadius<0.5)
         {
             circleState = STRAIGHT;
         }
@@ -391,45 +394,61 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     break;
     case CROSSING:
     {
-        if (rightJumpPointB.x == -1 || leftJumpPointB.x == -1 || (rightJumpPointB.y > 100 || leftJumpPointB.y > 100) || (isleftLanecontinuous || isrightLanecontinuous))
+        if ((rightJumpPointB.x == -1 && leftJumpPointB.x == -1) || (rightJumpPointB.y > 100 || leftJumpPointB.y > 100) || (isleftLanecontinuous || isrightLanecontinuous))
         {
             circleState = CIRCLE_INACTIVE;
             break;
         }
-        if (isrightJumpvalid && isleftJumpvalid)
+        if (rightJumpPointA.x!=-1&&rightJumpPointB.x!=-1&& leftJumpPointA.x!=-1&&leftJumpPointB.x!=-1)
         {
             leftJumpPointA = leftJumpPointA;
         }
-        else if (isrightJumpvalid && !isleftJumpvalid)
+        else if (rightJumpPointB.x<rightJumpPointA.x&&rightJumpPointA.x>1 && (leftJumpPointA.x != -1||leftJumpPointB.x!=-1))
         {
-            float widthA = getTrackWIdthFormY(rightJumpPointA.y);
-            float widthB = getTrackWIdthFormY(rightJumpPointB.y);
-            leftJumpPointA.x = rightJumpPointA.x - widthA;
-            leftJumpPointA.y = rightJumpPointA.y;
-            leftJumpPointB.x = rightJumpPointB.x - widthB;
-            leftJumpPointB.y = rightJumpPointB.y;
-            // float deltax = rightJumpPointA.x-rightJumpPointB.x;
-            // float deltay = rightJumpPointA.y-rightJumpPointB.y;
-            // leftJumpPointB.x = leftJumpPointA.x + deltax;
-            // leftJumpPointB.y = leftJumpPointA.y - deltay;
+            // float widthA = getTrackWIdthFormY(rightJumpPointA.y);
+            // float widthB = getTrackWIdthFormY(rightJumpPointB.y);
+            // leftJumpPointA.x = rightJumpPointA.x - widthA;
+            // leftJumpPointA.y = rightJumpPointA.y;
+            // leftJumpPointB.x = rightJumpPointB.x - widthB;
+            // leftJumpPointB.y = rightJumpPointB.y;
+            if(leftJumpPointB.x==-1)
+            {
+                leftJumpPointB.y = rightJumpPointB.y;
+                leftJumpPointB.x = leftJumpPointA.x;
+            }
+            else if(leftJumpPointA.x==-1)
+            {
+                leftJumpPointA.y = rightJumpPointA.y;
+                leftJumpPointA.x = leftJumpPointB.x;
+            }
         }
-        else if (isleftJumpvalid && !isrightJumpvalid)
+        else if (leftJumpPointA.x < leftJumpPointB.x && leftJumpPointB.x > 1 && (rightJumpPointA.x != -1|| rightJumpPointB.x != -1))
         {
-            float widthA = getTrackWIdthFormY(leftJumpPointA.y);
-            float widthB = getTrackWIdthFormY(leftJumpPointB.y);
-            rightJumpPointA.x = leftJumpPointA.x + widthA;
-            rightJumpPointA.y = leftJumpPointA.y;
-            rightJumpPointB.x = leftJumpPointB.x + widthB;
-            rightJumpPointB.y = leftJumpPointB.y;
-            // float deltax = leftJumpPointA.x-leftJumpPointB.x;
-            // float deltay = leftJumpPointA.y-leftJumpPointB.y;
-            // rightJumpPointB.x = rightJumpPointA.x + deltax;
-            // rightJumpPointB.y = rightJumpPointA.y - deltay;
+            // float widthA = getTrackWIdthFormY(leftJumpPointA.y);
+            // float widthB = getTrackWIdthFormY(leftJumpPointB.y);
+            // rightJumpPointA.x = leftJumpPointA.x + widthA;
+            // rightJumpPointA.y = leftJumpPointA.y;
+            // rightJumpPointB.x = leftJumpPointB.x + widthB;
+            // rightJumpPointB.y = leftJumpPointB.y;
+            if(rightJumpPointB.x==-1)
+            {
+                rightJumpPointB.y = leftJumpPointB.y;
+                rightJumpPointB.x = rightJumpPointA.x;
+            }
+            else if(rightJumpPointA.x==-1)
+            {
+                rightJumpPointA.y = leftJumpPointA.y;
+                rightJumpPointA.x = rightJumpPointB.x;
+            }
         }
-        else
+        else if(rightJumpPointB.y > 30 && leftJumpPointB.y >= 30 && rightJumpPointB.x - leftJumpPointB.x > 30)
         {
             leftJumpPointA = leftLane[leftLane.size() - 1].position;
             rightJumpPointA = rightLane[rightLane.size() - 1].position;
+        }
+        else
+        {
+            break;
         }
         cerr << "leftJumpPointA: " << leftJumpPointA << endl;
         cerr << "leftJumpPointB: " << leftJumpPointB << endl;
@@ -1113,7 +1132,11 @@ void LaneProcessor::generateVirtualPath(const Point2f &start, const Point2f &end
                                         bool isLeftLane)
 {
     path.clear();
-
+    if(start.x < 0 || start.y < 0 || end.x < 0 || end.y < 0)
+    {
+        cerr << "起点或终点坐标无效，无法生成虚拟路径" << endl;
+        return;
+    }
     // 计算行数差（必须为整数）
     const int rowDiff = static_cast<int>(end.y) - static_cast<int>(start.y);
     if (rowDiff == 0)

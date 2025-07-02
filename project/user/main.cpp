@@ -6,11 +6,24 @@ int debugmode = readFlag("./debugmode");
 const int camera = 0;
 int flag = 0;
 unsigned int send_counter = 0;
-int speed = 550; // 车速
+int speed = 540; // 车速
 const unsigned int SEND_INTERVAL = 20;
 int ready_count = 0;
 int control_circle;
 extern bool slow_down;
+
+// 另外一端的IP地址
+#define SERVER_IP "192.168.209.138"
+// 端口号
+#define PORT 8888
+
+uint32 read_len = 0;
+uint8 recv_buff[1024];
+uint8 temp_str[] = "seekfree this is udp demo.\r\n";
+uint8 read_str[] = "read data:\r\n";
+char float_str1[32];
+char float_str2[32];
+
 int main()
 {
     VideoCapture cap = cap_init(camera);
@@ -28,9 +41,21 @@ int main()
     brush_off();
     ctrl.motor_control(0, 0, 0);
     int new_socket = sendImageOverSocket();
+    // if (udp_init(SERVER_IP, PORT) == 0)
+    // {
+    //     printf("tcp_client ok\r\n");
+    //     udp_send_data(temp_str, sizeof(temp_str));
+    //     udp_send_data(temp_str, sizeof(temp_str));
+    //     udp_send_data(temp_str, sizeof(temp_str));
+    // }
+    // else
+    // {
+    //     printf("tcp_client error\r\n");
+    //     return -1;
+    // }
     if (!debugmode)
     {
-        brush_init(900); // 初始化
+        brush_init(800); // 初始化
         pit_ms_init(5, [&ctrl, &detector]()
                     { 
             if (!detector.lost && ready_count > 30)
@@ -59,6 +84,11 @@ int main()
             cerr << "错误：读取帧失败！" << endl;
             break;
         }
+        // 回显UDP数据。
+        //sprintf(float_str1, "left_encoder: %.2f\r\n", ctrl.pidLeft.actual);
+         //sprintf(float_str2, "right_encoder: %.2f\r\n", ctrl.pidRight.actual);
+        //udp_send_data((uint8_t *)&float_str1, sizeof(float_str1));
+         //udp_send_data((uint8_t *)&float_str2, sizeof(float_str2));
 
         imu_data_get();
         DetectionResult result = detector.detect(frame);
@@ -72,6 +102,7 @@ int main()
         // ctrl.update_shared_error(error);
         cerr << "error: " << error << endl;
         ctrl.set_servo_angle(error);
+        //ctrl.set_servo_angle(0);
         // pwm_set_duty(MOTOR1_PWM, 1000); // 小占空比
         // gpio_set_level(MOTOR1_DIR, 1);
         // pwm_set_duty(MOTOR2_PWM, 1000); // 小占空比
@@ -81,7 +112,7 @@ int main()
         {
             flag = 1;
         }
-        else if (debugmode == 1 )
+        else if (debugmode == 1)
         {
             vector<uchar> buf;
             vector<int> params = {cv::IMWRITE_JPEG_QUALITY, 90};
