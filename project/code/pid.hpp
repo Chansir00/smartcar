@@ -437,22 +437,26 @@ public:
         float outer_factor = 1.0f + 0.17 * (W / 2) * tn / L; // 0.10
         float inner_factor = 1.0f - 0.83 * (W / 2) * tn / L; // 0.90
 
-        inner_factor = max(0.8f, min(inner_factor, 1.2f)); // 限制在 0.9~1.1 范围内
-        outer_factor = max(0.8f, min(outer_factor, 1.2f)); // 可选：对称限幅
-        //cerr << "in:" << inner_factor << endl;
-        //cerr << "out:" << outer_factor << endl;
+        inner_factor = max(0.97f, min(inner_factor, 1.2f)); // 限制在 0.9~1.1 范围内
+        outer_factor = max(0.97f, min(outer_factor, 1.2f)); // 可选：对称限幅
+        cerr << "in:" << inner_factor << endl;
+        cerr << "out:" << outer_factor << endl;
         // float outer_factor = (A*(K+0.5*W*tn/L*AK));
         // float inner_factor = (A*(K-0.5*W*tn/L*AK));
         //  应用差速
         if (current_servo_pwm >= steer_middle)
         {
-            pidLeft.target = Speed_Goal * inner_factor;
-            pidRight.target = Speed_Goal * outer_factor;
+            //pidLeft.target = Speed_Goal * inner_factor;
+            //pidRight.target = Speed_Goal * outer_factor;
+            pidLeft.target = Speed_Goal * outer_factor;
+            pidRight.target = Speed_Goal * inner_factor;
         }
         else
         {
-            pidLeft.target = Speed_Goal * outer_factor;
-            pidRight.target = Speed_Goal * inner_factor;
+            //pidLeft.target = Speed_Goal * outer_factor;
+            //pidRight.target = Speed_Goal * inner_factor;
+            pidLeft.target = Speed_Goal * inner_factor;
+            pidRight.target = Speed_Goal * outer_factor;
         }
     }
 
@@ -467,8 +471,10 @@ public:
         gpio_set_level(MOTOR1_DIR, 0);
         gpio_set_level(MOTOR2_DIR, 0); // yuan 1
         // 初始化PID参数
-         init_pid(pidLeft, 28.0f, 2.845f, -0.2f, PWM_MAX,DELTA_PID);       //you  10.0 1.245
+         init_pid(pidLeft, 28.0f, 2.845f, 0.2f, PWM_MAX,DELTA_PID);       //you  10.0 1.245
          init_pid(pidRight, 30.0f, 2.805f, 0.18f, PWM_MAX,DELTA_PID);    //zuo
+          //init_pid(pidLeft, 10.0f, 0.845f, -0.2f, PWM_MAX,DELTA_PID);       //you  10.0 1.245
+         //init_pid(pidRight, 10.0f, 0.805f, 0.18f, PWM_MAX,DELTA_PID);    //zuo
         //init_pid(pidLeft, 2.0f, 2.0f, 0.0f, PWM_MAX, DELTA_PID);  // you
         //init_pid(pidRight, 2.0f, 2.0f, 0.0f, PWM_MAX, DELTA_PID); // zuo
         init_pid(pidservo, 6.0f, 0.0f, 14.0f, 441.0f, FUZZY_PID);   //
@@ -549,6 +555,8 @@ public:
         std::lock_guard<std::mutex> lock(encoder_mutex);
         encoder_left = encoder_get_count(ENCODER_1);
         encoder_right = encoder_get_count(ENCODER_2);
+        cerr << "Encoder Left: " << encoder_left
+             << ", Right: " << encoder_right << endl;
         // if(abs(encoder_left)>500)
         //{
         // encoder_left = 200 ;
@@ -666,8 +674,13 @@ private:
             float delta = pid.Kp * (pid.error[0] - pid.error[1]) + pid.Ki * pid.error[0] + pid.Kd * (pid.error[0] - 2 * pid.error[1] + pid.error[2]);
 
             // 叠加输出并限幅
+             float delta_limit = pid.max_output * 0.5f;
+            delta = std::clamp(delta, -delta_limit, delta_limit);
+            // 叠加输出并限幅
             pid.output += delta;
             pid.output = std::clamp(pid.output, -pid.max_output, pid.max_output);
+            //pid.output += delta;
+            //pid.output = std::clamp(pid.output, -pid.max_output, pid.max_output);
         }
 
         else if (pid.mode == FUZZY_PID && pid.fuzzy_initialized)

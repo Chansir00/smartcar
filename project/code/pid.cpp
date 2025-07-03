@@ -61,7 +61,7 @@ void MotionController::motor_control(int speed, float k, int limit)
 
     float speed1 = speed - (speed * (1 - chasu) * abs(pwm_error) * k_decision / SERVO_MOTOR_MID); // 打满时速度为0.825
 
-    if (abs(pwm_error) >= 150)
+    if (abs(pwm_error) >= 180)
     {
         ackerman_diff_control(speed1);
     }

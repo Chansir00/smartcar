@@ -6,14 +6,14 @@ int debugmode = readFlag("./debugmode");
 const int camera = 0;
 int flag = 0;
 unsigned int send_counter = 0;
-int speed = 540; // 车速
+int speed = 590; // 车速
 const unsigned int SEND_INTERVAL = 20;
 int ready_count = 0;
 int control_circle;
 extern bool slow_down;
 
 // 另外一端的IP地址
-#define SERVER_IP "192.168.209.138"
+#define SERVER_IP "192.168.209.246"
 // 端口号
 #define PORT 8888
 
@@ -41,6 +41,7 @@ int main()
     brush_off();
     ctrl.motor_control(0, 0, 0);
     int new_socket = sendImageOverSocket();
+    //int new_socket = 0;
     // if (udp_init(SERVER_IP, PORT) == 0)
     // {
     //     printf("tcp_client ok\r\n");
@@ -55,7 +56,7 @@ int main()
     // }
     if (!debugmode)
     {
-        brush_init(800); // 初始化
+        brush_init(900); // 初始化
         pit_ms_init(5, [&ctrl, &detector]()
                     { 
             if (!detector.lost && ready_count > 30)
@@ -74,7 +75,7 @@ int main()
 
     while (true)
     {
-        if (ready_count < 330)
+        if (ready_count < 1000)
             ready_count++;
         clock_t start = clock();
         Mat frame;
@@ -86,7 +87,7 @@ int main()
         }
         // 回显UDP数据。
         //sprintf(float_str1, "left_encoder: %.2f\r\n", ctrl.pidLeft.actual);
-         //sprintf(float_str2, "right_encoder: %.2f\r\n", ctrl.pidRight.actual);
+        // sprintf(float_str2, "right_encoder: %.2f\r\n", ctrl.pidRight.actual);
         //udp_send_data((uint8_t *)&float_str1, sizeof(float_str1));
          //udp_send_data((uint8_t *)&float_str2, sizeof(float_str2));
 
@@ -103,9 +104,9 @@ int main()
         cerr << "error: " << error << endl;
         ctrl.set_servo_angle(error);
         //ctrl.set_servo_angle(0);
-        // pwm_set_duty(MOTOR1_PWM, 1000); // 小占空比
+        // pwm_set_duty(MOTOR1_PWM, 2000); // 小占空比
         // gpio_set_level(MOTOR1_DIR, 1);
-        // pwm_set_duty(MOTOR2_PWM, 1000); // 小占空比
+        // pwm_set_duty(MOTOR2_PWM, 2000); // 小占空比
         // gpio_set_level(MOTOR2_DIR, 0);
         // cerr << "Forward countl: " << encoder_get_count(ENCODER_1) <<"Forward countr: " << encoder_get_count(ENCODER_2) << endl;
         if (debugmode == 0)
