@@ -8,6 +8,17 @@ float servo_motor_duty = 90.0;
 float servo_motor_dir = 1;
 int16 encoder_left;
 int16 encoder_right;
+int point_speed_max = 60;
+int point_speed_min = 30;
+int speed_min = 470;
+int speed_max = 650;
+
+// enum PID_Mode
+// {
+//     POSITION_PID,
+//     DELTA_PID,
+//     FUZZY_PID
+// };
 
 void sigint_handler(int signum)
 {
@@ -49,19 +60,48 @@ void cleanup()
 //         close(serial_fd);
 //     }
 // }
+float MotionController::ave_speed() {
+    std::lock_guard<std::mutex> lock(encoder_mutex);
+    float current_speed = (encoder_left + encoder_right) / 2.0;
+    if (buffer_count < 20) {
+        speed_buffer[buffer_index] = current_speed;
+        buffer_count++;
+    } else {
+        speed_buffer[buffer_index] = current_speed;
+    }
+    buffer_index = (buffer_index + 1) % 20;
+    float average_speed = 0;
+    for (int i = 0; i < buffer_count; i++) {
+        average_speed += speed_buffer[i];
+    }
+    average_speed /= buffer_count;
+    return average_speed;
+}
+
+int MotionController::dongtaiqianzhan(){                                              
+    std::lock_guard<std::mutex> lock(encoder_mutex);
+    //int average_speed = (encoder_left + encoder_right) / 2.0;
+    int average_speed = ave_speed();
+    int point_speed = ((average_speed - speed_min) / (speed_max - speed_min) * (point_speed_max - point_speed_min)) + point_speed_min;// 计算点速度
+    return point_speed;
+}
+                    
+
 void MotionController::motor_control(int speed, float k, int limit)
 {
     std::lock_guard<std::mutex> lock(encoder_mutex);
-    // auto params = laneProcessor->getControlParams();
-    // float speed_factor = params.speed_factor;
-    // int speed1 = speed * speed_factor;
+    auto params = laneProcessor->getControlParams();
+    float speed_factor = params.speed_factor;
+    cerr<< "speed_factor: " << speed_factor << endl;
+    //int speed1 = speed * speed_factor;
     float chasu = 0.8;
     float pwm_error = current_servo_pwm - SERVO_MOTOR_MID;
     float k_decision = 8;
 
-    float speed1 = speed - (speed * (1 - chasu) * abs(pwm_error) * k_decision / SERVO_MOTOR_MID); // 打满时速度为0.825
-
-    if (abs(pwm_error) >= 180)
+    //float speed1 = speed - (speed * (1 - chasu) * abs(pwm_error) * k_decision / SERVO_MOTOR_MID); // 打满时速度为0.825
+    float speed1 = speed * speed_factor;
+    //float speed1 = speed;
+    if (abs(pwm_error) >= 150)
     {
         ackerman_diff_control(speed1);
     }
@@ -177,36 +217,36 @@ float MotionController::Err_sum(const vector<Point> &centerline)
     // 5. 计算加权误差
     float error = 0.0f;
     float weight_count = 0.0f;
-    if (params.weight_case == 1.0f)
-    {
-        if (start_idx <= 0)
-        {
-            for (int i = 0; i < steps_used; ++i)
-            {
-                // int idx = start_idx - i; // 自动确保 idx >= 0
-                error += (centerline[i + force_start].x - 80) * weight1[i];
-                weight_count += weight1[i];
-            }
-        }
-        else
-        {
-            for (int i = 0; i < steps_used; ++i)
-            {
-                // int idx = start_idx - i; // 自动确保 idx >= 0
-                error += (centerline[i + start].x - 80) * weight1[i];
-                weight_count += weight1[i];
-            }
-        }
-    }
-    else
-    {
+    // if (params.weight_case == 1.0f)
+    // {
+    //     if (start_idx <= 0)
+    //     {
+    //         for (int i = 0; i < steps_used; ++i)
+    //         {
+    //             // int idx = start_idx - i; // 自动确保 idx >= 0
+    //             error += (centerline[i + force_start].x - 80) * weight1[i];
+    //             weight_count += weight1[i];
+    //         }
+    //     }
+    //     else
+    //     {
+    //         for (int i = 0; i < steps_used; ++i)
+    //         {
+    //             // int idx = start_idx - i; // 自动确保 idx >= 0
+    //             error += (centerline[i + start].x - 80) * weight1[i];
+    //             weight_count += weight1[i];
+    //         }
+    //     }
+    // }
+    //else
+    //{
         for (int i = 0; i < steps_used; ++i)
         {
             // int idx = i - i; // 自动确保 idx >= 0
             error += (centerline[i + start].x - 80) * weight[i];
             weight_count += weight[i];
         }
-    }
+    //}
     // 6. 检查权重和是否为0（避免除零）
     if (fabs(weight_count) < 1e-6f)
     {
@@ -216,6 +256,219 @@ float MotionController::Err_sum(const vector<Point> &centerline)
 
     return error / weight_count;
 }
+float MotionController::Err_sum2(const vector<Point> &centerline){
+    int steps_used = 0;
+    float error = 0.0f;
+    float weight_count = 0.0f;
+    int a = dongtaiqianzhan();
+    a = std::clamp(a, 0, 99); 
+    for(int i = 0;i < 21;i++){
+        quan_weight[i + a] = dongtaiquan[i];
+    }
+  
+    for( steps_used = 0; steps_used < centerline.size(); ++steps_used){
+          error += (centerline[steps_used].x - 80) * quan_weight[steps_used];
+          weight_count += quan_weight[steps_used];
+    }
+    return (weight_count != 0.0f) ? error / weight_count : 0.0f;
+}
+void MotionController::init_pid(PID_Controller &pid, float Kp, float Ki, float Kd, float max_out, PID_Mode mode)
+    {
+        pid.Kp = Kp;
+        pid.Ki = Ki;
+        pid.Kd = Kd;
+        pid.max_output = max_out;
+        pid.integral = 0;
+        memset(pid.error, 0, sizeof(pid.error));
+        pid.mode = mode;
+        //auto params = laneProcessor->getControlParams();
+        if (mode == FUZZY_PID)
+        {
+            // 初始化模糊参数
+            pid.fuzzy_pd = {6.0f, 28.0f, 1.0, 35.0, 6.0, 1.0f};
+            //pid.fuzzy_pd = {params.kp_switch, params.kd_switch, 1.0, 35.0, 6.0, 1.0f,params.A_switch};
+            /* Kp0 */
+            /* Kd0 */
+            /* deltakp threshold */
+            /* maximum */
+            /* minimum */
+            /* factor */ // 假设误差范围为 ±160 像素，缩放因子 factor=0.5 后为 ±80
+            float uff_p_max = 12.0f, uff_d_max = 40.0f;
+            for (int i = 0; i < 7; ++i)
+            {
+                pid.uff.UFF_P[i] = uff_p_max * (i - 3.0f) / 3.0f;
+                pid.uff.UFF_D[i] = uff_d_max * (i - 3.0f) / 3.0f;
+                pid.EFF[i] = 60.0f * (i - 3.0f) / 3.0f; // 21f误差范围
+                if (i == 3)
+                    pid.EFF[i] = 20.0f;
+                pid.DFF[i] = 20.0f * (i - 3.0f) / 3.0f; // 18f变化率范围
+            }
+            pid.fuzzy_initialized = true;
+        }
+    }
+float MotionController::calculate_pid(PID_Controller &pid, float target)
+    {
+        float error = target - pid.actual;
+        float alpha = 1.0f;                 // 低通滤波系数
+        static float filtered_output = 0.0f; // 滤波后的输出
+        if (error > 4000)
+        {
+            error = 6;
+        }
+        if (pid.mode == POSITION_PID)
+        {
+            // 位置式PID
+            pid.integral += error;
+            pid.integral = std::clamp(pid.integral, -pid.max_output / pid.Ki, pid.max_output / pid.Ki);
+
+            float P = pid.Kp * error;
+            float I = pid.Ki * pid.integral;
+            float D = pid.Kd * (error - pid.error[0]); // 微分项使用当前误差与上一次误差的差
+
+            pid.output = P + I + D;
+            pid.output = std::clamp(pid.output, -pid.max_output, pid.max_output);
+
+            // 更新误差记录（保存当前误差供下次使用）
+            pid.error[0] = error;
+        }
+        if (pid.mode == DELTA_PID)
+        {
+            // 增量式PID: Δu = Kp*(e(k)-e(k-1)) + Ki*e(k) + Kd*(e(k)-2e(k-1)+e(k-2))
+
+            // 更新误差历史
+            pid.error[2] = pid.error[1];
+            pid.error[1] = pid.error[0];
+            pid.error[0] = error;
+
+            // 计算增量
+            float delta = pid.Kp * (pid.error[0] - pid.error[1]) + pid.Ki * pid.error[0] + pid.Kd * (pid.error[0] - 2 * pid.error[1] + pid.error[2]);
+
+            // 叠加输出并限幅
+             float delta_limit = pid.max_output * 0.5f;
+            delta = std::clamp(delta, -delta_limit, delta_limit);
+            // 叠加输出并限幅
+            pid.output += delta;
+            pid.output = std::clamp(pid.output, -pid.max_output, pid.max_output);
+            //pid.output += delta;
+            //pid.output = std::clamp(pid.output, -pid.max_output, pid.max_output);
+        }
+
+        else if (pid.mode == FUZZY_PID && pid.fuzzy_initialized)
+        {
+            auto params = laneProcessor->getControlParams();
+            float ec = error - pid.last_error;
+            //pid.fuzzy_pd.A = A;
+            pid.last_error = error;
+            float error_abs = fabs(error);
+            pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f;
+            //  执行模糊推理
+            count_DMF(pid, error * pid.fuzzy_pd.factor, ec * pid.fuzzy_pd.factor * EC_FACTOR);
+            float delta_kp = Fuzzy_Kp(pid);
+            cerr << "ΔKp:" << delta_kp << endl;
+            float delta_kd = Fuzzy_Kd(pid);
+            cerr << "ΔKd:" << delta_kd << endl;
+            pid.fuzzy_pd.Kp0 = params.kp_switch;
+            pid.fuzzy_pd.Kd0 = params.kd_switch;
+            pid.fuzzy_pd.A = params.A_switch; // 模糊PID参数A
+            // 计算最终输出
+            float P = (pid.fuzzy_pd.Kp0 + delta_kp) * error; // 直接使用模糊调整后的Kp
+            // float P = pid.fuzzy_pd.Kp0 + abs(error)*delta_kp * error + ;
+            // float D = pid.Kd * ec;
+            float D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec;
+            cerr << "kd0:" << pid.fuzzy_pd.Kd0 <<endl;
+            cerr << "kp0:" << pid.fuzzy_pd.Kp0 << endl;
+            cerr << "A:" << pid.fuzzy_pd.A << endl;
+            float output = 0;
+        
+            output = error * (pid.fuzzy_pd.Kp0 + pid.fuzzy_pd.A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; //(pid.fuzzy_pd.Kd0 + delta_kd); // imu963ra_gyro_z * delta_kd;
+            cerr<<"output"<<output<<endl;
+            // float output = (pid.fuzzy_pd.Kp0 + delta_kp) * error / 100.0f;
+            // output += (pid.fuzzy_pd.Kd0 + delta_kd) * ec / 100.0f;
+            // output *= -0.7f;
+            //  输出限幅
+            filtered_output = output; //+ (1.0f - alpha) * filtered_output;
+            filtered_output = clamp(filtered_output, -pid.max_output, pid.max_output);
+            // output = clamp(output, -pid.max_output, pid.max_output);
+
+            return filtered_output;
+        }
+
+        return pid.output;
+    }
+
+// float MotionController::dongtaiqianzhan(){
+
+// }
+// float MotionController::Err_sum(const vector<Point> &centerline)
+// {
+//     auto params = laneProcessor->getControlParams();
+//     const int min_required_size = 5;
+//     const int total_points = 39;  // 总共需要39个点
+//     const int start_offset = 55;  // 正常情况下的起始点偏移量
+
+//     // 检查输入有效性
+//     if (centerline.size() < min_required_size) {
+//         cerr << "错误：centerline 长度不足（至少需要 " << min_required_size
+//              << " 个点，实际 " << centerline.size() << "）" << endl;
+//         return 0.0f;
+//     }
+
+//     // 计算起始索引和实际步数
+//     int begin_index = 0;
+//     int steps_used = 0;
+    
+//     // 情况1: 有足够点取从start_offset开始的39个点
+//     if (centerline.size() - start_offset >= total_points) {
+//         begin_index = centerline.size() - start_offset;
+//         steps_used = total_points;
+//     }
+//     // 情况2: 点足够但起始位置不足39个点
+//     else if (centerline.size() > start_offset) {
+//         begin_index = centerline.size() - start_offset;
+//         steps_used = min(total_points, static_cast<int>(centerline.size() - begin_index));
+//     }
+//     // 情况3: 直接使用最上面的39个点
+//     else {
+//         steps_used = min(total_points, static_cast<int>(centerline.size()));
+//         begin_index = centerline.size() - steps_used; // 从尾部开始计算点数
+//     }
+
+//     // 检查权重数组尺寸
+//     const int weight_size = sizeof(weight) / sizeof(weight[0]);
+//     const int weight1_size = sizeof(weight1) / sizeof(weight1[0]);
+//     if (steps_used > weight_size || steps_used > weight1_size) {
+//         cerr << "错误：权重数组尺寸不足（需要 " << steps_used
+//              << "，实际 weight_size=" << weight_size 
+//              << ", weight1_size=" << weight1_size << "）" << endl;
+//         return 0.0f;
+//     }
+
+//     // 计算加权误差
+//     float error = 0.0f;
+//     float weight_count = 0.0f;
+    
+//     if (params.weight_case == 1.0f) {
+//         for (int i = 0; i < steps_used; ++i) {
+//             error += (centerline[begin_index + i].x - 80) * weight1[i];
+//             weight_count += weight1[i];
+//         }
+//     } else {
+//         for (int i = 0; i < steps_used; ++i) {
+//             error += (centerline[begin_index + i].x - 80) * weight[i];
+//             weight_count += weight[i];
+//         }
+//     }
+
+//     // 检查权重和是否为0
+//     if (fabs(weight_count) < 1e-6f) {
+//         cerr << "错误：权重和为0！" << endl;
+//         return 0.0f;
+//     }
+
+//     return error / weight_count;
+// }
+
+
 void MotionController::update_shared_error(float err)
 {
     std::lock_guard<std::mutex> lock(error_mutex);

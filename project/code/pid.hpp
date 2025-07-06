@@ -28,23 +28,29 @@ constexpr float weight1[39] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1,
     1, 1, 1, 13, 13, 13, 13, 15,
     17, 17, 15, 15, 15, 15, 19, 19, 11, 13, 15,
-    17, 19, 20, 20, 1, 1, 1, 1, 1, 1};
+    17, 19, 20, 20, 1, 1, 1, 1, 1, 1
+};
+constexpr float weight2[120] = {  
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0-9  
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10-19      44  93
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20-29 
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 30-39 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 40-49 
+    1, 1, 9, 9, 10, 10, 11, 11, 12, 12, // 50-59 
+    12, 12, 13, 13, 13, 15, 15, 17, 17, 17, // 60-69 
+    19, 20, 10, 19, 15, 15, 14, 14, 14, 12, // 70-79 
+    12, 12, 11, 11, 10, 10, 9, 9, 7, 7, // 80-89 
+    6, 6, 4, 4, 1, 1, 1, 1, 1, 1, // 90-99 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 100-109 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1  // 110-119 
+};
 
-// 1,1,1,1,1,1,1,              //0-7
-// 1,1,1,1,1,12,12,14,15, //8-16
-// 19,17,17,15,15,13,13,1,1,   //17-25
-// 1,1,1,1,1,1,1,1,1,1,1,1,1,1        //26-39
-
-// 3,3,5,7,9,11,13,              //0-7
-// 15,17,17,19,19,20,20,19,9, //8-16
-// 9,7,7,5,5,3,3,10,10,   //17-25
-// 1,1,1,1,1,1,1,1,1,3,4,5,6,1        //26-39
-
-// 1,1,1,1,1,1,1,1,1,
-// 3,3,3,3,11,13,13,15,
-// 17,17,19,19,20,20,19,19,11,13,15,
-// 17,19,20,20,19,15,10,5,3,1
-
+constexpr float dongtaiquan[21] = {  
+7,7,9,9,11,11,13,13,15,15,20,15,15,13,13,11,11,9,9,7,7 // 0-19
+};
+constexpr float quan_whitenum[120] = {  
+7,7,9,9,11,11,13,13,15,15,20,15,15,13,13,11,11,9,9,7,7 // 0-19
+};
 using namespace std;
 //+-15测误差变化率范围
 #define PB 3  // 正大
@@ -102,12 +108,13 @@ typedef struct
     float maximum;      // kp max
     float minimum;      // kp min
     float factor;       // 误差缩放因子（匹配EFF范围）error*factor落在EFF
-    float SetValue;     // 目标值 0
-    float CurrentValue; // 当前值 160-wide error
-    float err;          // 当前误差
-    float errlast;      // 上次误差
-    float out;          // 输出值
-    float outlast;      // 上次输出
+    float A = 0.01; // 模糊PID参数A
+    // float SetValue;     // 目标值 0
+    // float CurrentValue; // 当前值 160-wide error
+    // float err;          // 当前误差
+    // float errlast;      // 上次误差
+    // float out;          // 输出值
+    // float outlast;      // 上次输出
 } Fuzzy_PD_t;
 
 typedef struct
@@ -192,6 +199,7 @@ struct PID_Controller
     float DFF[7];     // 误差变化率隶属函数参数 大中小/2
     float last_error; // 用于计算误差变化率
     bool fuzzy_initialized = false;
+    //float A = 0.01; // 模糊PID参数A
 };
 
 class MotionController
@@ -437,26 +445,28 @@ public:
         float outer_factor = 1.0f + 0.17 * (W / 2) * tn / L; // 0.10
         float inner_factor = 1.0f - 0.83 * (W / 2) * tn / L; // 0.90
 
-        inner_factor = max(0.97f, min(inner_factor, 1.2f)); // 限制在 0.9~1.1 范围内
-        outer_factor = max(0.97f, min(outer_factor, 1.2f)); // 可选：对称限幅
+        //inner_factor = max(0.97f, min(inner_factor, 1.2f)); // 限制在 0.9~1.1 范围内
+        //outer_factor = max(0.97f, min(outer_factor, 1.2f)); // 可选：对称限幅
+        inner_factor = max(0.7f, min(inner_factor, 1.2f)); // 限制在 0.9~1.1 范围内
+        outer_factor = max(0.7f, min(outer_factor, 1.2f)); // 可选：对称限幅
         cerr << "in:" << inner_factor << endl;
         cerr << "out:" << outer_factor << endl;
         // float outer_factor = (A*(K+0.5*W*tn/L*AK));
         // float inner_factor = (A*(K-0.5*W*tn/L*AK));
         //  应用差速
-        if (current_servo_pwm >= steer_middle)
+        if (current_servo_pwm >= steer_middle) // 左转
         {
-            //pidLeft.target = Speed_Goal * inner_factor;
-            //pidRight.target = Speed_Goal * outer_factor;
-            pidLeft.target = Speed_Goal * outer_factor;
-            pidRight.target = Speed_Goal * inner_factor;
+            pidLeft.target = Speed_Goal * inner_factor;
+            pidRight.target = Speed_Goal * outer_factor;
+            //pidLeft.target = Speed_Goal * outer_factor;
+            //pidRight.target = Speed_Goal * inner_factor;
         }
         else
         {
-            //pidLeft.target = Speed_Goal * outer_factor;
-            //pidRight.target = Speed_Goal * inner_factor;
-            pidLeft.target = Speed_Goal * inner_factor;
-            pidRight.target = Speed_Goal * outer_factor;
+            pidLeft.target = Speed_Goal * outer_factor;
+            pidRight.target = Speed_Goal * inner_factor;
+            //pidLeft.target = Speed_Goal * inner_factor;
+            //pidRight.target = Speed_Goal * outer_factor;
         }
     }
 
@@ -478,6 +488,8 @@ public:
         //init_pid(pidLeft, 2.0f, 2.0f, 0.0f, PWM_MAX, DELTA_PID);  // you
         //init_pid(pidRight, 2.0f, 2.0f, 0.0f, PWM_MAX, DELTA_PID); // zuo
         init_pid(pidservo, 6.0f, 0.0f, 14.0f, 441.0f, FUZZY_PID);   //
+        //std::copy(std::begin(quan_weight), std::end(quan_weight), 
+        //std::begin(m_dynamic_weights));
         init_serial();
     }
 
@@ -566,8 +578,10 @@ public:
         // encoder_right = 200 ;
         //}
     }
-
+    float ave_speed ();
+    int dongtaiqianzhan();
     void motor_control(int speed, float k, int limit);
+
     void set_servo_angle(int error)
     {
         // 死区处理 (±4像素不响应)
@@ -598,134 +612,190 @@ public:
         error_last = error;
     }
     float Err_sum(const vector<Point> &centerline);
+    float Err_sum2(const vector<Point> &centerline);
     void update_shared_error(float err);
     float get_shared_error();
-
+    void init_pid(PID_Controller &pid, float Kp, float Ki, float Kd, float max_out, PID_Mode mode = POSITION_PID);
+    float calculate_pid(PID_Controller &pid, float target);
 private:
-    void init_pid(PID_Controller &pid, float Kp, float Ki, float Kd, float max_out, PID_Mode mode = POSITION_PID)
-    {
-        pid.Kp = Kp;
-        pid.Ki = Ki;
-        pid.Kd = Kd;
-        pid.max_output = max_out;
-        pid.integral = 0;
-        memset(pid.error, 0, sizeof(pid.error));
-        pid.mode = mode;
+    float speed_buffer[20] = {0};
+    int buffer_index = 0;      // 当前要替换的位置
+    int buffer_count = 0;      // 当前缓冲区中的数据个数（用于初始填充）
+    float quan_weight[120] = {  
+    // 索引0-20（已提供的21个元素）
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,  // 索引21,22,23
+    0,0,1,  // 24,25,26
+    0,0,1,  // 27,28,29
+    0,0,1,  // 30,31,32
+    0,0,1,  // 33,34,35
+    0,0,1,  // 36,37,38
+    0,0,1,  // 39,40,41
+    0,0,1,  // 42,43,44
+    0,0,1,  // 45,46,47
+    0,0,1,  // 48,49,50
+    0,0,1,  // 51,52,53
+    0,0,1,  // 54,55,56
+    0,0,1,  // 57,58,59
+    0,0,1,  // 60,61,62
+    0,0,1,  // 63,64,65
+    0,0,1,  // 66,67,68
+    0,0,1,  // 69,70,71
+    0,0,1,  // 72,73,74
+    0,0,1,  // 75,76,77
+    0,0,1,  // 78,79,80
+    0,0,1,  // 81,82,83
+    0,0,1,  // 84,85,86
+    0,0,1,  // 87,88,89
+    0,0,1,  // 90,91,92
+    0,0,1,  // 93,94,95
+    0,0,1,  // 96,97,98
+    0,0,1,  // 99,100,101
+    0,0,1,  // 102,103,104
+    0,0,1,  // 105,106,107
+    0,0,1,  // 108,109,110
+    0,0,1,  // 111,112,113
+    0,0,1,  // 114,115,116
+    0,0,1   // 117,118,119
+};
+float quan_mid[120] = {  
+    // 索引0-20（已提供的21个元素）
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,  // 索引21,22,23
+    0,0,1,  // 24,25,26
+    0,0,1,  // 27,28,29
+    0,0,1,  // 30,31,32
+    0,0,1,  // 33,34,35
+    0,0,1,  // 36,37,38
+    0,0,1,  // 39,40,41
+    0,0,1,  // 42,43,44
+    0,0,1,  // 45,46,47
+    0,0,1,  // 48,49,50
+    0,0,1,  // 51,52,53
+    0,0,1,  // 54,55,56
+    0,0,1,  // 57,58,59
+    0,0,1,  // 60,61,62
+    0,0,1,  // 63,64,65
+    0,0,1,  // 66,67,68
+    0,0,1,  // 69,70,71
+    0,0,1,  // 72,73,74
+    0,0,1,  // 75,76,77
+    0,0,1,  // 78,79,80
+    0,0,1,  // 81,82,83
+    0,0,1,  // 84,85,86
+    0,0,1,  // 87,88,89
+    0,0,1,  // 90,91,92
+    0,0,1,  // 93,94,95
+    0,0,1,  // 96,97,98
+    0,0,1,  // 99,100,101
+    0,0,1,  // 102,103,104
+    0,0,1,  // 105,106,107
+    0,0,1,  // 108,109,110
+    0,0,1,  // 111,112,113
+    0,0,1,  // 114,115,116
+    0,0,1   // 117,118,119
+};
+    // float calculate_pid(PID_Controller &pid, float target)
+    // {
+    //     float error = target - pid.actual;
+    //     float alpha = 1.0f;                 // 低通滤波系数
+    //     static float filtered_output = 0.0f; // 滤波后的输出
+    //     if (error > 4000)
+    //     {
+    //         error = 6;
+    //     }
+    //     if (pid.mode == POSITION_PID)
+    //     {
+    //         // 位置式PID
+    //         pid.integral += error;
+    //         pid.integral = std::clamp(pid.integral, -pid.max_output / pid.Ki, pid.max_output / pid.Ki);
 
-        if (mode == FUZZY_PID)
-        {
-            // 初始化模糊参数
-            pid.fuzzy_pd = {6.0f, 28.0f, 1.0, 35.0, 6.0, 1.0f};
-            /* Kp0 */
-            /* Kd0 */
-            /* deltakp threshold */
-            /* maximum */
-            /* minimum */
-            /* factor */ // 假设误差范围为 ±160 像素，缩放因子 factor=0.5 后为 ±80
-            float uff_p_max = 12.0f, uff_d_max = 40.0f;
-            for (int i = 0; i < 7; ++i)
-            {
-                pid.uff.UFF_P[i] = uff_p_max * (i - 3.0f) / 3.0f;
-                pid.uff.UFF_D[i] = uff_d_max * (i - 3.0f) / 3.0f;
-                pid.EFF[i] = 60.0f * (i - 3.0f) / 3.0f; // 21f误差范围
-                if (i == 3)
-                    pid.EFF[i] = 20.0f;
-                pid.DFF[i] = 20.0f * (i - 3.0f) / 3.0f; // 18f变化率范围
-            }
-            pid.fuzzy_initialized = true;
-        }
-    }
+    //         float P = pid.Kp * error;
+    //         float I = pid.Ki * pid.integral;
+    //         float D = pid.Kd * (error - pid.error[0]); // 微分项使用当前误差与上一次误差的差
 
-    float calculate_pid(PID_Controller &pid, float target)
-    {
-        float error = target - pid.actual;
-        float alpha = 0.95f;                 // 低通滤波系数
-        static float filtered_output = 0.0f; // 滤波后的输出
-        if (error > 4000)
-        {
-            error = 6;
-        }
-        if (pid.mode == POSITION_PID)
-        {
-            // 位置式PID
-            pid.integral += error;
-            pid.integral = std::clamp(pid.integral, -pid.max_output / pid.Ki, pid.max_output / pid.Ki);
+    //         pid.output = P + I + D;
+    //         pid.output = std::clamp(pid.output, -pid.max_output, pid.max_output);
 
-            float P = pid.Kp * error;
-            float I = pid.Ki * pid.integral;
-            float D = pid.Kd * (error - pid.error[0]); // 微分项使用当前误差与上一次误差的差
+    //         // 更新误差记录（保存当前误差供下次使用）
+    //         pid.error[0] = error;
+    //     }
+    //     if (pid.mode == DELTA_PID)
+    //     {
+    //         // 增量式PID: Δu = Kp*(e(k)-e(k-1)) + Ki*e(k) + Kd*(e(k)-2e(k-1)+e(k-2))
 
-            pid.output = P + I + D;
-            pid.output = std::clamp(pid.output, -pid.max_output, pid.max_output);
+    //         // 更新误差历史
+    //         pid.error[2] = pid.error[1];
+    //         pid.error[1] = pid.error[0];
+    //         pid.error[0] = error;
 
-            // 更新误差记录（保存当前误差供下次使用）
-            pid.error[0] = error;
-        }
-        if (pid.mode == DELTA_PID)
-        {
-            // 增量式PID: Δu = Kp*(e(k)-e(k-1)) + Ki*e(k) + Kd*(e(k)-2e(k-1)+e(k-2))
+    //         // 计算增量
+    //         float delta = pid.Kp * (pid.error[0] - pid.error[1]) + pid.Ki * pid.error[0] + pid.Kd * (pid.error[0] - 2 * pid.error[1] + pid.error[2]);
 
-            // 更新误差历史
-            pid.error[2] = pid.error[1];
-            pid.error[1] = pid.error[0];
-            pid.error[0] = error;
+    //         // 叠加输出并限幅
+    //          float delta_limit = pid.max_output * 0.5f;
+    //         delta = std::clamp(delta, -delta_limit, delta_limit);
+    //         // 叠加输出并限幅
+    //         pid.output += delta;
+    //         pid.output = std::clamp(pid.output, -pid.max_output, pid.max_output);
+    //         //pid.output += delta;
+    //         //pid.output = std::clamp(pid.output, -pid.max_output, pid.max_output);
+    //     }
 
-            // 计算增量
-            float delta = pid.Kp * (pid.error[0] - pid.error[1]) + pid.Ki * pid.error[0] + pid.Kd * (pid.error[0] - 2 * pid.error[1] + pid.error[2]);
+    //     else if (pid.mode == FUZZY_PID && pid.fuzzy_initialized)
+    //     {
+    //         auto params = laneProcessor->getControlParams();
+    //         float ec = error - pid.last_error;
+    //         //pid.fuzzy_pd.A = A;
+    //         pid.last_error = error;
+    //         float error_abs = fabs(error);
+    //         pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f;
+    //         //  执行模糊推理
+    //         count_DMF(pid, error * pid.fuzzy_pd.factor, ec * pid.fuzzy_pd.factor * EC_FACTOR);
+    //         float delta_kp = Fuzzy_Kp(pid);
+    //         //cerr << "ΔKp:" << delta_kp << endl;
+    //         float delta_kd = Fuzzy_Kd(pid);
+    //         //cerr << "ΔKd:" << delta_kd << endl;
+    //         pid.fuzzy_pd.Kp0 = params.kp_switch;
+    //         pid.fuzzy_pd.Kd0 = params.kd_switch;
+    //         pid.fuzzy_pd.A = params.A_switch; // 模糊PID参数A
+    //         // 计算最终输出
+    //         float P = (pid.fuzzy_pd.Kp0 + delta_kp) * error; // 直接使用模糊调整后的Kp
+    //         // float P = pid.fuzzy_pd.Kp0 + abs(error)*delta_kp * error + ;
+    //         // float D = pid.Kd * ec;
+    //         float D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec;
+    //         cerr << "kd0:" << pid.fuzzy_pd.Kd0 <<endl;
+    //         cerr << "kp0:" << pid.fuzzy_pd.Kp0 << endl;
+    //         cerr << "A:" << pid.fuzzy_pd.A << endl;
+    //         float output = 0;
+        
+    //         output = error * (pid.fuzzy_pd.Kp0 + pid.fuzzy_pd.A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; //(pid.fuzzy_pd.Kd0 + delta_kd); // imu963ra_gyro_z * delta_kd;
+    //         cerr<<"output"<<output<<endl;
+    //         // float output = (pid.fuzzy_pd.Kp0 + delta_kp) * error / 100.0f;
+    //         // output += (pid.fuzzy_pd.Kd0 + delta_kd) * ec / 100.0f;
+    //         // output *= -0.7f;
+    //         //  输出限幅
+    //         filtered_output = output; //+ (1.0f - alpha) * filtered_output;
+    //         filtered_output = clamp(filtered_output, -pid.max_output, pid.max_output);
+    //         // output = clamp(output, -pid.max_output, pid.max_output);
 
-            // 叠加输出并限幅
-             float delta_limit = pid.max_output * 0.5f;
-            delta = std::clamp(delta, -delta_limit, delta_limit);
-            // 叠加输出并限幅
-            pid.output += delta;
-            pid.output = std::clamp(pid.output, -pid.max_output, pid.max_output);
-            //pid.output += delta;
-            //pid.output = std::clamp(pid.output, -pid.max_output, pid.max_output);
-        }
+    //         return filtered_output;
+    //     }
 
-        else if (pid.mode == FUZZY_PID && pid.fuzzy_initialized)
-        {
-            float ec = error - pid.last_error;
-            float A = 0.03;
-            pid.last_error = error;
-            float error_abs = fabs(error);
-            // pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f;
-            //  执行模糊推理
-            count_DMF(pid, error * pid.fuzzy_pd.factor, ec * pid.fuzzy_pd.factor * EC_FACTOR);
-            float delta_kp = Fuzzy_Kp(pid);
-            //cerr << "ΔKp:" << delta_kp << endl;
-            float delta_kd = Fuzzy_Kd(pid);
-            //cerr << "ΔKd:" << delta_kd << endl;
-
-            // 计算最终输出
-            float P = (pid.fuzzy_pd.Kp0 + delta_kp) * error; // 直接使用模糊调整后的Kp
-            // float P = pid.fuzzy_pd.Kp0 + abs(error)*delta_kp * error + ;
-            // float D = pid.Kd * ec;
-            float D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec;
-            //cerr << "kd0:" << pid.fuzzy_pd.Kd0 <<endl;
-            float output = 0;
-            if (error_abs >= 15)
-            {
-                output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; //(pid.fuzzy_pd.Kd0 + delta_kd); // imu963ra_gyro_z * delta_kd;
-            }
-            else if(error_abs <15 || control_circle ==13 ||control_circle==1||control_circle==6)
-            {
-                output = error * (pid.fuzzy_pd.Kp0 + 0.1 * delta_kp) + ec * (pid.fuzzy_pd.Kd0 + delta_kd);//pid.fuzzy_pd.Kd0; //(pid.fuzzy_pd.Kd0 + delta_kd); // imu963ra_gyro_z * delta_kd;
-                cerr<<"output"<<output<<endl;
-            }
-            // float output = (pid.fuzzy_pd.Kp0 + delta_kp) * error / 100.0f;
-            // output += (pid.fuzzy_pd.Kd0 + delta_kd) * ec / 100.0f;
-            // output *= -0.7f;
-            //  输出限幅
-            filtered_output = alpha * output + (1.0f - alpha) * filtered_output;
-            filtered_output = clamp(filtered_output, -pid.max_output, pid.max_output);
-            // output = clamp(output, -pid.max_output, pid.max_output);
-
-            return filtered_output;
-        }
-
-        return pid.output;
-    }
+    //     return pid.output;
+    // }
 
     void LSD_Control()
     {

@@ -100,8 +100,9 @@ public:
 
     struct ControlParams {
         float speed_factor = 1.0f;
-        int lookahead_lines = 39;
-        float weight_case = 0.0f;
+        float kp_switch = 1.0f; // 速度切换阈值
+        float kd_switch = 1.0f;  // 速度切换阈值
+        float A_switch = 1.0f;
     };
 
     ControlParams getControlParams() const {
@@ -162,27 +163,36 @@ public:
         switch(circleState) {
             case RIGHT_CIRCLE_DETECTED:
             case RIGHT_CIRCLE_INTRY:
-                current_params = {1.0f, 25, 1.0f};
+                current_params = {0.725f,10.0f,20.0f,0.1f};  //速度倍数,Kp0,Kd0,A
+                break;
+            case RIGHT_CIRCLE_INSIDE:
+                current_params = {0.725f,10.0f,20.0f,0.2f};
                 break;
             case LEFT_CIRCLE_DETECTED:
             case LEFT_CIRCLE_INTRY:
-                current_params = {1.0f, 25, 1.0f};
+                current_params = {0.825f,10.0f,20.0f,0.1f};
+                break;
+            case LEFT_CIRCLE_INSIDE:
+                current_params = {0.725f,1.0f,20.0f,0.2f};
                 break;
             case CROSSING:
-                current_params = {1.0f, 15, 0.0f};
+                current_params = {0.825f,6.0f,18.0f,0.03f};
                 break;
             case RIGHT_TURN:
-                current_params = {1.0f, 25, 0.0f};
+                current_params = {0.825f,10.0f,30.0f,0.09f};
                 break;
             case LEFT_TURN:
-                current_params = {1.0f, 25, 0.0f};
+                current_params = {0.825f,10.0f,30.0f,0.09f};
+                break;
+            case STRAIGHT:
+                current_params = {1.0f,6.0f,12.0f,0.02f};
                 break;
             default:
-                current_params = {1.0f, 35, 0.0f};
+                current_params = {0.825f,8.0f,18.0f,0.05f}; // 默认参数
         }
     }
 };
 
 // 逆透视变换类
 
-#endif;
+#endif
