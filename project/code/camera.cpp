@@ -64,6 +64,8 @@ int circleflag = 1;
 int countcircle = 0;
 bool slow_down = false;
 int small_count = 0;
+int lefttrend = 0;
+int righttrend = 0;
 // 检测圆环
 void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
                                   vector<TrackPoint> &RightLane,
@@ -84,6 +86,8 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     findleftInflectionPoints(LeftLane, leftJumpPointA, leftJumpPointB, isleftJumpvalid);
     isleftLanecontinuous = isLaneContinuous(LeftLane, -1);
     isrightLanecontinuous = isLaneContinuous(RightLane, 1);
+    lefttrend = checkLaneTrend(LeftLane);
+    righttrend = checkLaneTrend(RightLane);
     Point righthemisphere = Point(-1, -1);
     Point lefthemisphere = Point(-1, -1);
     bool isleftstraight = false;
@@ -111,21 +115,14 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     cerr << "leftMissedRadius: " << leftMissedRadius << endl;
     cerr << "isleftstraight: " << isleftstraight << endl;
     cerr << "isrightstraight: " << isrightstraight << endl;
-    cerr << "imu963ra_acc_z: " << imu963ra_acc_z << endl;
+    //cerr << "imu963ra_acc_z: " << imu963ra_acc_z << endl;
     cerr << "numPoints: " << numPoints << endl;
     cerr << "lastnumPoints: " << lastnumPoints << endl;
     cerr << "small_count: " << small_count << endl;
+    cerr<< "lefttrend: " << lefttrend << endl;
+    cerr<< "righttrend: " << righttrend << endl;
     if (numPoints < 3)
         lost = true;
-    if (lastnumPoints > 100 && numPoints < 100)
-    {
-        slow_down = true;
-        gpio_set_level(BEEP, 0x1);
-    }
-    else
-    {
-        slow_down = false;
-    }
     switch (circleState)
     {
     case CIRCLE_INACTIVE:
@@ -147,11 +144,11 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = LEFT_CIRCLE_DETECTED;
         }
-        else if (isleftstraight && rightMissedRadius >= 0.9 && numPoints < img_devided)
+        else if (isleftLanecontinuous && lefttrend == 1 &&righttrend ==0&& numPoints <= img_devided)
         {
             circleState = RIGHT_TURN;
         }
-        else if (isrightstraight && leftMissedRadius >= 0.9 && numPoints < img_devided)
+        else if (isrightLanecontinuous && righttrend == -1&&lefttrend==0&& numPoints <= img_devided)
         {
             circleState = LEFT_TURN;
         }
@@ -183,7 +180,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         //      break;
         //  }
         circle(output, righthemisphere, 2, Scalar(0, 0, 0), 2);
-        if (rightJumpPointA.x != -1)
+        if (rightJumpPointA.x != -1||rightJumpPointA.y >60)
         {
             generateVirtualPath(rightJumpPointB, rightJumpPointA, rightvirtualPath, true);
             // if (righthemisphere.x != -1 && righthemisphere.x < rightJumpPointA.x)
@@ -286,7 +283,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         //  }
 
         circle(output, lefthemisphere, 2, Scalar(0, 0, 0), 2);
-        if (leftJumpPointA.x != -1)
+        if (leftJumpPointA.x != -1&&leftJumpPointA.y > 60)
         {
             generateVirtualPath(leftJumpPointB, leftJumpPointA, leftvirtualPath, true);
             // if (lefthemisphere.x != -1 && lefthemisphere.x > leftJumpPointA.x)
@@ -380,7 +377,8 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     break;
     case LEFT_TURN:
     {
-        if (numPoints > img_devided || leftMissedRadius < 0.7)
+        gpio_set_level(BEEP, 0x1);
+        if (numPoints > img_devided )
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -388,7 +386,8 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     break;
     case RIGHT_TURN:
     {
-        if (numPoints > img_devided || rightMissedRadius < 0.7)
+        gpio_set_level(BEEP, 0x1);
+        if (numPoints > img_devided)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -753,7 +752,7 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
     }
 
     // cerr<<"numPoints"<<numPoints<<endl;
-    const int estimatedLaneWidth = 30; // 假设车道宽度为 100 像素，你可以动态计算
+    const int estimatedLaneWidth = 0; // 假设车道宽度为 100 像素，你可以动态计算
     // 清空之前的中线数据
     centerLine.clear();
 
@@ -768,6 +767,7 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
         //     leftLane[i].position.x = leftLane[i - 1].position.x;
         // }
         circle(image, leftLane[i].position, 1, Scalar(255, 0, 0), FILLED);
+        //cerr << "leftLane[" << i << "]: " << leftLane[i].position << endl;
     }
     // 绘制右车道
     for (size_t i = roiHeight; i > roiHeight - numPoints; i--)
@@ -1515,4 +1515,29 @@ float LaneProcessor::getTrackWIdthFormY(int y)
         float width = a * y * y * y + b * y * y + c * y + d;
         return (width > 159.0f) ? 159.0f : width; // 强制上限
     }
+}
+int LaneProcessor::checkLaneTrend(const std::vector<TrackPoint>& lane)
+{
+    if (lane.empty()) return 0;
+
+    bool allIncreasing = true;
+    bool allDecreasing = true;
+
+    for (size_t i = startline+1; i < roiHeight-1; ++i)
+    {
+        int prevX = lane[i - 1].position.x;
+        int currX = lane[i].position.x;
+
+        if (currX < prevX)
+            //cerr << "当前点: " << currX << ", 前一个点: " << prevX << endl;
+            allIncreasing = false;
+        if (currX > prevX){
+            cerr << "当前点: " << currX << ", 前一个点: " << prevX << endl;
+            allDecreasing = false;
+        }
+    }
+
+    if (allIncreasing) return -1;
+    if (allDecreasing) return 1;
+    return 0;
 }

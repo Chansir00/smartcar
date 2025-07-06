@@ -154,7 +154,7 @@ public:
     const std::vector<TrackPoint>& leftLane,
     const std::vector<TrackPoint>& rightLane);
     float getTrackWIdthFormY(int y);
-
+    int checkLaneTrend(const std::vector<TrackPoint>& lane);
     private:
     ControlParams current_params;
 
