@@ -6,7 +6,7 @@ int debugmode = readFlag("./debugmode");
 const int camera = 0;
 int flag = 0;
 unsigned int send_counter = 0;
-int speed = 400; // 车速
+int speed = 500; // 车速
 const unsigned int SEND_INTERVAL = 20;
 int ready_count = 0;
 int control_circle;
@@ -56,7 +56,7 @@ int main()
     // }
     if (!debugmode)
     {
-        //brush_init(900); // 初始化
+
         pit_ms_init(5, [&ctrl, &detector]()
                     { 
             if (!detector.lost && ready_count > 30)
@@ -75,6 +75,7 @@ int main()
 
     while (true)
     {
+        brush_init(800); // 初始化
         if (ready_count < 1000)
             ready_count++;
         clock_t start = clock();
@@ -91,7 +92,6 @@ int main()
         //udp_send_data((uint8_t *)&float_str1, sizeof(float_str1));
          //udp_send_data((uint8_t *)&float_str2, sizeof(float_str2));
 
-        imu_data_get();
         DetectionResult result = detector.detect(frame);
         control_circle = detector.circleState;
         if (detector.lost)
