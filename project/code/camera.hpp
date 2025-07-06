@@ -127,7 +127,7 @@ public:
     void resetCircleState();
 
     // 辅助函数
-    bool isLaneContinuous(const vector<TrackPoint>& lane, int trend);
+    bool isLaneContinuous(const vector<TrackPoint>& lane);
     void findrightInflectionPoints(const vector<TrackPoint> &lane,
                               Point &pointA, Point &pointB,
                               bool &isValid);
