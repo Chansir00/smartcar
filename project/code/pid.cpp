@@ -1,14 +1,20 @@
-#include <pid.hpp>
+#include "pid.hpp"
 #include <zf_common_headfile.h>
+#include <vector>
 
+//==============================================================================
+// >> Global Variable Definitions
+//==============================================================================
 struct pwm_info motor_1_pwm_info;
 struct pwm_info motor_2_pwm_info;
 struct pwm_info servo_pwm_info;
 float servo_motor_duty = 90.0;
 float servo_motor_dir = 1;
-int16 encoder_left;
-int16 encoder_right;
-
+int16_t encoder_left;
+int16_t encoder_right;
+//==============================================================================
+// >> Free Function Implementations
+//==============================================================================
 void sigint_handler(int signum)
 {
     printf("收到Ctrl+C，程序即将退出\n");
@@ -18,211 +24,496 @@ void sigint_handler(int signum)
 void cleanup()
 {
     printf("程序异常退出，执行清理操作\n");
-    brush_off();
-    // 关闭电机
+    // brush_off(); // Original function call, ensure it's defined elsewhere
     pwm_set_duty(SERVO_MOTOR1_PWM, 0);
     pwm_set_duty(MOTOR1_PWM, 0);
     pwm_set_duty(MOTOR2_PWM, 0);
     gpio_set_level(BEEP, 0x0);
 }
 
-// MotionController::MotionController()
-//     : laneProcessor(std::make_unique<LaneProcessor>())  // 初始化智能指针
-// {
-//     // 设备初始化
-//     pwm_get_dev_info(MOTOR1_PWM, &motor_1_pwm_info);
-//     pwm_get_dev_info(MOTOR2_PWM, &motor_2_pwm_info);
-//     pwm_get_dev_info(SERVO_MOTOR1_PWM, &servo_pwm_info);
-//     gpio_set_level(MOTOR1_DIR, 0);
-//     gpio_set_level(MOTOR2_DIR, 0);
+int decideSpeed(int state, int speed)
+{
+    switch (state)
+    {
+    case 13:
+        return speed * 1.2;
+    case 2:
+        return speed * 0.9;
+    case 7:
+        return speed * 0.9;
+    case 4:
+        return speed * 0.9;
+    case 9:
+        return speed * 0.9;
+    case 11:
+        return speed * 0.9;
+    case 12:
+        return speed * 0.9;
+    default:
+        return speed;
+    }
+}
 
-//     // 初始化 PID 参数
-//     init_pid(pidLeft, 1.25f, 0.245f, 0.10f, PWM_MAX, DELTA_PID);
-//     init_pid(pidRight, 1.25f, 0.205f, 0.18f, PWM_MAX, DELTA_PID);
-//     init_pid(pidservo, 5.0f, 0.0f, 10.0f, 367.0f, FUZZY_PID);
-//     init_serial();
-// }
+//==============================================================================
+// >> MotionController Class Implementations
+//==============================================================================
 
-// 析构函数实现
-// MotionController::~MotionController() {
-//     if(serial_fd != -1) {
-//         close(serial_fd);
-//     }
-// }
+MotionController::MotionController(LaneProcessor *lp) : laneProcessor(lp)
+{
+    // Device Initialization
+    pwm_get_dev_info(MOTOR1_PWM, &motor_1_pwm_info);
+    pwm_get_dev_info(MOTOR2_PWM, &motor_2_pwm_info);
+    pwm_get_dev_info(SERVO_MOTOR1_PWM, &servo_pwm_info);
+    gpio_set_level(MOTOR1_DIR, 0);
+    gpio_set_level(MOTOR2_DIR, 0);
+
+    // PID Parameter Initialization
+    init_pid(pidLeft, 8.0f, 1.0f, 0.1f, PWM_MAX, DELTA_PID);
+    init_pid(pidRight, 8.2f, 1.0f, 0.14f, PWM_MAX, DELTA_PID);
+    init_pid(pidservo, 6.0f, 0.0f, 14.0f, 441.0f, FUZZY_PID);
+
+    init_serial();
+}
+
+MotionController::~MotionController()
+{
+    if (serial_fd != -1)
+    {
+        close(serial_fd);
+    }
+}
+
 void MotionController::motor_control(int speed, float k, int limit)
 {
     std::lock_guard<std::mutex> lock(encoder_mutex);
-    // auto params = laneProcessor->getControlParams();
-    // float speed_factor = params.speed_factor;
-    // int speed1 = speed * speed_factor;
-    float chasu = 0.8;
-    float pwm_error = current_servo_pwm - SERVO_MOTOR_MID;
-    float k_decision = 8;
 
-    float speed1 = speed - (speed * (1 - chasu) * abs(pwm_error) * k_decision / SERVO_MOTOR_MID); // 打满时速度为0.825
+    ackerman_diff_control(speed, control_circle);
 
-    if (abs(pwm_error) >= 180)
-    {
-        ackerman_diff_control(speed1);
-    }
-    else
-    {
-        pidLeft.target = speed1;
-        pidRight.target = speed1;
-    }
-    // suibian_control(speed1);
-
-    // 获取编码器值
+    // Get encoder values
     pidLeft.actual = encoder_left;
     pidRight.actual = -encoder_right;
 
-    cerr << "left: " << pidLeft.actual << " right: " << pidRight.actual << endl;
-    //  PID计算
+    std::cerr << "left: " << pidLeft.actual << " right: " << pidRight.actual << std::endl;
+    std::cerr << "pidLeft.target: " << pidLeft.target << " pidRight.target: " << pidRight.target << std::endl;
 
-    // pidLeft.target = speed1;
-    // pidRight.target = speed1;
-    // LSD_Control();
-
+    // PID calculation
     float raw_outL = calculate_pid(pidLeft, pidLeft.target);
     float raw_outR = calculate_pid(pidRight, pidRight.target);
 
-    // float raw_outL = calculate_pid(pidLeft,pidLeft.target);
-    // float raw_outR = calculate_pid(pidRight,pidRight.target);
-    gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 1 : 0); // 假设0为正转
-    gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 0 : 1); // 假设0为转
+    gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 1 : 0); // right
+    gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 1 : 0); // left
+
     float outL = std::clamp(abs(raw_outL), 0.0f, 0.40f * static_cast<float>(PWM_MAX));
     float outR = std::clamp(abs(raw_outR), 0.0f, 0.40f * static_cast<float>(PWM_MAX));
-    // float outL = calculate_pid(pidLeft, speed);
-    // float outR = calculate_pid(pidRight, speed);
 
-    // outL = std::clamp(abs(outL), 0.0f, static_cast<float>(PWM_MAX));
-    // outR = std::clamp(abs(outR), 0.0f, static_cast<float>(PWM_MAX));
-
-    // 设置电机输出
+    // Set motor output
     pwm_set_duty(MOTOR1_PWM, outL);
     pwm_set_duty(MOTOR2_PWM, outR);
-    // cerr << "dutyl: " << outL <<"dutyr: " <<  outR << endl;
+    // std::cerr << "dutyl: " << outL << " dutyr: " << outR << std::endl;
 }
 
-// float MotionController::Err_sum(const vector<Point> &centerline) {
-//     auto params = laneProcessor->getControlParams();
-
-//     int effective_rows = min(params.lookahead_lines, (int)centerline.size());
-
-//     float error = 0.0f;
-//     float weight_sum = 0.0f;
-
-//     for(int i=0; i<effective_rows; ++i) {
-//         if(params.weight_case == 1.0f){
-//         float base_weight = weight1[i % 39];
-//         error += (centerline[i].x - 80)*base_weight;
-//         weight_sum += base_weight;
-//         }
-//         else {
-//         float base_weight = weight[i % 39];
-//         error += (centerline[i].x - 80)*base_weight;
-//         weight_sum += base_weight;
-//         }
-//     }
-//     return error / weight_sum;
-// }
-float MotionController::Err_sum(const vector<Point> &centerline)
+float MotionController::Err_sum(const std::vector<cv::Point> &centerline)
 {
-    auto params = laneProcessor->getControlParams();
-
-    // cerr<<params.weight_case<<endl;
-    // cerr<<params.speed_factor<<endl;
-    //  1. 检查输入有效性
     if (centerline.empty())
-    {
-        cerr << "错误：centerline 是空的！" << endl;
         return 0.0f;
-    }
 
-    // 2. 检查 centerline 是否至少包含 5 个点
-    const int min_required_size = 5;
-    if (centerline.size() < min_required_size)
-    {
-        cerr << "错误：centerline 长度不足（至少需要 " << min_required_size
-             << " 个点，实际 " << centerline.size() << "）" << endl;
-        return 0.0f;
-    }
+    const int total_lines = centerline.size();
 
-    // 3. 计算实际可用的步数
-    const int total_steps = 38;                      // 默认需要计算的步数
-    const int start = 55;                            // 400 50 420 60 430 64
-    const int start_idx = centerline.size() - start; // 起始索引
-    const int start2 = centerline.size() - 39;
-    const int force_start = max(start2, 0);
-    int steps_used = 0;
-    // cerr<<start_idx<<endl;
-    if (start_idx > 0)
-    {
-        steps_used = min(total_steps, start_idx + 1); // 实际计算的步数
-    }
-    else
-    {
-        steps_used = (centerline.size() >= 39) ? 39 : centerline.size();
-    }
-    // const int steps_used = (centerline.size() >= total_steps) ? total_steps : centerline.size();
-    //  4. 检查权重数组是否足够
-    const int weight_size = sizeof(weight) / sizeof(weight[0]);
-    if (weight_size < steps_used)
-    {
-        cerr << "错误：权重数组尺寸不足（需要 " << steps_used
-             << "，实际 " << weight_size << "）" << endl;
-        return 0.0f;
-    }
+    constexpr int weight_len = 30;
+    constexpr float weight_middle[weight_len] = {
+     1,1, 1, 2, 3, 3, 3, 5, 16, 16,     //70
+    16, 16, 18, 18, 20 ,20, 20, 23, 23, 23,   //80
+    25, 25, 17, 17, 6, 5, 4, 3, 2};  //89
+    constexpr float weight_front[weight_len] = {
+     1,1,1, 2, 3, 3, 13, 15, 16, 16,     //70
+    16, 16, 18, 18, 20 ,20, 20, 23, 23, 23,   //80
+    25, 25, 27, 26, 27, 29, 29, 30, };  //89
+    // ↑ 最后几个权重最大（用于最远点）
 
-    // 5. 计算加权误差
     float error = 0.0f;
     float weight_count = 0.0f;
-    if (params.weight_case == 1.0f)
+
+    if (total_lines > 95)
     {
-        if (start_idx <= 0)
+        // 正常情况：从第65到第89行（近中段）
+        int start = 65;
+        for (int i = 0; i < weight_len; ++i)
         {
-            for (int i = 0; i < steps_used; ++i)
-            {
-                // int idx = start_idx - i; // 自动确保 idx >= 0
-                error += (centerline[i + force_start].x - 80) * weight1[i];
-                weight_count += weight1[i];
-            }
+            int idx = start + i;
+            if (idx >= total_lines) break;
+            error += (centerline[idx].x - 80) * weight_middle[i];
+            weight_count += weight_middle[i];
         }
-        else
+    }
+    else if (total_lines > 65)
+    {
+        // 从第64行开始，向远处最多取30个（反向加权）
+        int start = 64;
+        int usable_points = std::min(total_lines - start, weight_len);
+        for (int i = 0; i < usable_points; ++i)
         {
-            for (int i = 0; i < steps_used; ++i)
-            {
-                // int idx = start_idx - i; // 自动确保 idx >= 0
-                error += (centerline[i + start].x - 80) * weight1[i];
-                weight_count += weight1[i];
-            }
+            int idx = start + i;
+            int weight_idx = weight_len - usable_points + i;  // 让远处的点权重大
+            error += (centerline[idx].x - 80) * weight_front[weight_idx];
+            weight_count += weight_front[weight_idx];
         }
     }
     else
     {
-        for (int i = 0; i < steps_used; ++i)
+        // 点数太少，从最后一个点往前取最多30个（反向加权）
+        int usable_points = std::min(total_lines, weight_len);
+        for (int i = 0; i < usable_points; ++i)
         {
-            // int idx = i - i; // 自动确保 idx >= 0
-            error += (centerline[i + start].x - 80) * weight[i];
-            weight_count += weight[i];
+            int idx = total_lines - usable_points + i;
+            int weight_idx = weight_len - usable_points + i;  // 越远权重越大
+            error += (centerline[idx].x - 80) * weight_front[weight_idx];
+            weight_count += weight_front[weight_idx];
         }
     }
-    // 6. 检查权重和是否为0（避免除零）
+
     if (fabs(weight_count) < 1e-6f)
-    {
-        cerr << "错误：权重和为0！" << endl;
         return 0.0f;
-    }
 
     return error / weight_count;
 }
+
+
 void MotionController::update_shared_error(float err)
 {
     std::lock_guard<std::mutex> lock(error_mutex);
     shared_error = err;
 }
+
 float MotionController::get_shared_error()
 {
     std::lock_guard<std::mutex> lock(error_mutex);
     return shared_error;
+}
+
+void MotionController::init_serial()
+{
+    serial_fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
+    if (serial_fd == -1)
+    {
+        perror("[UART] Open failed");
+        return;
+    }
+
+    struct termios options;
+    tcgetattr(serial_fd, &options);
+    cfmakeraw(&options);
+    cfsetspeed(&options, B115200);
+
+    options.c_cflag &= ~PARENB;
+    options.c_cflag &= ~CSTOPB;
+    options.c_cflag &= ~CSIZE;
+    options.c_cflag |= (CS8 | CLOCAL | CREAD);
+    options.c_cc[VTIME] = 1;
+    options.c_cc[VMIN] = 0;
+
+    if (tcsetattr(serial_fd, TCSANOW, &options) != 0)
+    {
+        perror("[UART] Configure failed");
+        close(serial_fd);
+        serial_fd = -1;
+    }
+
+    tcflush(serial_fd, TCIOFLUSH);
+    last_serial_retry = std::chrono::steady_clock::now();
+    // std::cerr << "Serial initialized. FD: " << serial_fd << std::endl;
+}
+
+void MotionController::pit_callback()
+{
+    std::lock_guard<std::mutex> lock(encoder_mutex);
+    encoder_left = encoder_get_count(ENCODER_1);
+    encoder_right = encoder_get_count(ENCODER_2);
+    // std::cerr << "Encoder Left: " << encoder_left << ", Right: " << encoder_right << std::endl;
+}
+
+void MotionController::set_servo_angle(int error)
+{
+    static int error_last = 0;
+
+    if (abs(error) < 4)
+    { // Dead zone
+        pwm_set_duty(SERVO_MOTOR1_PWM, 4360);
+        error_last = error;
+        return;
+    }
+
+    pidservo.target = 0;
+    pidservo.actual = error;
+
+    float pwm_adjustment = calculate_pid(pidservo, pidservo.target);
+
+    float target_pwm = 4360 + pwm_adjustment;
+    target_pwm = std::clamp(target_pwm, static_cast<float>(SERVO_MOTOR_R_MAX), static_cast<float>(SERVO_MOTOR_L_MAX));
+
+    pwm_set_duty(SERVO_MOTOR1_PWM, target_pwm);
+    // std::cerr << "pwm" << target_pwm << std::endl;
+    current_servo_pwm = target_pwm;
+    error_last = error;
+    // 死区处理 (±4像素不响应)
+    // if(abs(error_last - error) >30) error = error_last;
+}
+
+void MotionController::init_pid(PID_Controller &pid, float Kp, float Ki, float Kd, float max_out, PID_Mode mode)
+{
+    pid.Kp = Kp;
+    pid.Ki = Ki;
+    pid.Kd = Kd;
+    pid.max_output = max_out;
+    pid.integral = 0;
+    memset(pid.error, 0, sizeof(pid.error));
+    pid.mode = mode;
+
+    if (mode == FUZZY_PID)
+    {
+        pid.fuzzy_pd = {6.0f, 28.0f, 1.0, 35.0, 6.0, 1.0f};
+        float uff_p_max = 18.0f, uff_d_max = 40.0f;
+        for (int i = 0; i < 7; ++i)
+        {
+            pid.uff.UFF_P[i] = uff_p_max * (i - 3.0f) / 3.0f;
+            pid.uff.UFF_D[i] = uff_d_max * (i - 3.0f) / 3.0f;
+            pid.EFF[i] = 60.0f * (i - 3.0f) / 3.0f;
+            if (i == 3)
+                pid.EFF[i] = 20.0f;
+            pid.DFF[i] = 20.0f * (i - 3.0f) / 3.0f;
+        }
+        pid.fuzzy_initialized = true;
+    }
+}
+
+float MotionController::calculate_pid(PID_Controller &pid, float target)
+{
+    float error = target - pid.actual;
+    float alpha = 0.95f;
+    static float filtered_output = 0.0f;
+
+    if (error > 4000)
+    {
+        error = 6;
+    }
+
+    if (pid.mode == POSITION_PID)
+    {
+        pid.integral += error;
+        pid.integral = std::clamp(pid.integral, -pid.max_output / pid.Ki, pid.max_output / pid.Ki);
+        float P = pid.Kp * error;
+        float I = pid.Ki * pid.integral;
+        float D = pid.Kd * (error - pid.error[0]);
+        pid.output = P + I + D;
+        pid.output = std::clamp(pid.output, -pid.max_output, pid.max_output);
+        pid.error[0] = error;
+    }
+    else if (pid.mode == DELTA_PID)
+    {
+        pid.error[2] = pid.error[1];
+        pid.error[1] = pid.error[0];
+        pid.error[0] = error;
+
+        float delta = pid.Kp * (pid.error[0] - pid.error[1]) + pid.Ki * pid.error[0] + pid.Kd * (pid.error[0] - 2 * pid.error[1] + pid.error[2]);
+        float delta_limit = pid.max_output * 0.5f;
+        delta = std::clamp(delta, -delta_limit, delta_limit);
+
+        pid.output += delta;
+        pid.output = std::clamp(pid.output, -pid.max_output, pid.max_output);
+    }
+    else if (pid.mode == FUZZY_PID && pid.fuzzy_initialized)
+    {
+        auto params = laneProcessor->getControlParams();
+        float ec = error - pid.last_error;
+        // pid.fuzzy_pd.A = A;
+        pid.last_error = error;
+        float error_abs = fabs(error);
+        pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f;
+        //  执行模糊推理
+        count_DMF(pid, error * pid.fuzzy_pd.factor, ec * pid.fuzzy_pd.factor * EC_FACTOR);
+        float delta_kp = Fuzzy_Kp(pid);
+        cerr << "ΔKp:" << delta_kp << endl;
+        float delta_kd = Fuzzy_Kd(pid);
+        cerr << "ΔKd:" << delta_kd << endl;
+        pid.fuzzy_pd.Kp0 = params.kp_switch;
+        pid.fuzzy_pd.Kd0 = params.kd_switch;
+        pid.fuzzy_pd.A = params.A_switch; // 模糊PID参数A
+        // 计算最终输出
+        float P = (pid.fuzzy_pd.Kp0 + delta_kp) * error; // 直接使用模糊调整后的Kp
+        // float P = pid.fuzzy_pd.Kp0 + abs(error)*delta_kp * error + ;
+        // float D = pid.Kd * ec;
+        float D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec;
+        cerr << "kd0:" << pid.fuzzy_pd.Kd0 << endl;
+        cerr << "kp0:" << pid.fuzzy_pd.Kp0 << endl;
+        cerr << "A:" << pid.fuzzy_pd.A << endl;
+        float output = 0;
+
+        output = error * (pid.fuzzy_pd.Kp0 + pid.fuzzy_pd.A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; //(pid.fuzzy_pd.Kd0 + delta_kd); // imu963ra_gyro_z * delta_kd;
+        // float output = (pid.fuzzy_pd.Kp0 + delta_kp) * error / 100.0f;
+        // output += (pid.fuzzy_pd.Kd0 + delta_kd) * ec / 100.0f;
+        // output *= -0.7f;
+        //  输出限幅
+        filtered_output = output; //+ (1.0f - alpha) * filtered_output;
+        filtered_output = clamp(filtered_output, -pid.max_output, pid.max_output);
+        cerr<< "output:" << output << endl;
+        // output = clamp(output, -pid.max_output, pid.max_output);
+
+        return filtered_output;
+    }
+    return pid.output;
+}
+
+void MotionController::ackerman_diff_control(int Speed_Goal, int state)
+{
+    const float L = 200.0f, W = 150.0f;
+    float angle1 = abs((4360 - current_servo_pwm) * 0.09278f);
+    float angle_rad = angle1 * M_PI / 180.0f;
+    float tn = tan(angle_rad);
+
+    float outer_factor = 1.0f + 0.17f * (W / 2.0f) * tn / L;
+    float inner_factor = 1.0f - 0.83f * (W / 2.0f) * tn / L;
+
+    inner_factor = std::max(0.88f, std::min(inner_factor, 1.2f));
+    outer_factor = std::max(0.88f, std::min(outer_factor, 1.2f));
+
+    std::cerr << "in:" << inner_factor << std::endl;
+    std::cerr << "out:" << outer_factor << std::endl;
+    cerr << "state:" << state << endl;
+
+    switch (state)
+    {
+    case 13:
+        Speed_Goal = Speed_Goal * 1.2;
+        break;
+    case 2:
+        Speed_Goal = Speed_Goal * 0.9;
+        break;
+    case 7:
+        Speed_Goal = Speed_Goal * 0.9;
+        break;
+    case 4:
+        Speed_Goal = Speed_Goal * 0.9;
+        break;
+    case 9:
+        Speed_Goal = Speed_Goal * 0.9;
+        break;
+    case 11:
+        Speed_Goal = Speed_Goal * 0.9;
+        break;
+    case 12:
+        Speed_Goal = Speed_Goal * 0.9;
+        break;
+    default:
+        break;
+    }
+    cerr << "speed_goal:" << Speed_Goal << endl;
+    if (state == 12)
+    { // right turn
+        pidLeft.target = Speed_Goal * outer_factor;
+        pidRight.target = Speed_Goal * inner_factor;
+    }
+    else if (state == 11)
+    { // left turn
+        pidLeft.target = Speed_Goal * inner_factor;
+        pidRight.target = Speed_Goal * outer_factor;
+    }
+    else
+    { // straight
+        pidLeft.target = Speed_Goal;
+        pidRight.target = Speed_Goal;
+    }
+}
+
+// --- Fuzzy Logic Helper Implementations ---
+
+void MotionController::count_DMF(PID_Controller &pid, float e, float ec)
+{
+    // Error membership calculation
+    if (e > pid.EFF[0] && e < pid.EFF[6])
+    {
+        for (int i = 0; i < 6; ++i)
+        {
+            if (e >= pid.EFF[i] && e <= pid.EFF[i + 1])
+            {
+                pid.dmf.EF[0] = (pid.EFF[i + 1] - e) / (pid.EFF[i + 1] - pid.EFF[i]);
+                pid.dmf.EF[1] = (e - pid.EFF[i]) / (pid.EFF[i + 1] - pid.EFF[i]);
+                pid.dmf.En[0] = i;
+                pid.dmf.En[1] = i + 1;
+                break;
+            }
+        }
+    }
+    else
+    {
+        pid.dmf.En[0] = (e <= pid.EFF[0]) ? 0 : 6;
+        pid.dmf.En[1] = -1;
+        pid.dmf.EF[0] = 1.0f;
+    }
+
+    // Error change rate membership calculation
+    if (ec > pid.DFF[0] && ec < pid.DFF[6])
+    {
+        for (int i = 0; i < 6; ++i)
+        {
+            if (ec >= pid.DFF[i] && ec <= pid.DFF[i + 1])
+            {
+                pid.dmf.DF[0] = (pid.DFF[i + 1] - ec) / (pid.DFF[i + 1] - pid.DFF[i]);
+                pid.dmf.DF[1] = (ec - pid.DFF[i]) / (pid.DFF[i + 1] - pid.DFF[i]);
+                pid.dmf.Dn[0] = i;
+                pid.dmf.Dn[1] = i + 1;
+                break;
+            }
+        }
+    }
+    else
+    {
+        pid.dmf.Dn[0] = (ec <= pid.DFF[0]) ? 0 : 6;
+        pid.dmf.Dn[1] = -1;
+        pid.dmf.DF[0] = 1.0f;
+    }
+}
+
+float MotionController::Fuzzy_Kp(PID_Controller &pid)
+{
+    float KpgradSums[7] = {0};
+    for (int i = 0; i < 2; ++i)
+    {
+        if (pid.dmf.En[i] == -1)
+            continue;
+        for (int j = 0; j < 2; ++j)
+        {
+            if (pid.dmf.Dn[j] == -1)
+                continue;
+            int rule = rule_p[pid.dmf.En[i]][pid.dmf.Dn[j]];
+            KpgradSums[rule + 3] += pid.dmf.EF[i] * pid.dmf.DF[j];
+        }
+    }
+    float sum = 0;
+    for (int i = 0; i < 7; ++i)
+    {
+        sum += pid.uff.UFF_P[i] * KpgradSums[i];
+    }
+    return sum;
+}
+
+float MotionController::Fuzzy_Kd(PID_Controller &pid)
+{
+    float KdgradSums[7] = {0};
+    for (int i = 0; i < 2; ++i)
+    {
+        if (pid.dmf.En[i] == -1)
+            continue;
+        for (int j = 0; j < 2; ++j)
+        {
+            if (pid.dmf.Dn[j] == -1)
+                continue;
+            int rule = rule_d[pid.dmf.En[i]][pid.dmf.Dn[j]];
+            KdgradSums[rule + 3] += pid.dmf.EF[i] * pid.dmf.DF[j];
+        }
+    }
+    float sum = 0;
+    for (int i = 0; i < 7; ++i)
+    {
+        sum += pid.uff.UFF_D[i] * KdgradSums[i];
+    }
+    return sum;
 }

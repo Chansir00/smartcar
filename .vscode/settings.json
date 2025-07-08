@@ -60,7 +60,14 @@
         "streambuf": "cpp",
         "thread": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "cerrno": "cpp",
+        "cfloat": "cpp",
+        "climits": "cpp",
+        "ios": "cpp",
+        "locale": "cpp",
+        "queue": "cpp",
+        "cstdbool": "cpp"
     },
     "cmake.sourceDirectory": "/home/chan/Documents/app_317/smartcar/project/user",
     "cmake.ignoreCMakeListsMissing": true

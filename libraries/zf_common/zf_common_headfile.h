@@ -75,6 +75,7 @@
 #include "zf_driver_pwm.h"
 #include "zf_driver_adc.h"
 #include "zf_driver_pit.h"
+#include "zf_driver_pit_fd.h"
 // //#include "zf_driver_iic.h"
 // #include "zf_driver_pit.h"
 // #include "zf_driver_pwm.h"
@@ -137,13 +138,13 @@
 //===================================================应用组件层===================================================
 
 //===================================================用户自定义文件===================================================
-#include "pid.hpp"
 #include "camera.hpp"
 #include "socket.h"
 #include "Pers.h"
 #include "imu.h"
 #include "brush.h"
 #include "home.hpp"
+#include "pid.hpp"
 //===================================================用户自定义文件===================================================
 
 
