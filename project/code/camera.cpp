@@ -476,7 +476,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case STRAIGHT:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints < 100 || !isleftstraight || !isrightstraight)
+        if (numPoints < 100)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -876,7 +876,7 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
     pointA = Point(-1, -1);
     pointB = Point(-1, -1);
     // 从索引 239 开始查找 A 点
-    int startIndex = 116;
+    int startIndex = 114;
     size_t candidateAIndex = startIndex;
     int maxJumpA = 8;
     int pre_error = 0;
@@ -885,7 +885,7 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
     size_t candidateCIndex = 20;
     int maxJumpC = 7;
     // find pointB
-    for (size_t i = startline + 1; i < roiHeight - 1; i++)
+    for (size_t i = startline + 1; i < roiHeight - 3; i++)
     {
         // cerr << i << endl;
         if (lane[i].position.x == -1)
@@ -921,7 +921,7 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
     // find Point A
     if (!pointA_found)
     {
-        for (int i = roiHeight - 2; i > candidateCIndex + 2; i--)
+        for (int i = roiHeight - 3; i > candidateCIndex + 2; i--)
         {
             // cerr<<lane[i].position<<endl;
             //  计算当前点的跳变点数
@@ -1012,7 +1012,7 @@ void LaneProcessor::findleftInflectionPoints(const vector<TrackPoint> &lane,
     pointA = Point(-1, -1);
     pointB = Point(-1, -1);
 
-    int startIndex = 116;
+    int startIndex = 114;
     size_t candidateAIndex = startIndex;
     int maxJumpA = 8;
     int pre_error = 0;
@@ -1022,7 +1022,7 @@ void LaneProcessor::findleftInflectionPoints(const vector<TrackPoint> &lane,
     size_t candidateCIndex = startline;
     int maxJumpC = 7;
 
-    for (size_t i = startline + 1; i < roiHeight - 2; i++)
+    for (size_t i = startline + 1; i < roiHeight - 3; i++)
     {
         if (lane[i].position.x == -1)
             continue;
@@ -1053,7 +1053,7 @@ void LaneProcessor::findleftInflectionPoints(const vector<TrackPoint> &lane,
     }
     if (!pointA_found)
     {
-        for (int i = roiHeight - 2; i > candidateCIndex + 2; i--)
+        for (int i = roiHeight - 3; i > candidateCIndex + 2; i--)
         {
             if (lane[i].position.x == -1)
                 continue;

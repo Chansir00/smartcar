@@ -65,6 +65,9 @@ constexpr float weight1[39] = {
     17, 17, 15, 15, 15, 15, 19, 19, 11, 13, 15,
     17, 19, 20, 20, 1, 1, 1, 1, 1, 1};
 
+constexpr float dongtaiquan[21] = {  
+7,7,9,9,11,11,13,13,15,15,20,15,15,13,13,11,11,9,9,7,7 // 0-19
+};
 
 // --- Fuzzy Logic Constants
 enum FuzzyTerm { NB = -3, NM = -2, NS = -1, ZO = 0, PS = 1, PM = 2, PB = 3 };
@@ -182,6 +185,9 @@ public:
     MotionController& operator=(const MotionController&) = delete;
 
     // --- High-Level Control Interface
+    float ave_speed();
+    int dongtaiqianzhan();
+    float Err_sum2(const vector<Point> &centerline);
     void motor_control(int speed, float k, int limit);
     void set_servo_angle(int error);
     float Err_sum(const std::vector<cv::Point>& centerline);
@@ -238,6 +244,55 @@ public:
     float shared_error;
     std::mutex error_mutex;
     std::mutex encoder_mutex;
+private:
+    //std::unordered_map<int, CircleControlParams> circle_params_map;
+    //CircleControlParams default_params;
+    float speed_buffer[20] = {0};
+    int buffer_index = 0;      // 当前要替换的位置
+    int buffer_count = 0;      // 当前缓冲区中的数据个数（用于初始填充）
+    float quan_weight[120] = {  
+    // 索引0-20（已提供的21个元素）
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,
+    0,0,1,  // 索引21,22,23
+    0,0,1,  // 24,25,26
+    0,0,1,  // 27,28,29
+    0,0,1,  // 30,31,32
+    0,0,1,  // 33,34,35
+    0,0,1,  // 36,37,38
+    0,0,1,  // 39,40,41
+    0,0,1,  // 42,43,44
+    0,0,1,  // 45,46,47
+    0,0,1,  // 48,49,50
+    0,0,1,  // 51,52,53
+    0,0,1,  // 54,55,56
+    0,0,1,  // 57,58,59
+    0,0,1,  // 60,61,62
+    0,0,1,  // 63,64,65
+    0,0,1,  // 66,67,68
+    0,0,1,  // 69,70,71
+    0,0,1,  // 72,73,74
+    0,0,1,  // 75,76,77
+    0,0,1,  // 78,79,80
+    0,0,1,  // 81,82,83
+    0,0,1,  // 84,85,86
+    0,0,1,  // 87,88,89
+    0,0,1,  // 90,91,92
+    0,0,1,  // 93,94,95
+    0,0,1,  // 96,97,98
+    0,0,1,  // 99,100,101
+    0,0,1,  // 102,103,104
+    0,0,1,  // 105,106,107
+    0,0,1,  // 108,109,110
+    0,0,1,  // 111,112,113
+    0,0,1,  // 114,115,116
+    0,0,1   // 117,118,119
+};
 };
 
 //==============================================================================

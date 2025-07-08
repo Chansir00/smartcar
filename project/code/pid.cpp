@@ -12,6 +12,10 @@ float servo_motor_duty = 90.0;
 float servo_motor_dir = 1;
 int16_t encoder_left;
 int16_t encoder_right;
+int point_speed_max = 70;   //前瞻最大起始点
+int point_speed_min = 50;   //最小
+int speed_min = speed*0.9;
+int speed_max = speed*1.2;        //最大s
 //==============================================================================
 // >> Free Function Implementations
 //==============================================================================
@@ -83,6 +87,55 @@ MotionController::~MotionController()
     }
 }
 
+float MotionController::ave_speed() {
+    std::lock_guard<std::mutex> lock(encoder_mutex);
+    float current_speed = (encoder_left + encoder_right) / 2.0;
+    if (buffer_count < 20) {
+        speed_buffer[buffer_index] = current_speed;
+        buffer_count++;
+    } else {
+        speed_buffer[buffer_index] = current_speed;
+    }
+    buffer_index = (buffer_index + 1) % 20;
+    float average_speed = 0;
+    for (int i = 0; i < buffer_count; i++) {
+        average_speed += speed_buffer[i];
+    }
+    average_speed /= buffer_count;
+    cerr<< "average_speed:" << average_speed << endl;
+    return average_speed;
+}
+
+int MotionController::dongtaiqianzhan(){                                              
+    std::lock_guard<std::mutex> lock(encoder_mutex);
+    int average_speed = (encoder_left + encoder_right) / 2.0;
+    //int average_speed = ave_speed();
+    //(encoder_left + encoder_right) / 2.0;
+    int point_speed = ((average_speed - speed_min) / (speed_max - speed_min) * (point_speed_max - point_speed_min)) + point_speed_min;// 计算点速度
+    //cerr<<"point_speed:"<<point_speed<<endl;
+    return point_speed;
+}
+
+float MotionController::Err_sum2(const vector<Point> &centerline){
+    int steps_used = 0;
+    float error = 0.0f;
+    float weight_count = 0.0f;
+    int a = dongtaiqianzhan();
+    a = std::clamp(a, 0, 99); 
+    cerr<< "a:" << a << endl;
+     for(int i = 0;i < 21;i++){
+         quan_weight[i + a] = dongtaiquan[i];
+     }
+  
+    for( steps_used = 0; steps_used < centerline.size(); ++steps_used){
+          error += (centerline[steps_used].x - 80) * quan_weight[steps_used];
+          weight_count += quan_weight[steps_used];
+    }
+    int B = error / weight_count ;
+    return (weight_count != 0.0f) ? B : 0.0f;
+}
+
+
 void MotionController::motor_control(int speed, float k, int limit)
 {
     std::lock_guard<std::mutex> lock(encoder_mutex);
@@ -103,8 +156,8 @@ void MotionController::motor_control(int speed, float k, int limit)
     gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 1 : 0); // right
     gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 1 : 0); // left
 
-    float outL = std::clamp(abs(raw_outL), 0.0f, 0.40f * static_cast<float>(PWM_MAX));
-    float outR = std::clamp(abs(raw_outR), 0.0f, 0.40f * static_cast<float>(PWM_MAX));
+    float outL = std::clamp(abs(raw_outL), 0.0f, 0.60f * static_cast<float>(PWM_MAX));
+    float outR = std::clamp(abs(raw_outR), 0.0f, 0.60f * static_cast<float>(PWM_MAX));
 
     // Set motor output
     pwm_set_duty(MOTOR1_PWM, outL);
@@ -125,7 +178,7 @@ float MotionController::Err_sum(const std::vector<cv::Point> &centerline)
     16, 16, 18, 18, 20 ,20, 20, 23, 23, 23,   //80
     25, 25, 17, 17, 6, 5, 4, 3, 2};  //89
     constexpr float weight_front[weight_len] = {
-     1,1,1, 2, 3, 3, 13, 15, 16, 16,     //70
+    3,3,5, 5, 8, 8, 10, 10, 12, 12,     //70
     16, 16, 18, 18, 20 ,20, 20, 23, 23, 23,   //80
     25, 25, 27, 26, 27, 29, 29, 30, };  //89
     // ↑ 最后几个权重最大（用于最远点）
@@ -135,8 +188,8 @@ float MotionController::Err_sum(const std::vector<cv::Point> &centerline)
 
     if (total_lines > 95)
     {
-        // 正常情况：从第65到第89行（近中段）
-        int start = 65;
+        // 正常情况：从第50到第80行（近中段）
+        int start = 55;
         for (int i = 0; i < weight_len; ++i)
         {
             int idx = start + i;
@@ -271,7 +324,7 @@ void MotionController::init_pid(PID_Controller &pid, float Kp, float Ki, float K
     if (mode == FUZZY_PID)
     {
         pid.fuzzy_pd = {6.0f, 28.0f, 1.0, 35.0, 6.0, 1.0f};
-        float uff_p_max = 18.0f, uff_d_max = 40.0f;
+        float uff_p_max = 20.0f, uff_d_max = 40.0f;
         for (int i = 0; i < 7; ++i)
         {
             pid.uff.UFF_P[i] = uff_p_max * (i - 3.0f) / 3.0f;
@@ -370,10 +423,10 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state)
     float tn = tan(angle_rad);
 
     float outer_factor = 1.0f + 0.17f * (W / 2.0f) * tn / L;
-    float inner_factor = 1.0f - 0.83f * (W / 2.0f) * tn / L;
+    float inner_factor = 1.0f - 0.73f * (W / 2.0f) * tn / L;
 
-    inner_factor = std::max(0.88f, std::min(inner_factor, 1.2f));
-    outer_factor = std::max(0.88f, std::min(outer_factor, 1.2f));
+    inner_factor = std::max(0.90f, std::min(inner_factor, 1.2f));
+    outer_factor = std::max(1.f, std::min(outer_factor, 1.2f));
 
     std::cerr << "in:" << inner_factor << std::endl;
     std::cerr << "out:" << outer_factor << std::endl;

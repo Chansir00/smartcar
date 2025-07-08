@@ -177,20 +177,17 @@ private:
         case LEFT_CIRCLE_INSIDE:
             current_params = {0.725f, 1.0f, 20.0f, 0.2f};
             break;
-        case CROSSING:
-            current_params = {0.825f, 6.0f, 18.0f, 0.03f};
-            break;
         case RIGHT_TURN:
-            current_params = {0.825f, 28.0f, 35.0f, 0.095f};
+            current_params = {0.825f, 29.0f, 35.0f, 0.099f};
             break;
         case LEFT_TURN:
-            current_params = {0.825f, 28.0f, 35.0f, 0.095f};
+            current_params = {0.825f, 29.0f, 35.0f, 0.099f};
             break;
         case STRAIGHT:
-            current_params = {1.0f, 5.0f, 15.0f, 0.02f};
+            current_params = {1.0f, 4.0f, 10.0f, 0.01f};
             break;
         default:
-            current_params = {0.825f, 15.0f, 20.0f, 0.02f}; // 默认参数
+            current_params = {0.825f, 12.0f, 25.0f, 0.02f}; // 默认参数
         }
     }
 };
