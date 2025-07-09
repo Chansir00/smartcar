@@ -153,7 +153,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = ZEBRA;
         }
-        else if ((small_count > 0.85 * numPoints && numPoints > 100 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && isleftstraight && isrightstraight)||(numPoints>=105))
+        else if (small_count > 0.85 * numPoints && numPoints > 100 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && isleftLanecontinuous && isrightLanecontinuous)
         {
             circleState = STRAIGHT;
         }

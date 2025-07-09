@@ -29,6 +29,7 @@ void cleanup()
 {
     printf("程序异常退出，执行清理操作\n");
     // brush_off(); // Original function call, ensure it's defined elsewhere
+    brush_off();
     pwm_set_duty(SERVO_MOTOR1_PWM, 0);
     pwm_set_duty(MOTOR1_PWM, 0);
     pwm_set_duty(MOTOR2_PWM, 0);
@@ -72,9 +73,9 @@ MotionController::MotionController(LaneProcessor *lp) : laneProcessor(lp)
     gpio_set_level(MOTOR2_DIR, 0);
 
     // PID Parameter Initialization
-    init_pid(pidLeft, 8.0f, 1.0f, 0.1f, PWM_MAX, DELTA_PID);
-    init_pid(pidRight, 8.2f, 1.0f, 0.14f, PWM_MAX, DELTA_PID);
-    init_pid(pidservo, 6.0f, 0.0f, 14.0f, 441.0f, FUZZY_PID);
+    init_pid(pidLeft, 8.0f, 0.8f, 0.1f, PWM_MAX, DELTA_PID);
+    init_pid(pidRight, 8.2f, 0.8f, 0.14f, PWM_MAX, DELTA_PID);
+    init_pid(pidservo, 6.0f, 0.0f, 14.0f, 481.0f, FUZZY_PID);
 
     init_serial();
 }
@@ -153,8 +154,8 @@ void MotionController::motor_control(int speed, float k, int limit)
     float raw_outL = calculate_pid(pidLeft, pidLeft.target);
     float raw_outR = calculate_pid(pidRight, pidRight.target);
 
-    gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 1 : 0); // right
-    gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 1 : 0); // left
+    gpio_set_level(MOTOR2_DIR, (raw_outL >= 0) ? 1 : 0); // right
+    gpio_set_level(MOTOR1_DIR, (raw_outR >= 0) ? 1 : 0); // left
 
     float outL = std::clamp(abs(raw_outL), 0.0f, 0.60f * static_cast<float>(PWM_MAX));
     float outR = std::clamp(abs(raw_outR), 0.0f, 0.60f * static_cast<float>(PWM_MAX));
@@ -174,9 +175,10 @@ float MotionController::Err_sum(const std::vector<cv::Point> &centerline)
 
     constexpr int weight_len = 30;
     constexpr float weight_middle[weight_len] = {
-     1,1, 1, 2, 3, 3, 3, 5, 16, 16,     //70
-    16, 16, 18, 18, 20 ,20, 20, 23, 23, 23,   //80
-    25, 25, 17, 17, 6, 5, 4, 3, 2};  //89
+    1,  2,  3,  4,  5,  6,  7,  8,  9, 10,
+   11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+   20, 19, 18, 17, 16, 15, 14, 13, 12, 11,};  //89
+
     constexpr float weight_front[weight_len] = {
     3,3,5, 5, 8, 8, 10, 10, 12, 12,     //70
     16, 16, 18, 18, 20 ,20, 20, 23, 23, 23,   //80
@@ -189,7 +191,7 @@ float MotionController::Err_sum(const std::vector<cv::Point> &centerline)
     if (total_lines > 95)
     {
         // 正常情况：从第50到第80行（近中段）
-        int start = 55;
+        int start = 64;
         for (int i = 0; i < weight_len; ++i)
         {
             int idx = start + i;
@@ -201,7 +203,7 @@ float MotionController::Err_sum(const std::vector<cv::Point> &centerline)
     else if (total_lines > 65)
     {
         // 从第64行开始，向远处最多取30个（反向加权）
-        int start = 64;
+        int start = 55;
         int usable_points = std::min(total_lines - start, weight_len);
         for (int i = 0; i < usable_points; ++i)
         {
@@ -425,7 +427,7 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state)
     float outer_factor = 1.0f + 0.17f * (W / 2.0f) * tn / L;
     float inner_factor = 1.0f - 0.73f * (W / 2.0f) * tn / L;
 
-    inner_factor = std::max(0.90f, std::min(inner_factor, 1.2f));
+    inner_factor = std::max(0.895f, std::min(inner_factor, 1.2f));
     outer_factor = std::max(1.f, std::min(outer_factor, 1.2f));
 
     std::cerr << "in:" << inner_factor << std::endl;

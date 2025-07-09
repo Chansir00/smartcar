@@ -160,7 +160,7 @@ private:
         switch (circleState)
         {
         case RIGHT_CIRCLE_DETECTED:
-            current_params = {1.0f, 5.0f, 15.0f, 0.02f};
+            current_params = {1.0f, 5.0f, 15.0f, 0.01f};
             break;
         case RIGHT_CIRCLE_INTRY:
             current_params = {0.725f, 10.0f, 20.0f, 0.1f}; // 速度倍数,Kp0,Kd0,A
@@ -169,7 +169,7 @@ private:
             current_params = {0.725f, 10.0f, 20.0f, 0.2f};
             break;
         case LEFT_CIRCLE_DETECTED:
-            current_params = {1.0f, 5.0f, 15.0f, 0.02f};
+            current_params = {1.0f, 5.0f, 15.0f, 0.01f};
             break;
         case LEFT_CIRCLE_INTRY:
             current_params = {0.825f, 10.0f, 20.0f, 0.1f};
@@ -187,7 +187,7 @@ private:
             current_params = {1.0f, 4.0f, 10.0f, 0.01f};
             break;
         default:
-            current_params = {0.825f, 12.0f, 25.0f, 0.02f}; // 默认参数
+            current_params = {0.825f, 12.0f, 30.0f, 0.01f}; // 默认参数
         }
     }
 };

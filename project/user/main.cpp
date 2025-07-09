@@ -13,7 +13,7 @@ int control_circle = 0;
 extern bool slow_down;
 
 // 另外一端的IP地址
-#define SERVER_IP "192.168.141.237"
+#define SERVER_IP "192.168.141.172"
 // 端口号
 #define PORT 8888
 
@@ -23,7 +23,7 @@ uint8 temp_str[] = "seekfree this is udp demo.\r\n";
 uint8 read_str[] = "read data:\r\n";
 char float_str1[32];
 char float_str2[32];
-timer_fd *pit_timer = nullptr;
+
 int main()
 {
     VideoCapture cap = cap_init(camera);
@@ -41,7 +41,7 @@ int main()
     brush_off();
     ctrl.motor_control(0, 0, 0);
     int new_socket = sendImageOverSocket();
-    // int new_socket = 0;
+    //int new_socket = 0;
     //  if (udp_init(SERVER_IP, PORT) == 0)
     //  {
     //      printf("tcp_client ok\r\n");
@@ -56,28 +56,30 @@ int main()
     //  }
     if (!debugmode)
     {
-        brush_init(800); // 初始化
-        pit_timer = new timer_fd(5, [&ctrl, &detector]() {
-            // 编码器读数（需要互斥锁保护）
-            // 控制逻辑
-            if (!detector.lost && ready_count > 30) {
-                ctrl.pit_callback();        // 执行控制回调
-                ctrl.motor_control(speed, 0, 0); // 电机控制
+        //brush_init(800); // 初始化
+        pit_ms_init(5, [&ctrl, &detector]()
+                    { 
+            if (!detector.lost && ready_count > 30)
+            {
+                ctrl.pit_callback();
+                ctrl.motor_control(speed, 0, 0); // 将控制逻辑移到定时器回调200
             } 
-            else if (detector.lost) {
-                ctrl.motor_control(0, 0, 0); // 丢失路线停止电机
+            else if(detector.lost)
+            {
+                ctrl.motor_control(0, 0, 0);  // 将控制逻辑移到定时器回调200
                 brush_off();
-            }
-        });
-        pit_timer->start();
+
+            } });
     }
-    // pwm_set_duty(SERVO_MOTOR1_PWM, 3870);
+    //pwm_set_duty(SERVO_MOTOR1_PWM, 4360);
 
     while (true)
     {
-        // brush_init(800); // 初始化
-        if (ready_count < 1000)
+        //brush_init(800); // 初始化
+        if (ready_count < 700)
             ready_count++;
+        else
+            detector.lost = true;
         clock_t start = clock();
         Mat frame;
         cap >> frame; // 从摄像头读取一帧
@@ -87,9 +89,9 @@ int main()
             break;
         }
         // 回显UDP数据。
-        // sprintf(float_str1, "left_encoder: %.2f\r\n", ctrl.pidLeft.actual);
+        //sprintf(float_str1, "left_encoder: %.2f\r\n", ctrl.pidLeft.actual);
         // sprintf(float_str2, "right_encoder: %.2f\r\n", ctrl.pidRight.actual);
-        // udp_send_data((uint8_t *)&float_str1, sizeof(float_str1));
+        //udp_send_data((uint8_t *)&float_str1, sizeof(float_str1));
         // udp_send_data((uint8_t *)&float_str2, sizeof(float_str2));
 
         DetectionResult result = detector.detect(frame);
@@ -104,7 +106,6 @@ int main()
         // ctrl.update_shared_error(error);
         cerr << "error: " << error << endl;
         ctrl.set_servo_angle(error);
-        // ctrl.set_servo_angle(0);
         //  pwm_set_duty(MOTOR1_PWM, 2000); // 小占空比
         //  gpio_set_level(MOTOR1_DIR, 1);
         //  pwm_set_duty(MOTOR2_PWM, 2000); // 小占空比
