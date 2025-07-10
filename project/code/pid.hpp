@@ -76,23 +76,23 @@ constexpr int EC_FACTOR = 1;
 // Fuzzy rule table for Kp
 static const int rule_p[7][7] = {
     //      NB    NM    NS    ZO    PS    PM    PB
-    /*NB*/ {PB,   PB,   PM,   PM,   PS,   ZO,   ZO},
-    /*NM*/ {PB,   PM,   PM,   PS,   ZO,   ZO,   PS},
-    /*NS*/ {PM,   PM,   PS,   ZO,   ZO,   PS,   PM},
-    /*ZO*/ {PS,   PS,   ZO,   PS,   PS,   PS,   PS},
+    /*NB*/ {PB,   PB,   PM,   PM,   PS,   ZO,   PM},
+    /*NM*/ {PB,   PM,   PM,   PS,   ZO,   ZO,   PM},
+    /*NS*/ {PB,   PM,   PS,   ZO,   ZO,   PS,   PB},
+    /*ZO*/ {PM,   PS,   ZO,   PS,   PS,   PS,   PM},
     /*PS*/ {PM,   PS,   ZO,   PS,   PS,   PM,   PM},
-    /*PM*/ {ZO,   ZO,   PS,   PM,   PM,   PM,   PB},
+    /*PM*/ {PM,   ZO,   PS,   PM,   PM,   PM,   PB},
     /*PB*/ {PB,   PM,   PM,   PM,   PM,   PB,   PB}
 };
 
 // Fuzzy rule table for Kd
 static const int rule_d[7][7] = {
     {PS, NS, NB, NB, NB, NM, PS},
-    {PS, NS, NB, NM, NM, NS, ZO},
-    {ZO, NS, NM, NM, NS, NS, ZO},
-    {ZO, NS, NS, NS, NS, NS, ZO},
+    {PS, NS, NB, NM, NM, NS, PS},
+    {ZO, NS, NM, NM, NS, NS, PS},
+    {ZO, NS, NS, NS, NS, NS, PS},
     {ZO, ZO, ZO, ZO, ZO, ZO, ZO},
-    {PB, NS, PS, PS, PS, PS, PB},
+    {PM, NS, PS, PS, PS, PS, PM},
     {PB, PM, PM, PM, PS, PS, PB}
 };
 

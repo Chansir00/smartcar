@@ -16,6 +16,8 @@ int point_speed_max = 70; // 前瞻最大起始点
 int point_speed_min = 50; // 最小
 int speed_min = speed * 0.9;
 int speed_max = speed * 1.2; // 最大s
+int white_min = 70; // 白点最小
+int white_max = 107; // 白点最大
 //==============================================================================
 // >> Free Function Implementations
 //==============================================================================
@@ -51,9 +53,9 @@ int decideSpeed(int state, int speed)
     case 9:
         return speed * 0.9;
     case 11:
-        return speed * 0.8;
+        return speed * 0.9;
     case 12:
-        return speed * 0.8;
+        return speed * 0.9;
     default:
         return speed;
     }
@@ -128,12 +130,24 @@ float MotionController::Err_sum2(const vector<Point> &centerline)
     int steps_used = 0;
     float error = 0.0f;
     float weight_count = 0.0f;
-    int a = dongtaiqianzhan();
-    a = std::clamp(a, 0, 99);
-    cerr << "a:" << a << endl;
+    //int a = dongtaiqianzhan();
+    //a = std::clamp(a, 0, 99);
+    //cerr << "a:" << a << endl;
+    int b = centerline.size();
+    if(b < white_min)
+        b = white_min; 
+    else if(b > white_max)
+        b = white_max;
+    float white_range = static_cast<float>(white_max - white_min);
+    if (fabs(white_range) < 1e-5) white_range = 1.0f;
+    float scale = std::clamp(static_cast<float>(b - white_min) / white_range, 0.0f, 1.0f);
+    int point_white = static_cast<int>(scale * (point_speed_max - point_speed_min) + point_speed_min);
+    //int point_white = (b - white_min) / (white_max - white_min) * (point_speed_max - point_speed_min) + point_speed_min; // 计算点速度
+    point_white = std::clamp(point_white, 0, 99);
+    cerr << "point_white:" << point_white << endl;
     for (int i = 0; i < 21; i++)
     {
-        quan_weight[i + a] = dongtaiquan[i];
+        quan_weight[i + point_white] = dongtaiquan[i];
     }
 
     for (steps_used = 0; steps_used < centerline.size(); ++steps_used)
@@ -189,10 +203,10 @@ float MotionController::Err_sum(const std::vector<cv::Point> &centerline)
         10, 9, 8, 7, 6, 5, 4, 3, 2};
 
     constexpr float weight_front[39] = {
-        1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 13, 13, 13, 13, 15,
-        17, 17, 15, 15, 15, 15, 19, 19, 20, 20, 20,
-        17, 19, 20, 20, 1, 1, 1, 1, 1, 1};
+       1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+        11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+        20, 19, 18, 17, 16, 15, 14, 13, 12, 11,
+        10, 9, 8, 7, 6, 5, 4, 3, 2};
     // ↑ 最后几个权重最大（用于最远点）
 
     float error = 0.0f;
@@ -336,7 +350,7 @@ void MotionController::init_pid(PID_Controller &pid, float Kp, float Ki, float K
     if (mode == FUZZY_PID)
     {
         pid.fuzzy_pd = {6.0f, 28.0f, 1.0, 35.0, 6.0, 1.0f};
-        float uff_p_max = 22.0f, uff_d_max = 60.0f;
+        float uff_p_max = 30.f, uff_d_max = 60.0f;
         for (int i = 0; i < 7; ++i)
         {
             pid.uff.UFF_P[i] = uff_p_max * (i - 3.0f) / 3.0f;
@@ -386,9 +400,26 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
     else if (pid.mode == FUZZY_PID && pid.fuzzy_initialized)
     {
         float ec = error - pid.last_error;
-        float A = 0.05;
+        float A = 0.05f; // 模糊调整系数
+        float output = 0.0f;
         pid.last_error = error;
         float error_abs = fabs(error);
+        if(error_abs <10)
+        {
+            A = 0.0f; // 小误差时不调整
+        }
+        else if(error_abs < 30)
+        {
+            A = 0.04f; // 中等误差时调整
+        }
+        else if(error_abs < 50)
+        {
+            A = 0.05f; // 较大误差时调整
+        }
+        else
+        {
+            A = 0.06f; // 大误差时调整
+        }
         // pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f;
         //  执行模糊推理
         count_DMF(pid, error * pid.fuzzy_pd.factor, ec * pid.fuzzy_pd.factor * EC_FACTOR);
@@ -403,7 +434,10 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
         // float D = pid.Kd * ec;
         float D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec;
         // float output = P + D;
-        float output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; // imu963ra_gyro_z * delta_kd;
+        if(control_circle == 13)
+            output = P +D; 
+        else
+            output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; // imu963ra_gyro_z * delta_kd;
         // float output = (pid.fuzzy_pd.Kp0 + delta_kp) * error / 100.0f;
         // output += (pid.fuzzy_pd.Kd0 + delta_kd) * ec / 100.0f;
         // output *= -0.7f;
@@ -461,12 +495,12 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state)
         break;
     }
     cerr << "speed_goal:" << Speed_Goal << endl;
-    if (state == 12||current_servo_pwm <3950)
+    if (state == 12)
     { // right turn
         pidLeft.target = Speed_Goal * outer_factor;
         pidRight.target = Speed_Goal * inner_factor;
     }
-    else if (state == 11||current_servo_pwm > 4800)
+    else if (state == 11)
     { // left turn
         pidLeft.target = Speed_Goal * inner_factor;
         pidRight.target = Speed_Goal * outer_factor;

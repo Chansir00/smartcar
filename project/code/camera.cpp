@@ -139,13 +139,13 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         }
         else if (((isleftJumpvalid&&isrightJumpvalid) || (rightJumpPointB.x < rightJumpPointA.x && rightJumpPointB.x > 1 &&rightMissedRadius<0.5&& (leftJumpPointA.x != -1 || leftJumpPointB.x != -1)) || (leftJumpPointA.x < leftJumpPointB.x && leftJumpPointA.x > 1 &&leftMissedRadius<0.5&& (rightJumpPointA.x != -1 || rightJumpPointB.x != -1)) || (rightJumpPointB.y > 30 && leftJumpPointB.y >= 30 && rightJumpPointB.x - leftJumpPointB.x > 30)) && numPoints > img_devided)
         {
-            //circleState = CROSSING;
+            circleState = CROSSING;
         }
-        else if (isleftstraight && lefttrend == 1 &&leftMissedRadius<=0.7 && righttrend!=1 && numPoints <= img_devided )
+        else if ((isleftstraight && lefttrend == 1 &&leftMissedRadius<=0.7 && righttrend!=1 ) ||(leftMissedRadius<0.1&&rightMissedRadius>0.9&&leftJumpPointB.x==-1) && numPoints<=img_devided)
         {
             circleState = RIGHT_TURN;
         }
-        else if (isrightstraight && righttrend == -1 && rightMissedRadius<=0.7 && lefttrend!=-1&&numPoints <= img_devided)
+        else if ((isrightstraight && righttrend == -1 && rightMissedRadius<=0.7 && lefttrend!=-1)||(rightMissedRadius<0.1&&leftMissedRadius>0.9&&rightJumpPointB.x==-1)&&numPoints <= img_devided)
         {
             circleState = LEFT_TURN;
         }
@@ -153,7 +153,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = ZEBRA;
         }
-        else if (small_count > 0.85 * numPoints && numPoints > 100 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && isleftstraight&& isrightstraight&&lefttrend==1&&righttrend==-1)
+        else if (small_count > 0.85 * numPoints && numPoints >= 102 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && isleftstraight&& isrightstraight)
         {
             circleState = STRAIGHT;
         }
@@ -373,18 +373,26 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case LEFT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints > img_devided || !isrightstraight)
+        if (numPoints > img_devided && small_count > 0.6)
         {
             circleState = CIRCLE_INACTIVE;
+        }
+        else if (isleftstraight && lefttrend == 1 &&leftMissedRadius<=0.7 && righttrend!=1 && numPoints <= img_devided ||(leftMissedRadius<0.1&&rightMissedRadius>0.9))
+        {
+            circleState = RIGHT_TURN;
         }
     }
     break;
     case RIGHT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints > img_devided || !isleftstraight)
+        if (numPoints > img_devided &&small_count > 0.6)
         {
             circleState = CIRCLE_INACTIVE;
+        }
+        else if (isrightstraight && righttrend == -1 && rightMissedRadius<=0.7 && lefttrend!=-1&&numPoints <= img_devided||(rightMissedRadius<0.1&&leftMissedRadius>0.9))
+        {
+            circleState = LEFT_TURN;
         }
     }
     break;
@@ -1527,7 +1535,7 @@ int LaneProcessor::checkLaneTrend(const std::vector<TrackPoint> &lane)
     bool allIncreasing = true;
     bool allDecreasing = true;
 
-    for (size_t i = startline + 1; i < roiHeight - 5; ++i)
+    for (size_t i = startline + 1; i < roiHeight - 10; ++i)
     {
         int prevX = lane[i - 1].position.x;
         int currX = lane[i].position.x;

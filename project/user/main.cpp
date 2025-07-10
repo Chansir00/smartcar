@@ -57,7 +57,7 @@ int main()
     //  }
     if (!debugmode)
     {
-        //brush_init(700); // 初始化
+        brush_init(700); // 初始化
         pit_ms_init(5, [&ctrl, &detector]()
                     { 
             if (!detector.lost && ready_count > 30)
@@ -103,6 +103,8 @@ int main()
             break;
         }
         my_error = ctrl.Err_sum(detector.centerLine);
+        float my_error2 = ctrl.Err_sum2(detector.centerLine);
+        //  cout << "my_error2: " << my_error2 << endl;
         flag = 1;
         // ctrl.update_shared_error(error);
         cerr << "error: " << my_error << endl;
@@ -112,11 +114,11 @@ int main()
         //  pwm_set_duty(MOTOR2_PWM, 2000); // 小占空比
         //  gpio_set_level(MOTOR2_DIR, 0);
         //  cerr << "Forward countl: " << encoder_get_count(ENCODER_1) <<"Forward countr: " << encoder_get_count(ENCODER_2) << endl;
-        if (debugmode == 0)
+        if (debugmode == 2)
         {
             flag = 1;
         }
-        else if (debugmode == 1)
+        else if (debugmode==1 )
         {
             vector<uchar> buf;
             vector<int> params = {cv::IMWRITE_JPEG_QUALITY, 90};
