@@ -178,16 +178,16 @@ private:
             current_params = {0.725f, 1.0f, 20.0f, 0.2f};
             break;
         case RIGHT_TURN:
-            current_params = {0.825f, 29.0f, 35.0f, 0.099f};
+            current_params = {0.825f, 38.f, 35.0f, 0.2f};
             break;
         case LEFT_TURN:
-            current_params = {0.825f, 29.0f, 35.0f, 0.099f};
+            current_params = {0.825f, 38.f, 35.0f, 0.2f};
             break;
         case STRAIGHT:
-            current_params = {1.0f, 4.0f, 10.0f, 0.01f};
+            current_params = {1.0f,5.f, 10.0f, 0.0f};
             break;
         default:
-            current_params = {0.825f, 12.0f, 30.0f, 0.01f}; // 默认参数
+            current_params = {0.825f, 15.0f, 20.0f, 0.0f}; // 默认参数
         }
     }
 };

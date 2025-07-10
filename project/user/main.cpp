@@ -6,7 +6,7 @@ int debugmode = readFlag("./debugmode");
 const int camera = 0;
 int flag = 0;
 unsigned int send_counter = 0;
-int speed = 500; // 车速
+int speed = 550; // 车速
 const unsigned int SEND_INTERVAL = 20;
 int ready_count = 0;
 int control_circle = 0;
@@ -56,7 +56,7 @@ int main()
     //  }
     if (!debugmode)
     {
-        //brush_init(800); // 初始化
+        //brush_init(700); // 初始化
         pit_ms_init(5, [&ctrl, &detector]()
                     { 
             if (!detector.lost && ready_count > 30)
@@ -76,7 +76,7 @@ int main()
     while (true)
     {
         //brush_init(800); // 初始化
-        if (ready_count < 700)
+        if (ready_count < 2000)
             ready_count++;
         else
             detector.lost = true;

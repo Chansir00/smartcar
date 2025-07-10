@@ -81,7 +81,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     // {
     //     countcircle++;
     // }
-    int img_devided = 93;
+    int img_devided = 100;
     findrightInflectionPoints(rightLane, rightJumpPointA, rightJumpPointB, isrightJumpvalid);
     findleftInflectionPoints(LeftLane, leftJumpPointA, leftJumpPointB, isleftJumpvalid);
     isleftLanecontinuous = isLaneContinuous(LeftLane);
@@ -137,15 +137,15 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = LEFT_CIRCLE_DETECTED;
         }
-        else if (((leftJumpPointA.x != -1 && leftJumpPointB.x != -1 && rightJumpPointA.x != -1 && rightJumpPointB.x != -1 && rightJumpPointB.x > leftJumpPointB.x) || (rightJumpPointB.x < rightJumpPointA.x && rightJumpPointB.x > 1 && (leftJumpPointA.x != -1 || leftJumpPointB.x != -1)) || (leftJumpPointA.x < leftJumpPointB.x && leftJumpPointA.x > 1 && (rightJumpPointA.x != -1 || rightJumpPointB.x != -1)) || (rightJumpPointB.y > 30 && leftJumpPointB.y >= 30 && rightJumpPointB.x - leftJumpPointB.x > 30)) && numPoints > img_devided)
+        else if (((isleftJumpvalid&&isrightJumpvalid) || (rightJumpPointB.x < rightJumpPointA.x && rightJumpPointB.x > 1 &&rightMissedRadius<0.5&& (leftJumpPointA.x != -1 || leftJumpPointB.x != -1)) || (leftJumpPointA.x < leftJumpPointB.x && leftJumpPointA.x > 1 &&leftMissedRadius<0.5&& (rightJumpPointA.x != -1 || rightJumpPointB.x != -1)) || (rightJumpPointB.y > 30 && leftJumpPointB.y >= 30 && rightJumpPointB.x - leftJumpPointB.x > 30)) && numPoints > img_devided)
         {
-            circleState = CROSSING;
+            //circleState = CROSSING;
         }
-        else if (isleftstraight && lefttrend == 1 && !isrightstraight && righttrend!=1 && numPoints <= img_devided)
+        else if (isleftstraight && lefttrend == 1 &&leftMissedRadius<=0.7 && righttrend!=1 && numPoints <= img_devided )
         {
             circleState = RIGHT_TURN;
         }
-        else if (isrightstraight && righttrend == -1 && !isleftstraight && lefttrend!=-1&&numPoints <= img_devided)
+        else if (isrightstraight && righttrend == -1 && rightMissedRadius<=0.7 && lefttrend!=-1&&numPoints <= img_devided)
         {
             circleState = LEFT_TURN;
         }
@@ -153,7 +153,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = ZEBRA;
         }
-        else if (small_count > 0.85 * numPoints && numPoints > 100 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && isleftLanecontinuous && isrightLanecontinuous)
+        else if (small_count > 0.85 * numPoints && numPoints > 100 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && isleftstraight&& isrightstraight&&lefttrend==1&&righttrend==-1)
         {
             circleState = STRAIGHT;
         }
@@ -373,7 +373,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case LEFT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints > img_devided)
+        if (numPoints > img_devided ||rightMissedRadius>0.7)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -382,7 +382,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case RIGHT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints > img_devided)
+        if (numPoints > img_devided || leftMissedRadius > 0.7)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -476,7 +476,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case STRAIGHT:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints < 100)
+        if (numPoints < 102)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -591,7 +591,7 @@ bool LaneProcessor::isLaneContinuous(const vector<TrackPoint> &lane)
     }
 
     // 2. 检查所有相邻点的x差值
-    for (size_t i = startline + 1; i < roiHeight - 2; i++)
+    for (size_t i = startline + 3; i < roiHeight - 2; i++)
     {
         // 跳过无效点（x=-1或其他标志）
         if (lane[i - 1].position.x < 0)
@@ -849,7 +849,7 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
             // 绘制中线
 
             polylines(image, centerLine, false, Scalar(0, 255, 0), 1);
-            // cerr << "centerLine: " << centerLine[numPoints / 2] << endl;
+            cerr << "centerLine: " << centerLine[numPoints / 2] << endl;
         }
         else
         {
@@ -885,7 +885,7 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
     size_t candidateCIndex = 20;
     int maxJumpC = 7;
     // find pointB
-    for (size_t i = startline + 1; i < roiHeight - 3; i++)
+    for (size_t i = startline + 1; i < roiHeight - 20; i++)
     {
         // cerr << i << endl;
         if (lane[i].position.x == -1)
@@ -921,7 +921,7 @@ void LaneProcessor::findrightInflectionPoints(const vector<TrackPoint> &lane,
     // find Point A
     if (!pointA_found)
     {
-        for (int i = roiHeight - 3; i > candidateCIndex + 2; i--)
+        for (int i = roiHeight - 20; i > candidateCIndex + 2; i--)
         {
             // cerr<<lane[i].position<<endl;
             //  计算当前点的跳变点数
@@ -1022,7 +1022,7 @@ void LaneProcessor::findleftInflectionPoints(const vector<TrackPoint> &lane,
     size_t candidateCIndex = startline;
     int maxJumpC = 7;
 
-    for (size_t i = startline + 1; i < roiHeight - 3; i++)
+    for (size_t i = startline + 1; i < roiHeight - 20; i++)
     {
         if (lane[i].position.x == -1)
             continue;
@@ -1053,7 +1053,7 @@ void LaneProcessor::findleftInflectionPoints(const vector<TrackPoint> &lane,
     }
     if (!pointA_found)
     {
-        for (int i = roiHeight - 3; i > candidateCIndex + 2; i--)
+        for (int i = roiHeight - 20; i > candidateCIndex + 2; i--)
         {
             if (lane[i].position.x == -1)
                 continue;
