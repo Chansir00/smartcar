@@ -373,7 +373,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case LEFT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints > img_devided ||rightMissedRadius>0.7)
+        if (numPoints > img_devided || !isrightstraight)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -382,7 +382,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case RIGHT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints > img_devided || leftMissedRadius > 0.7)
+        if (numPoints > img_devided || !isleftstraight)
         {
             circleState = CIRCLE_INACTIVE;
         }

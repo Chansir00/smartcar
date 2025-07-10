@@ -10,6 +10,7 @@ int speed = 550; // 车速
 const unsigned int SEND_INTERVAL = 20;
 int ready_count = 0;
 int control_circle = 0;
+float my_error = 0.0f; // 误差
 extern bool slow_down;
 
 // 另外一端的IP地址
@@ -101,11 +102,11 @@ int main()
         {
             break;
         }
-        float error = ctrl.Err_sum(detector.centerLine);
+        my_error = ctrl.Err_sum(detector.centerLine);
         flag = 1;
         // ctrl.update_shared_error(error);
-        cerr << "error: " << error << endl;
-        ctrl.set_servo_angle(error);
+        cerr << "error: " << my_error << endl;
+        ctrl.set_servo_angle(my_error);
         //  pwm_set_duty(MOTOR1_PWM, 2000); // 小占空比
         //  gpio_set_level(MOTOR1_DIR, 1);
         //  pwm_set_duty(MOTOR2_PWM, 2000); // 小占空比

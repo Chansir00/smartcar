@@ -169,6 +169,7 @@ extern int16_t encoder_left;
 extern int16_t encoder_right;
 extern float servo_motor_duty;
 extern float servo_motor_dir;
+extern float my_error; // 误差
 
 //==============================================================================
 // >> Class Definition: MotionController
