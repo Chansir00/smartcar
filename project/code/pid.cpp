@@ -12,12 +12,12 @@ float servo_motor_duty = 90.0;
 float servo_motor_dir = 1;
 int16_t encoder_left;
 int16_t encoder_right;
-int point_speed_max = 70; // 前瞻最大起始点
+int point_speed_max = 90; // 前瞻最大起始点
 int point_speed_min = 50; // 最小
 int speed_min = speed * 0.9;
 int speed_max = speed * 1.2; // 最大s
-int white_min = 70; // 白点最小
-int white_max = 107; // 白点最大
+int white_min = 60; // 白点最小     
+int white_max = 108; // 白点最大
 //==============================================================================
 // >> Free Function Implementations
 //==============================================================================
@@ -53,9 +53,9 @@ int decideSpeed(int state, int speed)
     case 9:
         return speed * 0.9;
     case 11:
-        return speed * 0.9;
+        return speed * 0.8;
     case 12:
-        return speed * 0.9;
+        return speed * 0.8;
     default:
         return speed;
     }
@@ -77,7 +77,7 @@ MotionController::MotionController(LaneProcessor *lp) : laneProcessor(lp)
     // PID Parameter Initialization
     init_pid(pidLeft, 28.0f, 2.805f, 0.13f, PWM_MAX, DELTA_PID);
     init_pid(pidRight, 30.0f, 2.845f, 0.18f, PWM_MAX, DELTA_PID);
-    init_pid(pidservo, 6.0f, 0.0f, 14.0f, 481.0f, FUZZY_PID);
+    init_pid(pidservo, 6.0f, 0.0f, 14.0f, 500.0f, FUZZY_PID);
 
     init_serial();
 }
@@ -93,8 +93,10 @@ MotionController::~MotionController()
 float MotionController::ave_speed()
 {
     std::lock_guard<std::mutex> lock(encoder_mutex);
-    float current_speed = (encoder_left + encoder_right) / 2.0;
-    if (buffer_count < 20)
+
+    float current_speed = (encoder_left - encoder_right) / 2.0;
+
+    if (buffer_count < 5)
     {
         speed_buffer[buffer_index] = current_speed;
         buffer_count++;
@@ -103,7 +105,7 @@ float MotionController::ave_speed()
     {
         speed_buffer[buffer_index] = current_speed;
     }
-    buffer_index = (buffer_index + 1) % 20;
+    buffer_index = (buffer_index + 1) % 5;
     float average_speed = 0;
     for (int i = 0; i < buffer_count; i++)
     {
@@ -116,12 +118,18 @@ float MotionController::ave_speed()
 
 int MotionController::dongtaiqianzhan()
 {
-    std::lock_guard<std::mutex> lock(encoder_mutex);
-    int average_speed = (encoder_left + encoder_right) / 2.0;
-    // int average_speed = ave_speed();
-    //(encoder_left + encoder_right) / 2.0;
-    int point_speed = ((average_speed - speed_min) / (speed_max - speed_min) * (point_speed_max - point_speed_min)) + point_speed_min; // 计算点速度
-    // cerr<<"point_speed:"<<point_speed<<endl;
+    int average_speed = (encoder_left + encoder_right) / 2;
+    cerr << "average_speed:" << average_speed << endl;
+    if (speed_max <= speed_min) {
+        return point_speed_min;
+    }else if(average_speed > speed_max){
+        average_speed = speed_max;
+    }
+    float speed_range = static_cast<float>(speed_max - speed_min);
+    float scale = static_cast<float>(average_speed - speed_min) / speed_range;
+
+    scale = std::clamp(scale, 0.0f, 1.0f);
+    int point_speed = static_cast<int>(scale * (point_speed_max - point_speed_min) + point_speed_min);
     return point_speed;
 }
 
@@ -152,7 +160,7 @@ float MotionController::Err_sum2(const vector<Point> &centerline)
 
     for (steps_used = 0; steps_used < centerline.size(); ++steps_used)
     {
-        error += (centerline[steps_used].x - 80) * quan_weight[steps_used];
+        error += (centerline[steps_used].x - 81) * quan_weight[steps_used];
         weight_count += quan_weight[steps_used];
     }
     int B = error / weight_count;
@@ -203,10 +211,10 @@ float MotionController::Err_sum(const std::vector<cv::Point> &centerline)
         10, 9, 8, 7, 6, 5, 4, 3, 2};
 
     constexpr float weight_front[39] = {
-       1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-        11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-        20, 19, 18, 17, 16, 15, 14, 13, 12, 11,
-        10, 9, 8, 7, 6, 5, 4, 3, 2};
+        1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 13, 13, 13, 13, 15,
+        17, 17, 15, 15, 15, 15, 19, 19, 20, 20, 20,
+        17, 19, 20, 20, 1, 1, 1, 1, 1, 1};
     // ↑ 最后几个权重最大（用于最远点）
 
     float error = 0.0f;
@@ -221,7 +229,7 @@ float MotionController::Err_sum(const std::vector<cv::Point> &centerline)
             int idx = start + i;
             if (idx >= total_lines)
                 break;
-            error += (centerline[idx].x - 78) * weight_middle[i];
+            error += (centerline[idx].x - 81) * weight_middle[i];
             weight_count += weight_middle[i];
         }
     }
@@ -234,7 +242,7 @@ float MotionController::Err_sum(const std::vector<cv::Point> &centerline)
         {
             int idx = start + i;
             int weight_idx = weight_len - usable_points + i; // 让远处的点权重大
-            error += (centerline[idx].x - 78) * weight_front[weight_idx];
+            error += (centerline[idx].x - 81) * weight_front[weight_idx];
             weight_count += weight_front[weight_idx];
         }
     }
@@ -246,7 +254,7 @@ float MotionController::Err_sum(const std::vector<cv::Point> &centerline)
         {
             int idx = total_lines - usable_points + i;
             int weight_idx = weight_len - usable_points + i; // 越远权重越大
-            error += (centerline[idx].x - 78) * weight_front[weight_idx];
+            error += (centerline[idx].x - 81) * weight_front[weight_idx];
             weight_count += weight_front[weight_idx];
         }
     }
@@ -314,23 +322,26 @@ void MotionController::set_servo_angle(int error)
 {
     static int error_last = 0;
 
-    if (abs(error) < 4)
-    { // Dead zone
-        pwm_set_duty(SERVO_MOTOR1_PWM, 4360);
-        error_last = error;
-        return;
-    }
+    // if (abs(error) < 4)
+    // { // Dead zone
+    //     pwm_set_duty(SERVO_MOTOR1_PWM, 4360);
+    //     error_last = error;
+    //     return;
+    // }
 
     pidservo.target = 0;
     pidservo.actual = error;
 
     float pwm_adjustment = calculate_pid(pidservo, pidservo.target);
 
-    float target_pwm = 4360 + pwm_adjustment;
+    float target_pwm = 4260 + pwm_adjustment;
+    // if(target_pwm > 4500){
+    //     target_pwm *=1.1;
+    // }
     target_pwm = std::clamp(target_pwm, static_cast<float>(SERVO_MOTOR_R_MAX), static_cast<float>(SERVO_MOTOR_L_MAX));
 
     pwm_set_duty(SERVO_MOTOR1_PWM, target_pwm);
-    // std::cerr << "pwm" << target_pwm << std::endl;
+    std::cerr << "pwm" << target_pwm << std::endl;
     current_servo_pwm = target_pwm;
     error_last = error;
     // 死区处理 (±4像素不响应)
@@ -349,14 +360,15 @@ void MotionController::init_pid(PID_Controller &pid, float Kp, float Ki, float K
 
     if (mode == FUZZY_PID)
     {
-        pid.fuzzy_pd = {6.0f, 28.0f, 1.0, 35.0, 6.0, 1.0f};
-        float uff_p_max = 30.f, uff_d_max = 60.0f;
+        pid.fuzzy_pd = {6.0f, 12.0f, 1.0, 35.0, 6.0, 1.0f};
+        //float uff_p_max = 22.0f, uff_d_max = 60.0f;
+        float uff_p_max = 18.0f, uff_d_max = 60.0f;
         for (int i = 0; i < 7; ++i)
         {
             pid.uff.UFF_P[i] = uff_p_max * (i - 3.0f) / 3.0f;
             pid.uff.UFF_D[i] = uff_d_max * (i - 3.0f) / 3.0f;
-            pid.EFF[i] = 60.0f * (i - 3.0f) / 3.0f;
-            pid.DFF[i] = 20.0f * (i - 3.0f) / 3.0f;
+            pid.EFF[i] = 66.0f * (i - 3.0f) / 3.0f;
+            pid.DFF[i] = 30.0f * (i - 3.0f) / 3.0f;
         }
         pid.fuzzy_initialized = true;
     }
@@ -399,27 +411,11 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
     }
     else if (pid.mode == FUZZY_PID && pid.fuzzy_initialized)
     {
+        
         float ec = error - pid.last_error;
-        float A = 0.05f; // 模糊调整系数
-        float output = 0.0f;
+        float A = 0.06;
         pid.last_error = error;
         float error_abs = fabs(error);
-        if(error_abs <10)
-        {
-            A = 0.0f; // 小误差时不调整
-        }
-        else if(error_abs < 30)
-        {
-            A = 0.04f; // 中等误差时调整
-        }
-        else if(error_abs < 50)
-        {
-            A = 0.05f; // 较大误差时调整
-        }
-        else
-        {
-            A = 0.06f; // 大误差时调整
-        }
         // pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f;
         //  执行模糊推理
         count_DMF(pid, error * pid.fuzzy_pd.factor, ec * pid.fuzzy_pd.factor * EC_FACTOR);
@@ -427,17 +423,27 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
         cerr << "ΔKp:" << delta_kp << endl;
         float delta_kd = Fuzzy_Kd(pid);
         cerr << "ΔKd:" << delta_kd << endl;
+        float output = 0.0f;
+        float P = 0.0f;
+        float D = 0.0f;
+        // pid.fuzzy_pd.Kp0 = params.kp_switch;
+        // pid.fuzzy_pd.Kd0 = params.kd_switch;
+        // pid.fuzzy_pd.A = params.A_switch; // 模糊PID参数A
+        if(control_circle == 13){
+            pid.fuzzy_pd.Kp0 = 4.0f;
+            pid.fuzzy_pd.Kd0 = 8.0f;
+            delta_kd = 0.0f;
+            delta_kp = 0.0f;
+        }
+        P = (pid.fuzzy_pd.Kp0 + delta_kp) * error;
+        D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec;
+         if(error_abs < 15){
+            output = P + D;
+         }else {
+             output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; // imu963ra_gyro_z * delta_kd;
+    }
 
-        // 计算最终输出
-        float P = (pid.fuzzy_pd.Kp0 + delta_kp) * error; // 直接使用模糊调整后的Kp
-        // float P = pid.fuzzy_pd.Kp0 + abs(error)*delta_kp * error + ;
-        // float D = pid.Kd * ec;
-        float D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec;
-        // float output = P + D;
-        if(control_circle == 13)
-            output = P +D; 
-        else
-            output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; // imu963ra_gyro_z * delta_kd;
+        //float output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; // imu963ra_gyro_z * delta_kd;
         // float output = (pid.fuzzy_pd.Kp0 + delta_kp) * error / 100.0f;
         // output += (pid.fuzzy_pd.Kd0 + delta_kd) * ec / 100.0f;
         // output *= -0.7f;
@@ -461,7 +467,7 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state)
     float outer_factor = 1.0f + 0.2f * (W / 2.0f) * tn / L;
     float inner_factor = 1.0f - 0.8f * (W / 2.0f) * tn / L;
 
-    inner_factor = std::max(0.7f, std::min(inner_factor, 1.2f));
+    inner_factor = std::max(0.85f, std::min(inner_factor, 1.2f));
     outer_factor = std::max(1.f, std::min(outer_factor, 1.2f));
 
     std::cerr << "in:" << inner_factor << std::endl;
@@ -471,7 +477,7 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state)
     switch (state)
     {
     case 13:
-        Speed_Goal = Speed_Goal * 1.2;
+        Speed_Goal = Speed_Goal * 1.1;
         break;
     case 2:
         Speed_Goal = Speed_Goal * 0.9;
@@ -495,12 +501,12 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state)
         break;
     }
     cerr << "speed_goal:" << Speed_Goal << endl;
-    if (state == 12)
+    if (state == 12||current_servo_pwm <3900)
     { // right turn
         pidLeft.target = Speed_Goal * outer_factor;
         pidRight.target = Speed_Goal * inner_factor;
     }
-    else if (state == 11)
+    else if (state == 11||current_servo_pwm > 4600)
     { // left turn
         pidLeft.target = Speed_Goal * inner_factor;
         pidRight.target = Speed_Goal * outer_factor;

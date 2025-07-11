@@ -48,9 +48,9 @@ constexpr int PWM_MAX = 10000;            // 电机最大PWM
 constexpr int CONTROL_PERIOD_MS = 10;
 
 // --- Servo Parameters
-constexpr int SERVO_MOTOR_MID = 4360;
-constexpr int SERVO_MOTOR_L_MAX = 4840;
-constexpr int SERVO_MOTOR_R_MAX = 3880;
+constexpr int SERVO_MOTOR_MID = 4260;
+constexpr int SERVO_MOTOR_L_MAX = 4760;
+constexpr int SERVO_MOTOR_R_MAX = 3760;
 
 // --- Lane Following Weights
 constexpr float weight[39] = { //50
@@ -66,7 +66,7 @@ constexpr float weight1[39] = {
     17, 19, 20, 20, 1, 1, 1, 1, 1, 1};
 
 constexpr float dongtaiquan[21] = {  
-7,7,9,9,11,11,13,13,15,15,20,15,15,13,13,11,11,9,9,7,7 // 0-19
+1,3,5,7,9,11,13,13,15,15,20,15,15,13,13,11,9,7,5,3,1 // 0-19
 };
 
 // --- Fuzzy Logic Constants
@@ -76,23 +76,23 @@ constexpr int EC_FACTOR = 1;
 // Fuzzy rule table for Kp
 static const int rule_p[7][7] = {
     //      NB    NM    NS    ZO    PS    PM    PB
-    /*NB*/ {PB,   PB,   PM,   PM,   PS,   ZO,   PM},
-    /*NM*/ {PB,   PM,   PM,   PS,   ZO,   ZO,   PM},
-    /*NS*/ {PB,   PM,   PS,   ZO,   ZO,   PS,   PB},
-    /*ZO*/ {PM,   PS,   ZO,   PS,   PS,   PS,   PM},
+    /*NB*/ {PB,   PB,   PM,   PM,   PS,   ZO,   ZO},
+    /*NM*/ {PB,   PM,   PM,   PS,   ZO,   ZO,   PS},
+    /*NS*/ {PM,   PM,   PS,   ZO,   ZO,   PS,   PM},
+    /*ZO*/ {PS,   PS,   ZO,   PS,   PS,   PS,   PS},
     /*PS*/ {PM,   PS,   ZO,   PS,   PS,   PM,   PM},
-    /*PM*/ {PM,   ZO,   PS,   PM,   PM,   PM,   PB},
+    /*PM*/ {ZO,   ZO,   PS,   PM,   PM,   PM,   PB},
     /*PB*/ {PB,   PM,   PM,   PM,   PM,   PB,   PB}
 };
 
 // Fuzzy rule table for Kd
 static const int rule_d[7][7] = {
     {PS, NS, NB, NB, NB, NM, PS},
-    {PS, NS, NB, NM, NM, NS, PS},
-    {ZO, NS, NM, NM, NS, NS, PS},
-    {ZO, NS, NS, NS, NS, NS, PS},
+    {PS, NS, NB, NM, NM, NS, ZO},
+    {ZO, NS, NM, NM, NS, NS, ZO},
+    {ZO, NS, NS, NS, NS, NS, ZO},
     {ZO, ZO, ZO, ZO, ZO, ZO, ZO},
-    {PM, NS, PS, PS, PS, PS, PM},
+    {PB, NS, PS, PS, PS, PS, PB},
     {PB, PM, PM, PM, PS, PS, PB}
 };
 

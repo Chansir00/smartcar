@@ -72,7 +72,6 @@ int main()
 
             } });
     }
-    //pwm_set_duty(SERVO_MOTOR1_PWM, 4360);
 
     while (true)
     {
@@ -97,18 +96,18 @@ int main()
 
         DetectionResult result = detector.detect(frame);
         control_circle = detector.circleState;
-        // speed = decideSpeed(control_circle, speed);
+
         if (detector.lost)
         {
             break;
         }
         my_error = ctrl.Err_sum(detector.centerLine);
         float my_error2 = ctrl.Err_sum2(detector.centerLine);
-        //  cout << "my_error2: " << my_error2 << endl;
+        cout << "my_error2: " << my_error2 << endl;
         flag = 1;
         // ctrl.update_shared_error(error);
         cerr << "error: " << my_error << endl;
-        ctrl.set_servo_angle(my_error);
+        ctrl.set_servo_angle(my_error2);
         //  pwm_set_duty(MOTOR1_PWM, 2000); // 小占空比
         //  gpio_set_level(MOTOR1_DIR, 1);
         //  pwm_set_duty(MOTOR2_PWM, 2000); // 小占空比

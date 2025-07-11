@@ -85,6 +85,8 @@ public:
     Point rightJumpPointB;
     bool isleftJumpvalid = false;
     bool isrightJumpvalid = false;
+    bool isleftCrossing = false; // 左车道是否在环岛内
+    bool isrightCrossing = false; // 右车道是否在环岛内
     bool isleftLanecontinuous = false;
     bool isrightLanecontinuous = false;
     vector<Point> rightvirtualPath;
@@ -112,7 +114,7 @@ public:
     DetectionResult detect(const cv::Mat &inputImage);
     void initializeVariables(int image_w, int image_h);
     void detectWhitePixels(const Mat &img, int roiHeight, std::vector<int> &whitePixels);
-    bool detectZebraCrossing(const std::vector<int> &whitePixels, float &leftMissedRadius, float &rightMissedRadius);
+    bool detectZebraCrossing(const std::vector<int> &whitePixels);
     void detectLanePoints(const Mat &img, int roiHeight, const std::vector<int> &whitePixels,
                           std::vector<TrackPoint> &leftLane, std::vector<TrackPoint> &rightLane, int &leftMissedPoints, int &rightMissedPoints, float &leftMissedRadius, float &rightMissedRadius);
     void drawLanes(Mat &img, int roiHeight, vector<TrackPoint> &leftLane, vector<TrackPoint> &rightLane,
@@ -128,8 +130,8 @@ public:
     bool isLaneContinuous(const vector<TrackPoint> &lane);
     void findrightInflectionPoints(const vector<TrackPoint> &lane,
                                    Point &pointA, Point &pointB,
-                                   bool &isValid);
-    void findleftInflectionPoints(const vector<TrackPoint> &lane, Point &pointA, Point &pointB, bool &isValid);
+                                   bool &isValid,bool &isrightCrossing);
+    void findleftInflectionPoints(const vector<TrackPoint> &lane, Point &pointA, Point &pointB, bool &isValid,bool &isleftCrossing);
     void generateVirtualPath(const Point2f &start, const Point2f &end,
                              vector<Point> &path,
                              bool isLeftLane);
