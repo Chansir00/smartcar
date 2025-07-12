@@ -78,8 +78,6 @@ int main()
         //brush_init(800); // 初始化
         if (ready_count < 2000)
             ready_count++;
-        else
-            detector.lost = true;
         clock_t start = clock();
         Mat frame;
         cap >> frame; // 从摄像头读取一帧

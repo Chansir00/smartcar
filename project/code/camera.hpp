@@ -77,7 +77,7 @@ public:
     int numPoints;
     int lastnumPoints; // 上一帧的点数
     bool lost = false;
-    int roiHeight = image_h - 5;
+    int roiHeight = image_h - 1;
     // member variables
     Point leftJumpPointA;
     Point rightJumpPointA;
