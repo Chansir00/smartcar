@@ -60,6 +60,7 @@ int small_count = 0;
 int zebra_count = 0;
 int lefttrend = 0;
 int righttrend = 0;
+int crossing = 0;
 // 检测圆环
 void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
                                   vector<TrackPoint> &RightLane,
@@ -75,7 +76,11 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     {
         countcircle++;
     }
-    int img_devided = 107;
+    if(crossing>0)
+    {
+        crossing--;
+    }
+    int img_devided = 102;
     findrightInflectionPoints(rightLane, rightJumpPointA, rightJumpPointB, isrightJumpvalid,isrightCrossing);
     findleftInflectionPoints(LeftLane, leftJumpPointA, leftJumpPointB, isleftJumpvalid,isleftCrossing);
     isleftLanecontinuous = isLaneContinuous(LeftLane);
@@ -140,15 +145,15 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = CROSSING;
         }
-        else if (((isleftstraight && lefttrend == 1 && !isrightstraight&&leftMissedRadius<=0.7 && righttrend!=1 ) ||(leftMissedRadius<0.1&&rightMissedRadius>0.9&&leftJumpPointB.x==-1)) && numPoints<=img_devided)
+        else if ((isleftstraight && lefttrend == 1 && !isrightstraight&&leftMissedRadius<=0.7 && righttrend!=1 )  && numPoints<=img_devided)
         {
             circleState = RIGHT_TURN;
         }
-        else if (((isrightstraight && righttrend == -1 &&!isleftstraight&& rightMissedRadius<=0.7 && lefttrend!=-1)||(rightMissedRadius<0.1&&leftMissedRadius>0.9&&rightJumpPointB.x==-1))&&numPoints <= img_devided)
+        else if ((isrightstraight && righttrend == -1 &&!isleftstraight&& rightMissedRadius<=0.7 && lefttrend!=-1) && numPoints <= img_devided)
         {
             circleState = LEFT_TURN;
         }
-        else if (small_count > 0.9 * numPoints && numPoints >= 108 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && isleftstraight&& isrightstraight&&lefttrend==1 &&righttrend==-1)
+        else if (small_count > 0.9 * numPoints && numPoints >= 108 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && isleftLanecontinuous&& isrightLanecontinuous&&lefttrend==1 &&righttrend==-1)
         {
             circleState = STRAIGHT;
         }
@@ -171,8 +176,17 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         //      circleState = CIRCLE_INACTIVE;
         //      break;
         //  }
+        Point endPoint(159, 80); // 初始化为无效值
+        // for(int i = roiHeight-1;i>startline;i--)
+        // {
+        //     if (RightLane[i].position.x < 159)
+        //     {
+        //         endPoint = RightLane[i+1].position;
+        //         break;  // 找到第一个就退出循环
+        //     }
+        // }
         circle(output, righthemisphere, 2, Scalar(0, 0, 0), 2);
-        if (rightJumpPointA.x != -1&&rightJumpPointA.y>=60&&rightJumpPointA.x>=rightJumpPointB.x)
+        if (rightJumpPointA.x != -1&&rightJumpPointA.y>=20&&rightJumpPointA.x>=rightJumpPointB.x)
         {
             generateVirtualPath(rightJumpPointB, rightJumpPointA, rightvirtualPath, true);
             // if (righthemisphere.x != -1 && righthemisphere.x < rightJumpPointA.x)
@@ -182,10 +196,10 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         }
         else
         {
-            generateVirtualPath(rightJumpPointB, rightLane[rightLane.size() - 1].position, rightvirtualPath, true);
+            generateVirtualPath(rightJumpPointB, endPoint, rightvirtualPath, true);
         }
         mergeVirtualPath(RightLane, rightvirtualPath, -1);
-        if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 19)
+        if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 13)
         {
             circleState = RIGHT_CIRCLE_INTRY;
             //circleState = CIRCLE_INACTIVE;
@@ -201,7 +215,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         //     mergeVirtualPath(RightLane, rightvirtualPath,-1);
         // }
         Point endpoint(159, 0); // 初始化为无效值
-        if (numPoints < img_devided && rightJumpPointB.x == -1 && rightJumpPointA.x == -1 && isleftstraight)
+        if (numPoints < img_devided && rightJumpPointB.x == -1  && isleftstraight)
         {
             circleState = RIGHT_CIRCLE_INSIDE;
         }
@@ -292,7 +306,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             generateVirtualPath(leftJumpPointB, leftLane[leftLane.size() - 1].position, leftvirtualPath, true);
         }
         mergeVirtualPath(LeftLane, leftvirtualPath, -1);
-        if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 19)
+        if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 13)
         {
             circleState = LEFT_CIRCLE_INTRY;
             //circleState = CIRCLE_INACTIVE;
@@ -308,7 +322,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         //     mergeVirtualPath(LeftLane, leftvirtualPath,-1);
         // }
         Point endpoint(10, 0); // 初始化为无效值
-        if (numPoints < img_devided && leftJumpPointB.x == -1 && leftJumpPointA.x == -1 && isrightstraight)
+        if (numPoints < img_devided && leftJumpPointB.x == -1  && isrightstraight)
         {
             circleState = LEFT_CIRCLE_INSIDE;
         }
@@ -370,7 +384,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case LEFT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints > img_devided && small_count > 0.6)
+        if (numPoints > img_devided && small_count > 0.5)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -383,7 +397,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case RIGHT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints > img_devided &&small_count > 0.6)
+        if (numPoints > img_devided &&small_count > 0.5)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -397,6 +411,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     {
         if ((rightJumpPointB.x == -1 && leftJumpPointB.x == -1) || (rightJumpPointB.y > 100 || leftJumpPointB.y > 100) || isleftstraight || isrightstraight)
         {
+            crossing = 100;
             circleState = CIRCLE_INACTIVE;
             break;
         }
