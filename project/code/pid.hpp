@@ -68,7 +68,9 @@ constexpr float weight1[39] = {
 constexpr float dongtaiquan[21] = {  
 1,3,5,7,9,11,13,13,15,15,20,15,15,13,13,11,9,7,5,3,1 // 0-19
 };
-
+constexpr float dongtaiquan2[21] = {  
+1,1,1,1,3,3,3,5,5,5,7,7,7,12,12,15,17,17,15,1,1 // 0-19
+};
 // --- Fuzzy Logic Constants
 enum FuzzyTerm { NB = -3, NM = -2, NS = -1, ZO = 0, PS = 1, PM = 2, PB = 3 };
 constexpr int EC_FACTOR = 1;

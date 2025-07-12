@@ -12,12 +12,13 @@ float servo_motor_duty = 90.0;
 float servo_motor_dir = 1;
 int16_t encoder_left;
 int16_t encoder_right;
-int point_speed_max = 75; // 前瞻最大起始点
-int point_speed_min = 50; // 最小
+int point_speed_max = 90; // 前瞻最大起始点
+int point_speed_min = 65;
+; // 最小
 int speed_min = speed * 0.9;
 int speed_max = speed * 1.2; // 最大s
-int white_min = 50; // 白点最小     
-int white_max = 113; // 白点最大
+int white_min = 70;          // 白点最小
+int white_max = 118;         // 白点最大
 //==============================================================================
 // >> Free Function Implementations
 //==============================================================================
@@ -120,9 +121,12 @@ int MotionController::dongtaiqianzhan()
 {
     int average_speed = (encoder_left + encoder_right) / 2;
     cerr << "average_speed:" << average_speed << endl;
-    if (speed_max <= speed_min) {
+    if (speed_max <= speed_min)
+    {
         return point_speed_min;
-    }else if(average_speed > speed_max){
+    }
+    else if (average_speed > speed_max)
+    {
         average_speed = speed_max;
     }
     float speed_range = static_cast<float>(speed_max - speed_min);
@@ -138,32 +142,35 @@ float MotionController::Err_sum2(const vector<Point> &centerline)
     int steps_used = 0;
     float error = 0.0f;
     float weight_count = 0.0f;
-    //int a = dongtaiqianzhan();
-    //a = std::clamp(a, 0, 99);
-    //cerr << "a:" << a << endl;
+    // int a = dongtaiqianzhan();
+    // a = std::clamp(a, 0, 99);
+    // cerr << "a:" << a << endl;
     int b = centerline.size();
-    if(b < white_min)
-        b = white_min; 
-    else if(b > white_max)
+    if (b < white_min)
+        b = white_min;
+    else if (b > white_max)
         b = white_max;
     float white_range = static_cast<float>(white_max - white_min);
-    if (fabs(white_range) < 1e-5) white_range = 1.0f;
+    if (fabs(white_range) < 1e-5)
+        white_range = 1.0f;
     float scale = std::clamp(static_cast<float>(b - white_min) / white_range, 0.0f, 1.0f);
     int point_white = static_cast<int>(scale * (point_speed_max - point_speed_min) + point_speed_min);
-    //int point_white = (b - white_min) / (white_max - white_min) * (point_speed_max - point_speed_min) + point_speed_min; // 计算点速度
+    // int point_white = (b - white_min) / (white_max - white_min) * (point_speed_max - point_speed_min) + point_speed_min; // 计算点速度
     point_white = std::clamp(point_white, 0, 99);
     cerr << "point_white:" << point_white << endl;
     for (int i = 0; i < 21; i++)
     {
-        quan_weight[i + point_white] = dongtaiquan[i];
+        if(control_circle == 11||control_circle==12)
+            quan_weight[i+point_white] = dongtaiquan2[i];
+        else
+            quan_weight[i+point_white] = dongtaiquan[i];
     }
-
     for (steps_used = 0; steps_used < centerline.size(); ++steps_used)
     {
         error += (centerline[steps_used].x - 80) * quan_weight[steps_used];
         weight_count += quan_weight[steps_used];
     }
-    int B = error / weight_count;
+    float B = error / weight_count;
     return (weight_count != 0.0f) ? B : 0.0f;
 }
 
@@ -360,9 +367,9 @@ void MotionController::init_pid(PID_Controller &pid, float Kp, float Ki, float K
 
     if (mode == FUZZY_PID)
     {
-        pid.fuzzy_pd = {6.0f, 12.0f, 1.0, 35.0, 6.0, 1.0f};
-        //float uff_p_max = 22.0f, uff_d_max = 60.0f;
-        float uff_p_max = 18.0f, uff_d_max = 60.0f;
+        pid.fuzzy_pd = {7.f, 12.0f, 1.0, 35.0, 6.0, 1.0f}; // 12
+        // float uff_p_max = 22.0f, uff_d_max = 60.0f;
+        float uff_p_max = 20.0f, uff_d_max = 60.0f;
         for (int i = 0; i < 7; ++i)
         {
             pid.uff.UFF_P[i] = uff_p_max * (i - 3.0f) / 3.0f;
@@ -411,9 +418,9 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
     }
     else if (pid.mode == FUZZY_PID && pid.fuzzy_initialized)
     {
-        
+
         float ec = error - pid.last_error;
-        float A = 0.08;
+        float A = 0.10;
         pid.last_error = error;
         float error_abs = fabs(error);
         // pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f;
@@ -421,7 +428,7 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
         count_DMF(pid, error * pid.fuzzy_pd.factor, ec * pid.fuzzy_pd.factor * EC_FACTOR);
         float delta_kp = Fuzzy_Kp(pid);
         cerr << "ΔKp:" << delta_kp << endl;
-        float delta_kd = Fuzzy_Kd(pid);
+        float delta_kd = abs(Fuzzy_Kd(pid));
         cerr << "ΔKd:" << delta_kd << endl;
         float output = 0.0f;
         float P = 0.0f;
@@ -429,32 +436,42 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
         // pid.fuzzy_pd.Kp0 = params.kp_switch;
         // pid.fuzzy_pd.Kd0 = params.kd_switch;
         // pid.fuzzy_pd.A = params.A_switch; // 模糊PID参数A
-        if(control_circle == 13){
+        if (control_circle == 13 || control_circle == 1 || control_circle == 6)
+        {
             pid.fuzzy_pd.Kp0 = 8.0f;
             pid.fuzzy_pd.Kd0 = 18.0f;
             delta_kd = 0.0f;
             delta_kp = 0.0f;
         }
+        else if (control_circle == 0)
+        {
+            pid.fuzzy_pd.Kp0 = 10.0f;
+            pid.fuzzy_pd.Kd0 = 12.0f;
+        }
         P = (pid.fuzzy_pd.Kp0 + delta_kp) * error;
-        D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec;
-        if(control_circle == 11 || control_circle == 12){
+        D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec; //+ delta_kd
+        if (control_circle == 11 || control_circle == 12)
+        {
             output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0;
-        }else{
-            if(error_abs < 30){
-                output = P + D;
-            }else {
+        }
+        else if (control_circle == 13 || control_circle == 1 || control_circle == 6 || control_circle == 0)
+        {
+            output = P + D;
+        }
+        else
+        {
             output = error * (pid.fuzzy_pd.Kp0 + 0.03 * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0;
         }
-    }
-    //      }else {
-    //          output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; // imu963ra_gyro_z * delta_kd;
-    // }
-        //float output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; // imu963ra_gyro_z * delta_kd;
+    
+        //      }else {
+        //          output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; // imu963ra_gyro_z * delta_kd;
+        // }
+        // float output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; // imu963ra_gyro_z * delta_kd;
         // float output = (pid.fuzzy_pd.Kp0 + delta_kp) * error / 100.0f;
         // output += (pid.fuzzy_pd.Kd0 + delta_kd) * ec / 100.0f;
         // output *= -0.7f;
         //  输出限幅
-        filtered_output = output; //alpha * output + (1.0f - alpha) * filtered_output;
+        filtered_output = output; // alpha * output + (1.0f - alpha) * filtered_output;
         filtered_output = clamp(filtered_output, -pid.max_output, pid.max_output);
         // output = clamp(output, -pid.max_output, pid.max_output);
         // cerr<<"pwm"<<output<<endl;
@@ -498,23 +515,23 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state)
         Speed_Goal = Speed_Goal * 0.9;
         break;
     case 11:
-        Speed_Goal = Speed_Goal * 0.8;
+        Speed_Goal = Speed_Goal * 0.9;
         break;
     case 12:
-        Speed_Goal = Speed_Goal * 0.8;
+        Speed_Goal = Speed_Goal * 0.9;
         break;
     default:
         Speed_Goal = Speed_Goal;
         break;
     }
     cerr << "speed_goal:" << Speed_Goal << endl;
-    if (state == 12||current_servo_pwm <3900)//||current_servo_pwm <3800
-    { // right turn
+    if (state == 12 || state == 2 || current_servo_pwm < 3900) //||current_servo_pwm <3800
+    {                                                          // right turn
         pidLeft.target = Speed_Goal * outer_factor;
         pidRight.target = Speed_Goal * inner_factor;
     }
-    else if (state == 11||current_servo_pwm > 4600)//||current_servo_pwm > 4700
-    { // left turn
+    else if (state == 11 || state == 7 || current_servo_pwm > 4600) //||current_servo_pwm > 4700
+    {                                                               // left turn
         pidLeft.target = Speed_Goal * inner_factor;
         pidRight.target = Speed_Goal * outer_factor;
     }

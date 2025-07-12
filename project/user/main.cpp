@@ -57,7 +57,7 @@ int main()
     //  }
     if (!debugmode)
     {
-        brush_init(700); // 初始化
+        brush_init(800); // 初始化
         pit_ms_init(5, [&ctrl, &detector]()
                     { 
             if (!detector.lost && ready_count > 30)
