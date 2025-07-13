@@ -80,7 +80,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     {
         crossing--;
     }
-    int img_devided = 102;
+    int img_devided = 105;
     findrightInflectionPoints(rightLane, rightJumpPointA, rightJumpPointB, isrightJumpvalid,isrightCrossing);
     findleftInflectionPoints(LeftLane, leftJumpPointA, leftJumpPointB, isleftJumpvalid,isleftCrossing);
     isleftLanecontinuous = isLaneContinuous(LeftLane);
@@ -176,7 +176,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         //      circleState = CIRCLE_INACTIVE;
         //      break;
         //  }
-        Point endPoint(159, 80); // 初始化为无效值
+        Point endPoint(159, 110); // 初始化为无效值
         // for(int i = roiHeight-1;i>startline;i--)
         // {
         //     if (RightLane[i].position.x < 159)
@@ -199,7 +199,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             generateVirtualPath(rightJumpPointB, endPoint, rightvirtualPath, true);
         }
         mergeVirtualPath(RightLane, rightvirtualPath, -1);
-        if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 13)
+        if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 16)
         {
             circleState = RIGHT_CIRCLE_INTRY;
             //circleState = CIRCLE_INACTIVE;
@@ -214,7 +214,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         //     generateVirtualPath(RightLane[RightLane.size() - 1].position, hemisphere, rightvirtualPath, true);
         //     mergeVirtualPath(RightLane, rightvirtualPath,-1);
         // }
-        Point endpoint(159, 0); // 初始化为无效值
+        Point endpoint(150, 0); // 初始化为无效值
         if (numPoints < img_devided && rightJumpPointB.x == -1  && isleftstraight)
         {
             circleState = RIGHT_CIRCLE_INSIDE;
@@ -235,7 +235,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
 
     case RIGHT_CIRCLE_EXITING:
     {
-        Point endPoint(140, 0); // 初始化为无效值
+        Point endPoint(159, 0); // 初始化为无效值
         // for (int i = startline; i < roiHeight - 1; i++) {
         //     if (RightLane[i].position.x >= 159) {
         //         endPoint = RightLane[i].position;
@@ -303,10 +303,10 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         }
         else
         {
-            generateVirtualPath(leftJumpPointB, leftLane[leftLane.size() - 1].position, leftvirtualPath, true);
+            generateVirtualPath(leftJumpPointB, leftLane[leftLane.size() - 10].position, leftvirtualPath, true);
         }
         mergeVirtualPath(LeftLane, leftvirtualPath, -1);
-        if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 13)
+        if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 16)
         {
             circleState = LEFT_CIRCLE_INTRY;
             //circleState = CIRCLE_INACTIVE;
@@ -673,7 +673,7 @@ void LaneProcessor::detectLanePoints(const Mat &binaryImage, int roiHeight,
             maxRight[1] = whitePixels[i];
         }
     }
-    cerr << "maxLeft: " << maxLeft[0] << ", count: " << maxLeft[1] << endl;
+    //cerr << "maxLeft: " << maxLeft[0] << ", count: " << maxLeft[1] << endl;
     const int cols = binaryImage.cols;
 
     // 检查 maxLeft 和 maxRight 是否有效
@@ -1459,8 +1459,8 @@ bool LaneProcessor::isStraightLane(const std::vector<TrackPoint> &lane, int tren
 
     bool trendSet = (trend != 0); // 外部已提供初始趋势？
     int missedPoints = 0;
-    int temp = lane.size();
-    for (int i = startline + 10; i <= numPoints-20; ++i)
+    int temp = roiHeight-30-startline;
+    for (int i = startline + 10; i <= roiHeight-20; ++i)
     {
         int prevX = lane[i - 1].position.x;
         int currX = lane[i].position.x;
@@ -1468,7 +1468,7 @@ bool LaneProcessor::isStraightLane(const std::vector<TrackPoint> &lane, int tren
         // 忽略无效点
         if (prevX < 0 || currX < 0)
             continue;
-        if(currX == 119 || currX == 0)
+        if(currX >=158 || currX <=1)
         {
             missedPoints++;
             continue; // 跳过无效点
@@ -1489,10 +1489,12 @@ bool LaneProcessor::isStraightLane(const std::vector<TrackPoint> &lane, int tren
         // 趋势不一致
         if (trend != 0 && ((dx > 0 && trend < 0) || (dx < 0 && trend > 0)))
             return false;
-        if(missedPoints/temp >0.5)
-        {
-            return false; // 跳变点过多，认为不是直道
-        }
+
+    }
+    //cerr<< "missedPoints: " << missedPoints << ", temp: " << temp << endl;
+    if(missedPoints/temp >0.7)
+    {
+        return false; // 跳变点过多，认为不是直道
     }
 
     return trendSet; // 至少有趋势才能认为是直道

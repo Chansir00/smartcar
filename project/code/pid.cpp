@@ -12,7 +12,7 @@ float servo_motor_duty = 90.0;
 float servo_motor_dir = 1;
 int16_t encoder_left;
 int16_t encoder_right;
-int point_speed_max = 82; // 前瞻最大起始点
+int point_speed_max = 90; // 前瞻最大起始点
 int point_speed_min = 65;
 ; // 最小
 int speed_min = speed * 0.9;
@@ -135,20 +135,31 @@ float MotionController::Err_sum2(const vector<Point> &centerline)
     float scale = std::clamp(static_cast<float>(b - white_min) / white_range, 0.0f, 1.0f);
     int point_white = static_cast<int>(scale * (point_speed_max - point_speed_min) + point_speed_min);
     // int point_white = (b - white_min) / (white_max - white_min) * (point_speed_max - point_speed_min) + point_speed_min; // 计算点速度
-    point_white = std::clamp(point_white, 0, 99);
+    point_white = std::clamp(point_white, 0, 89);
     cerr << "point_white:" << point_white << endl;
-    for (int i = 0; i < 21; i++)
+    if(centerline.size()>point_white+21)
     {
-        if(control_circle == 11||control_circle==12||control_circle==2||control_circle==7)
-            quan_weight[i+point_white] = dongtaiquan2[i];
-        else
-            quan_weight[i+point_white] = dongtaiquan[i];
+        for (int i = 0; i < 21; i++)
+        {
+            if(control_circle == 11||control_circle==12||control_circle==2||control_circle==7||control_circle==3||control_circle==8){
+                error += (centerline[point_white+i].x - 80) * dongtaiquan2[i];
+                weight_count += dongtaiquan2[i];
+            }
+            else{
+                error += (centerline[point_white+i].x - 80) * quan_weight[i];
+                weight_count += quan_weight[i];
+            }
+        }
     }
-    for (steps_used = 0; steps_used < centerline.size(); ++steps_used)
+    else
     {
-        error += (centerline[steps_used].x - 80) * quan_weight[steps_used];
-        weight_count += quan_weight[steps_used];
+        for(int i = centerline.size()-21; i < centerline.size(); i++)
+        {
+                error += (centerline[i].x - 80) * dongtaiquan[i];
+                weight_count += dongtaiquan[i];
+        }
     }
+
     float B = error / weight_count;
     return (weight_count != 0.0f) ? B : 0.0f;
 }
@@ -381,7 +392,7 @@ void MotionController::init_pid(PID_Controller &pid, float Kp, float Ki, float K
     {
         pid.fuzzy_pd = {5.5f, 12.0f, 1.0, 35.0, 6.0, 1.0f}; // 12
         // float uff_p_max = 22.0f, uff_d_max = 60.0f;
-        float uff_p_max = 12.0f, uff_d_max = 70.0f;
+        float uff_p_max = 19.0f, uff_d_max = 60.0f;
         for (int i = 0; i < 7; ++i)
         {
             pid.uff.UFF_P[i] = uff_p_max * (i - 3.0f) / 3.0f;
@@ -432,7 +443,7 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
     {
 
         float ec = error - pid.last_error;
-        float A = 0.11;
+        float A = 0.09;
         pid.last_error = error;
         float error_abs = fabs(error);
         // pid.fuzzy_pd.Kp0 = error_abs > 20 ? 10.0f : 4.0f;
@@ -457,7 +468,7 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
         }
         else if (control_circle == 0)
         {
-            pid.fuzzy_pd.Kp0 = 2.0f;
+            pid.fuzzy_pd.Kp0 = 1.f;
             pid.fuzzy_pd.Kd0 = 8.0f;
         }
         P = (pid.fuzzy_pd.Kp0 + delta_kp) * error;
@@ -466,13 +477,13 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
         {
             output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0;
         }
-        else if (control_circle == 13 || control_circle == 1 || control_circle == 6 || control_circle == 0)
+        else if (control_circle == 13 || control_circle == 1 || control_circle == 6 )
         {
             output = P + D;
         }
         else
         {
-            output = error * (pid.fuzzy_pd.Kp0 + 0.02 * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0;
+            output = error * (pid.fuzzy_pd.Kp0 + 0.03 * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0;
         }
     
         //      }else {
@@ -500,9 +511,9 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state)
     float tn = tan(angle_rad);
 
     float outer_factor = 1.0f + 0.2f * (W / 2.0f) * tn / L;
-    float inner_factor = 1.0f - 0.6f * (W / 2.0f) * tn / L;
+    float inner_factor = 1.0f - 0.8f * (W / 2.0f) * tn / L;
 
-    inner_factor = std::max(0.7f, std::min(inner_factor, 1.2f));
+    inner_factor = std::max(0.65f, std::min(inner_factor, 1.2f));
     outer_factor = std::max(1.0f, std::min(outer_factor, 1.2f));
 
     std::cerr << "in:" << inner_factor << std::endl;
@@ -520,35 +531,41 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state)
     case 2:
         Speed_Goal = Speed_Goal * 0.87;
         break;
+    case 3:
+        Speed_Goal = Speed_Goal * 0.87;
+        break;
+    case 4:
+        Speed_Goal = Speed_Goal * 0.9;
+        break;
     case 6:
         Speed_Goal = Speed_Goal * 0.9;
         break;
     case 7:
         Speed_Goal = Speed_Goal * 0.87;
         break;
-    case 4:
-        Speed_Goal = Speed_Goal * 0.9;
+    case 8:
+        Speed_Goal = Speed_Goal * 0.87;
         break;
     case 9:
         Speed_Goal = Speed_Goal * 0.9;
         break;
     case 11:
-        Speed_Goal = Speed_Goal * 0.8;
+        Speed_Goal = Speed_Goal * 0.85;
         break;
     case 12:
-        Speed_Goal = Speed_Goal * 0.8;
+        Speed_Goal = Speed_Goal * 0.85;
         break;
     default:
         Speed_Goal = Speed_Goal;
         break;
     }
     cerr << "speed_goal:" << Speed_Goal << endl;
-    if (state == 12 || state == 2 || state==3||current_servo_pwm < 3800) //||current_servo_pwm <3800
+    if (state == 12  || state==3||current_servo_pwm < 3800) //||current_servo_pwm <3800
     {                                                          // right turn
         pidLeft.target = Speed_Goal * outer_factor;
         pidRight.target = Speed_Goal * inner_factor;
     }
-    else if (state == 11 || state == 7 ||state==8|| current_servo_pwm > 4700) //||current_servo_pwm > 4700
+    else if (state == 11  ||state==8|| current_servo_pwm > 4700) //||current_servo_pwm > 4700
     {                                                               // left turn
         pidLeft.target = Speed_Goal * inner_factor;
         pidRight.target = Speed_Goal * outer_factor;

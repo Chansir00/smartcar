@@ -16,7 +16,7 @@ const char* key_paths[MAX_KEYS] = {
 
 // 每个按键对应要执行的命令（可自行修改）
 const char* key_cmds[MAX_KEYS] = {
-    "/home/project",
+    "/home/root/project",
     "/home/long/program_1",
     "/home/long/program_2",
     "/home/long/program_3"

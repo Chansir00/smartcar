@@ -41,7 +41,7 @@ int main()
     Kalman_Init(&kf_roll);
     brush_off();
     ctrl.motor_control(0, 0, 0);
-    int new_socket = sendImageOverSocket();
+    int new_socket = 0;
     //int new_socket = 0;
     //  if (udp_init(SERVER_IP, PORT) == 0)
     //  {
@@ -57,10 +57,13 @@ int main()
     //  }
     if (!debugmode)
     {
-        brush_init(800); // 初始化
+        gpio_set_level(BEEP, 0x1);
+        system_delay_ms(1500);
+        gpio_set_level(BEEP, 0x0);
+        brush_init(750); // 初始化
         pit_ms_init(5, [&ctrl, &detector]()
                     { 
-            if (!detector.lost && ready_count > 30)
+            if (!detector.lost && ready_count > 50)
             {
                 ctrl.pit_callback();
                 ctrl.motor_control(speed, 0, 0); // 将控制逻辑移到定时器回调200
@@ -71,6 +74,10 @@ int main()
                 brush_off();
 
             } });
+    }
+    else
+    {
+        new_socket = sendImageOverSocket();
     }
 
     while (true)
