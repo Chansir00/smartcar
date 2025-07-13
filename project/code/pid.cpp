@@ -13,12 +13,12 @@ float servo_motor_dir = 1;
 int16_t encoder_left;
 int16_t encoder_right;
 int point_speed_max = 90; // 前瞻最大起始点
-int point_speed_min = 65;
+int point_speed_min = 75;
 ; // 最小
 int speed_min = speed * 0.9;
 int speed_max = speed * 1.2; // 最大s
-int white_min = 70;          // 白点最小
-int white_max = 118;         // 白点最大
+int white_min = 60;          // 白点最小
+int white_max = 115;         // 白点最大
 const float BANG_BANG_THRESHOLD = 100.0f;
 //==============================================================================
 // >> Free Function Implementations
@@ -39,7 +39,6 @@ void cleanup()
     pwm_set_duty(MOTOR2_PWM, 0);
     gpio_set_level(BEEP, 0x0);
 }
-
 
 //==============================================================================
 // >> MotionController Class Implementations
@@ -137,26 +136,28 @@ float MotionController::Err_sum2(const vector<Point> &centerline)
     // int point_white = (b - white_min) / (white_max - white_min) * (point_speed_max - point_speed_min) + point_speed_min; // 计算点速度
     point_white = std::clamp(point_white, 0, 89);
     cerr << "point_white:" << point_white << endl;
-    if(centerline.size()>point_white+21)
+    if (centerline.size() > point_white + 21)
     {
         for (int i = 0; i < 21; i++)
         {
-            if(control_circle == 11||control_circle==12||control_circle==2||control_circle==7||control_circle==3||control_circle==8){
-                error += (centerline[point_white+i].x - 80) * dongtaiquan2[i];
+            if (control_circle == 11 || control_circle == 12 || control_circle == 2 || control_circle == 7 || control_circle == 3 || control_circle == 8)
+            {
+                error += (centerline[point_white + i].x - 80) * dongtaiquan2[i];
                 weight_count += dongtaiquan2[i];
             }
-            else{
-                error += (centerline[point_white+i].x - 80) * quan_weight[i];
-                weight_count += quan_weight[i];
+            else
+            {
+                error += (centerline[point_white + i].x - 80) * dongtaiquan[i];
+                weight_count += dongtaiquan[i];
             }
         }
     }
     else
     {
-        for(int i = centerline.size()-21; i < centerline.size(); i++)
+        for (int i = centerline.size() - 21; i < centerline.size(); i++)
         {
-                error += (centerline[i].x - 80) * dongtaiquan[i];
-                weight_count += dongtaiquan[i];
+            error += (centerline[i].x - 80) * dongtaiquan2[i];
+            weight_count += dongtaiquan2[i];
         }
     }
 
@@ -178,16 +179,16 @@ void MotionController::motor_control(int speed, float k, int limit)
     float error_left = pidLeft.target - pidLeft.actual;
     float error_right = pidRight.target - pidRight.actual;
 
-     if (fabs(error_left) > BANG_BANG_THRESHOLD) 
+    if (fabs(error_left) > BANG_BANG_THRESHOLD)
     {
         pidLeft.integral = 0;
         memset(pidLeft.error, 0, sizeof(pidLeft.error));
-        
+
         float raw_outL = (error_left > 0) ? 0.40f * PWM_MAX : -0.40f * PWM_MAX;
         gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 1 : 0);
         pwm_set_duty(MOTOR1_PWM, fabs(raw_outL));
     }
-    else 
+    else
     {
         float raw_outL = calculate_pid(pidLeft, pidLeft.target);
         gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 1 : 0);
@@ -198,12 +199,12 @@ void MotionController::motor_control(int speed, float k, int limit)
     {
         pidRight.integral = 0;
         memset(pidRight.error, 0, sizeof(pidRight.error));
-        
+
         float raw_outR = (error_right > 0) ? 0.40f * PWM_MAX : -0.40f * PWM_MAX;
         gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 1 : 0);
         pwm_set_duty(MOTOR2_PWM, fabs(raw_outR));
     }
-    else 
+    else
     {
         float raw_outR = calculate_pid(pidRight, pidRight.target);
         gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 1 : 0);
@@ -390,9 +391,9 @@ void MotionController::init_pid(PID_Controller &pid, float Kp, float Ki, float K
 
     if (mode == FUZZY_PID)
     {
-        pid.fuzzy_pd = {5.5f, 12.0f, 1.0, 35.0, 6.0, 1.0f}; // 12
+        pid.fuzzy_pd = {12.f, 12.0f, 1.0, 35.0, 6.0, 1.0f}; // 12
         // float uff_p_max = 22.0f, uff_d_max = 60.0f;
-        float uff_p_max = 19.0f, uff_d_max = 60.0f;
+        float uff_p_max = 25.0f, uff_d_max = 61.0f;
         for (int i = 0; i < 7; ++i)
         {
             pid.uff.UFF_P[i] = uff_p_max * (i - 3.0f) / 3.0f;
@@ -450,50 +451,91 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
         //  执行模糊推理
         count_DMF(pid, error * pid.fuzzy_pd.factor, ec * pid.fuzzy_pd.factor * EC_FACTOR);
         float delta_kp = Fuzzy_Kp(pid);
-        cerr << "ΔKp:" << delta_kp << endl;
         float delta_kd = abs(Fuzzy_Kd(pid));
-        cerr << "ΔKd:" << delta_kd << endl;
         float output = 0.0f;
         float P = 0.0f;
         float D = 0.0f;
         // pid.fuzzy_pd.Kp0 = params.kp_switch;
         // pid.fuzzy_pd.Kd0 = params.kd_switch;
         // pid.fuzzy_pd.A = params.A_switch; // 模糊PID参数A
-        if (control_circle == 13 || control_circle == 1 || control_circle == 6)
+        if (control_circle == 13 || control_circle == 1 || control_circle == 6 || control_circle == 14)
         {
             pid.fuzzy_pd.Kp0 = 5.0f;
-            pid.fuzzy_pd.Kd0 = 12.0f;
+            pid.fuzzy_pd.Kd0 = 10.0f;
             delta_kd = 0.0f;
             delta_kp = 0.0f;
         }
-        else if (control_circle == 0)
+        else
         {
-            pid.fuzzy_pd.Kp0 = 1.f;
-            pid.fuzzy_pd.Kd0 = 8.0f;
+            delta_kd = 0.0f;
+            delta_kp = 0.0f;
+            if (error_abs < 10)
+            {
+                pid.fuzzy_pd.Kp0 = 4.5f;
+                pid.fuzzy_pd.Kd0 = 10.0f;
+            }
+            else if (error_abs < 15)
+            {
+                pid.fuzzy_pd.Kp0 = 5.5f;
+                pid.fuzzy_pd.Kd0 = 11.5f;
+            }
+            else if (error_abs < 20)
+            {
+                pid.fuzzy_pd.Kp0 = 6.5f;
+                pid.fuzzy_pd.Kd0 = 13.0f;
+            }
+            else if (error_abs < 25)
+            {
+                pid.fuzzy_pd.Kp0 = 7.5f;
+                pid.fuzzy_pd.Kd0 = 14.5f;
+            }
+            else if (error_abs < 30)
+            {
+                pid.fuzzy_pd.Kp0 = 8.5f;
+                pid.fuzzy_pd.Kd0 = 16.0f;
+            }
+            else if (error_abs < 35)
+            {
+                pid.fuzzy_pd.Kp0 = 11.5f;
+                pid.fuzzy_pd.Kd0 = 18.0f;
+            }
+            else if (error_abs < 40)
+            {
+                pid.fuzzy_pd.Kp0 = 12.5f;
+                pid.fuzzy_pd.Kd0 = 19.5f;
+            }
+            else if (error_abs < 45)
+            {
+                pid.fuzzy_pd.Kp0 = 13.5f;
+                pid.fuzzy_pd.Kd0 = 19.0f;
+            }
+            else if (error_abs < 50)
+            {
+                pid.fuzzy_pd.Kp0 = 14.0f;
+                pid.fuzzy_pd.Kd0 = 19.0f;
+            }
+            else if (error_abs < 60)
+            {
+                pid.fuzzy_pd.Kp0 = 15.0f;
+                pid.fuzzy_pd.Kd0 = 26.0f;
+            }
+            else
+            {
+                pid.fuzzy_pd.Kp0 = 17.0f;
+                pid.fuzzy_pd.Kd0 = 30.0f;
+            }
         }
         P = (pid.fuzzy_pd.Kp0 + delta_kp) * error;
         D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec; //+ delta_kd
-        if (control_circle == 11 || control_circle == 12 ||control_circle==2||control_circle ==7||control_circle==3||control_circle==8)
+        if (control_circle == 2 || control_circle == 3 || control_circle == 4 || control_circle == 7 || control_circle == 8 || control_circle == 9)
         {
             output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0;
         }
-        else if (control_circle == 13 || control_circle == 1 || control_circle == 6 )
+        else
         {
             output = P + D;
         }
-        else
-        {
-            output = error * (pid.fuzzy_pd.Kp0 + 0.03 * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0;
-        }
-    
-        //      }else {
-        //          output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; // imu963ra_gyro_z * delta_kd;
-        // }
-        // float output = error * (pid.fuzzy_pd.Kp0 + A * (abs(error) * delta_kp)) + ec * pid.fuzzy_pd.Kd0; // imu963ra_gyro_z * delta_kd;
-        // float output = (pid.fuzzy_pd.Kp0 + delta_kp) * error / 100.0f;
-        // output += (pid.fuzzy_pd.Kd0 + delta_kd) * ec / 100.0f;
-        // output *= -0.7f;
-        //  输出限幅
+        cerr << "output:" << output << " P:" << pid.fuzzy_pd.Kp0 << " D:" << pid.fuzzy_pd.Kd0 << " ec:" << ec << " delta_kp:" << delta_kp << " delta_kd:" << delta_kd << endl;
         filtered_output = output; // alpha * output + (1.0f - alpha) * filtered_output;
         filtered_output = clamp(filtered_output, -pid.max_output, pid.max_output);
         // output = clamp(output, -pid.max_output, pid.max_output);
@@ -512,10 +554,13 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state)
 
     float outer_factor = 1.0f + 0.2f * (W / 2.0f) * tn / L;
     float inner_factor = 1.0f - 0.8f * (W / 2.0f) * tn / L;
+    float outer_factor2 = 1.0f + 0.15f * (W / 2.0f) * tn / L;
+    float inner_factor2 = 1.0f - 0.3f * (W / 2.0f) * tn / L;
 
-    inner_factor = std::max(0.65f, std::min(inner_factor, 1.2f));
-    outer_factor = std::max(1.0f, std::min(outer_factor, 1.2f));
-
+    inner_factor = std::max(0.7f, std::min(inner_factor, 1.2f));
+    outer_factor = std::max(1.0f, std::min(outer_factor, 1.1f));
+    inner_factor2 = std::max(0.8f, std::min(inner_factor2, 1.2f));
+    outer_factor2 = std::max(1.0f, std::min(outer_factor2, 1.1f));
     std::cerr << "in:" << inner_factor << std::endl;
     std::cerr << "out:" << outer_factor << std::endl;
     cerr << "state:" << state << endl;
@@ -549,31 +594,43 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state)
     case 9:
         Speed_Goal = Speed_Goal * 0.9;
         break;
-    case 11:
-        Speed_Goal = Speed_Goal * 0.85;
-        break;
-    case 12:
-        Speed_Goal = Speed_Goal * 0.85;
-        break;
     default:
-        Speed_Goal = Speed_Goal;
+        if (abs(my_error2) > 20)
+            Speed_Goal = Speed_Goal * 0.9;
+        else
+            Speed_Goal = Speed_Goal;
         break;
     }
     cerr << "speed_goal:" << Speed_Goal << endl;
-    if (state == 12  || state==3||current_servo_pwm < 3800) //||current_servo_pwm <3800
-    {                                                          // right turn
+    if (state == 2 || state == 3 || state == 4) //||current_servo_pwm <3800
+    {                                           // right turn
         pidLeft.target = Speed_Goal * outer_factor;
         pidRight.target = Speed_Goal * inner_factor;
     }
-    else if (state == 11  ||state==8|| current_servo_pwm > 4700) //||current_servo_pwm > 4700
-    {                                                               // left turn
+    else if (state == 7 || state == 8 || state == 9) //||current_servo_pwm > 4700
+    {                                                // left turn
         pidLeft.target = Speed_Goal * inner_factor;
         pidRight.target = Speed_Goal * outer_factor;
     }
+    else if (state == 13)
+    {
+        { // straight
+            pidLeft.target = Speed_Goal;
+            pidRight.target = Speed_Goal;
+        }
+    }
     else
-    { // straight
-        pidLeft.target = Speed_Goal;
-        pidRight.target = Speed_Goal;
+    {
+        if (current_servo_pwm < 4260) // right turn
+        {
+            pidLeft.target = Speed_Goal * outer_factor2;
+            pidRight.target = Speed_Goal * inner_factor2;
+        }
+        else // left turn
+        {
+            pidLeft.target = Speed_Goal * inner_factor2;
+            pidRight.target = Speed_Goal * outer_factor2;
+        }
     }
 }
 

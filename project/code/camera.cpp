@@ -80,7 +80,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     {
         crossing--;
     }
-    int img_devided = 105;
+    int img_devided = 110;
     findrightInflectionPoints(rightLane, rightJumpPointA, rightJumpPointB, isrightJumpvalid,isrightCrossing);
     findleftInflectionPoints(LeftLane, leftJumpPointA, leftJumpPointB, isleftJumpvalid,isleftCrossing);
     isleftLanecontinuous = isLaneContinuous(LeftLane);
@@ -133,11 +133,11 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     {
         gpio_set_level(BEEP, 0x0);
         // 先通过左车道单调性和右车道丢点率判断是否可能进入环岛
-        if (circleflag == 1 && leftJumpPointA.x == -1  && leftMissedRadius < 0.6 && isrightJumpvalid && isleftstraight && !isrightstraight && numPoints >= img_devided)
+        if (circleflag == 1 && leftJumpPointA.x == -1  && leftMissedRadius < 0.6 &&rightMissedRadius<0.7&& isrightJumpvalid && isleftstraight && !isrightstraight && numPoints >= img_devided)
         {
             circleState = RIGHT_CIRCLE_DETECTED;
         }
-        else if (circleflag == 1 && rightJumpPointA.x == -1  && rightMissedRadius < 0.6 && isrightstraight && !isleftstraight && isleftJumpvalid && numPoints >= img_devided)
+        else if (circleflag == 1 && rightJumpPointA.x == -1  && rightMissedRadius < 0.6 &&leftMissedRadius<0.7&& isrightstraight && !isleftstraight && isleftJumpvalid && numPoints >= img_devided)
         {
             circleState = LEFT_CIRCLE_DETECTED;
         }
@@ -147,13 +147,13 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         }
         else if ((isleftstraight && lefttrend == 1 && !isrightstraight&&leftMissedRadius<=0.7 && righttrend!=1 )  && numPoints<=img_devided)
         {
-            circleState = RIGHT_TURN;
+            //circleState = RIGHT_TURN;
         }
         else if ((isrightstraight && righttrend == -1 &&!isleftstraight&& rightMissedRadius<=0.7 && lefttrend!=-1) && numPoints <= img_devided)
         {
-            circleState = LEFT_TURN;
+            //circleState = LEFT_TURN;
         }
-        else if (small_count > 0.9 * numPoints && numPoints >= 108 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && isleftLanecontinuous&& isrightLanecontinuous&&lefttrend==1 &&righttrend==-1)
+        else if (small_count > 0.9 * numPoints && numPoints >= 110 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && isleftLanecontinuous&& isrightLanecontinuous&&lefttrend==1 &&righttrend==-1)
         {
             circleState = STRAIGHT;
         }
@@ -194,12 +194,12 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             //     // generateVirtualPath(rightJumpPointA, righthemisphere, rightvirtualPath, true);
             // }
         }
-        else
+        else if(rightJumpPointB.x<=rightJumpPointA.x)
         {
             generateVirtualPath(rightJumpPointB, endPoint, rightvirtualPath, true);
         }
         mergeVirtualPath(RightLane, rightvirtualPath, -1);
-        if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 16)
+        if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 14)
         {
             circleState = RIGHT_CIRCLE_INTRY;
             //circleState = CIRCLE_INACTIVE;
@@ -267,7 +267,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             generateVirtualPath(rightJumpPointB, rightLane[rightLane.size() - 1].position, rightvirtualPath, true);
             mergeVirtualPath(rightLane, rightvirtualPath, -1);
         }
-        if (rightJumpPointB.x == -1 || rightJumpPointB.y >= 100)
+        if (rightJumpPointB.x == -1 || rightJumpPointB.x > 120 || rightJumpPointB.y >= 60)
         {
             circleState = CIRCLE_INACTIVE;
             circleflag = 0;
@@ -289,7 +289,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         //  }
 
         circle(output, lefthemisphere, 2, Scalar(0, 0, 0), 2);
-        if (leftJumpPointA.x != -1&&leftJumpPointA.y>=60&&leftJumpPointA.x<=leftJumpPointB.x)
+        if (leftJumpPointA.x != -1&&leftJumpPointA.y>=20&&leftJumpPointA.x<=leftJumpPointB.x)
         {
             generateVirtualPath(leftJumpPointB, leftJumpPointA, leftvirtualPath, true);
             // if (lefthemisphere.x != -1 && lefthemisphere.x > leftJumpPointA.x)
@@ -301,12 +301,12 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             //     generateVirtualPath(leftJumpPointB, leftLane[startline + 1].position, leftvirtualPath, true);
             // }
         }
-        else
+        else if(leftJumpPointB.x >= leftJumpPointA.x)
         {
             generateVirtualPath(leftJumpPointB, leftLane[leftLane.size() - 10].position, leftvirtualPath, true);
         }
         mergeVirtualPath(LeftLane, leftvirtualPath, -1);
-        if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 16)
+        if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 14)
         {
             circleState = LEFT_CIRCLE_INTRY;
             //circleState = CIRCLE_INACTIVE;
@@ -373,7 +373,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             generateVirtualPath(leftJumpPointB, leftLane[leftLane.size() - 1].position, leftvirtualPath, true);
             mergeVirtualPath(leftLane, leftvirtualPath, -1);
         }
-        if (leftJumpPointB.x == -1 || leftJumpPointB.y >= 100)
+        if (leftJumpPointB.x == -1 || leftJumpPointB.y >= 60||leftJumpPointB.x < 60)
         {
             circleflag = 0;
             circleState = CIRCLE_INACTIVE;
@@ -384,7 +384,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case LEFT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints > img_devided && small_count > 0.5)
+        if (numPoints > 100|| small_count > 0.9*numPoints)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -397,7 +397,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case RIGHT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints > img_devided &&small_count > 0.5)
+        if (numPoints >100 ||small_count > 0.9*numPoints)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -501,7 +501,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case STRAIGHT:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints < 108||rightJumpPointB.x!=-1||leftJumpPointB.x!=-1)
+        if (numPoints < 110||rightJumpPointB.x!=-1||leftJumpPointB.x!=-1)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -545,7 +545,7 @@ bool binaryThreshold(const Mat &input, Mat &binary, Mat &output)
         cerr << "错误：输入图像为空！" << endl;
         return false;
     }
-    Rect roi(0, 36, image_w, image_h -36); // 定义ROI区域
+    Rect roi(0, 34, image_w, image_h -34); // 定义ROI区域
     Mat croppedImage = input(roi);
     //  调整大小为160x120
     Mat resizedImage;

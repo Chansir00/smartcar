@@ -6,11 +6,12 @@ int debugmode = readFlag("./debugmode");
 const int camera = 0;
 int flag = 0;
 unsigned int send_counter = 0;
-int speed = 650; // 车速
+int speed = 600; // 车速
 const unsigned int SEND_INTERVAL = 20;
 int ready_count = 0;
 int control_circle = 0;
 float my_error = 0.0f; // 误差
+float my_error2 = 0.0f; // 误差2
 extern bool slow_down;
 
 // 另外一端的IP地址
@@ -60,7 +61,7 @@ int main()
         gpio_set_level(BEEP, 0x1);
         system_delay_ms(1500);
         gpio_set_level(BEEP, 0x0);
-        brush_init(750); // 初始化
+        brush_init(700); // 初始化
         pit_ms_init(5, [&ctrl, &detector]()
                     { 
             if (!detector.lost && ready_count > 50)
@@ -107,7 +108,7 @@ int main()
             break;
         }
         my_error = ctrl.Err_sum(detector.centerLine);
-        float my_error2 = ctrl.Err_sum2(detector.centerLine);
+        my_error2 = ctrl.Err_sum2(detector.centerLine);
         cout << "my_error2: " << my_error2 << endl;
         flag = 1;
         // ctrl.update_shared_error(error);
