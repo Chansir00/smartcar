@@ -6,7 +6,7 @@ int debugmode = readFlag("./debugmode");
 const int camera = 0;
 int flag = 0;
 unsigned int send_counter = 0;
-int speed = 800; // 车速
+int speed = 830; // 车速
 const unsigned int SEND_INTERVAL = 20;
 int ready_count = 0;
 int control_circle = 0;
@@ -84,7 +84,6 @@ int main()
 
     while (true)
     {
-        //brush_init(800); // 初始化
         if (ready_count < 2000)
             ready_count++;
         clock_t start = clock();
@@ -121,9 +120,9 @@ int main()
         //  pwm_set_duty(MOTOR2_PWM, 2000); // 小占空比
         //  gpio_set_level(MOTOR2_DIR, 0);
         //  cerr << "Forward countl: " << encoder_get_count(ENCODER_1) <<"Forward countr: " << encoder_get_count(ENCODER_2) << endl;
-        if (debugmode == 2)
+        if (debugmode == 0)
         {
-            brush_control();
+            //brush_control();
             flag = 1;
         }
         else if (debugmode==1 )
