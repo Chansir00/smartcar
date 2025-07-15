@@ -25,18 +25,18 @@ void brush_control()
     }
     else if(control_circle ==11  || control_circle == 6 || control_circle ==7 || control_circle == 8 || control_circle == 9)
     {
-        duty_left = 850;
+        duty_left = 900;
         duty_right = 900;
     }
     else if(control_circle ==12 || control_circle == 2 || control_circle == 3 || control_circle == 4||control_circle==5)
     {
         duty_left = 900;
-        duty_right = 850;
+        duty_right = 900;
     }
     else if(control_circle ==0)
     {
-            duty_left = 850;
-            duty_right = 850;
+            duty_left = 800;
+            duty_right = 800;
     }
 
     pwm_set_duty(PWM_1, duty_left);

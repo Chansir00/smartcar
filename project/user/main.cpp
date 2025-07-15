@@ -6,7 +6,7 @@ int debugmode = readFlag("./debugmode");
 const int camera = 0;
 int flag = 0;
 unsigned int send_counter = 0;
-int speed = 820; // 车速
+int speed = 800; // 车速
 const unsigned int SEND_INTERVAL = 20;
 int ready_count = 0;
 int control_circle = 0;
@@ -44,24 +44,25 @@ int main()
     brush_off();
     ctrl.motor_control(0, 0, 0);
     int new_socket = 0;
-     if (udp_init(SERVER_IP, PORT) == 0)
-     {
-         printf("tcp_client ok\r\n");
-         udp_send_data(temp_str, sizeof(temp_str));
-         udp_send_data(temp_str, sizeof(temp_str));
-         udp_send_data(temp_str, sizeof(temp_str));
-     }
-     else
-     {
-         printf("tcp_client error\r\n");
-         return -1;
-     }
+    //int new_socket = 0;
+    //  if (udp_init(SERVER_IP, PORT) == 0)
+    //  {
+    //      printf("tcp_client ok\r\n");
+    //      udp_send_data(temp_str, sizeof(temp_str));
+    //      udp_send_data(temp_str, sizeof(temp_str));
+    //      udp_send_data(temp_str, sizeof(temp_str));
+    //  }
+    //  else
+    //  {
+    //      printf("tcp_client error\r\n");
+    //      return -1;
+    //  }
     if (!debugmode)
     {
-        brush_init(800);
         gpio_set_level(BEEP, 0x1);
         system_delay_ms(1500);
         gpio_set_level(BEEP, 0x0);
+        brush_init(800); // 初始化
         pit_ms_init(5, [&ctrl, &detector]()
                     { 
             if (!detector.lost && ready_count > 50)
@@ -83,6 +84,7 @@ int main()
 
     while (true)
     {
+        //brush_init(800); // 初始化
         if (ready_count < 2000)
             ready_count++;
         clock_t start = clock();
@@ -94,10 +96,11 @@ int main()
             break;
         }
         // 回显UDP数据。
-        sprintf(float_str1, "left_encoder: %.2f\r\n", ctrl.pidLeft.actual);
-        //sprintf(float_str2, "right_encoder: %.2f\r\n", ctrl.pidRight.actual);
-        udp_send_data((uint8_t *)&float_str1, sizeof(float_str1));
+        //sprintf(float_str1, "left_encoder: %.2f\r\n", ctrl.pidLeft.actual);
+        // sprintf(float_str2, "right_encoder: %.2f\r\n", ctrl.pidRight.actual);
+        //udp_send_data((uint8_t *)&float_str1, sizeof(float_str1));
         // udp_send_data((uint8_t *)&float_str2, sizeof(float_str2));
+
         DetectionResult result = detector.detect(frame);
         control_circle = detector.circleState;
         speed_circle = detector.speed_decide();
@@ -118,12 +121,12 @@ int main()
         //  pwm_set_duty(MOTOR2_PWM, 2000); // 小占空比
         //  gpio_set_level(MOTOR2_DIR, 0);
         //  cerr << "Forward countl: " << encoder_get_count(ENCODER_1) <<"Forward countr: " << encoder_get_count(ENCODER_2) << endl;
-        if (debugmode == 0)
+        if (debugmode == 2)
         {
             brush_control();
             flag = 1;
         }
-        else if (debugmode == 1)
+        else if (debugmode==1 )
         {
             vector<uchar> buf;
             vector<int> params = {cv::IMWRITE_JPEG_QUALITY, 90};
