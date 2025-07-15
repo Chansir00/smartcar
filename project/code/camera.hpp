@@ -96,6 +96,7 @@ public:
     vector<TrackPoint> leftLane;  // 左车道
     vector<TrackPoint> rightLane; // 右车道
     vector<Point> centerLine;     // 中线
+    int juli = 0; // 距离计算
 
     struct ControlParams
     {
@@ -112,6 +113,8 @@ public:
 
     // member function
     DetectionResult detect(const cv::Mat &inputImage);
+    int juli_caculate(const cv::Mat &binaryImage);
+    int speed_decide();//const vector<TrackPoint> &Leftline, const vector<TrackPoint> &Rightline
     void initializeVariables(int image_w, int image_h);
     void detectWhitePixels(const Mat &img, int roiHeight, std::vector<int> &whitePixels);
     bool detectZebraCrossing(const std::vector<int> &whitePixels);
@@ -155,6 +158,27 @@ public:
     int checkLaneTrend(const std::vector<TrackPoint> &lane);
 
 private:
+    int left_straight[120] = {
+    42, 42, 42, 42, 42, 43, 43, 43, 44, 44, 44, 44, 45, 45, 45, 46, 46, 46, 46, 47,
+    47, 47, 47, 48, 48, 49, 49, 49, 50, 50, 50, 50, 51, 51, 51, 52, 52, 52, 53, 53,
+    53, 53, 54, 54, 54, 55, 55, 55, 55, 56, 57, 57, 57, 58, 58, 58, 58, 59, 59, 59,
+    59, 60, 60, 60, 60, 60, 61, 62, 62, 62, 62, 63, 63, 64, 64, 64, 65, 65, 65, 65,
+    66, 66, 66, 66, 67, 67, 67, 68, 68, 69, 69, 70, 70, 70, 71, 71, 71, 72, 72, 72,
+    73, 73, 73, 74, 74, 74, 75, 75, 75, 75, 76, 76, 76, 77, 77, 77, 77, 77, 77, 77,
+};
+    int right_straight[120] = {
+    113, 113, 113, 112, 112, 112, 112, 112, 112, 111,
+    111, 111, 111, 110, 110, 110, 110, 110, 109, 109,
+    109, 108, 108, 108, 108, 107, 107, 107, 106, 106,
+    106, 106, 106, 105, 105, 105, 105, 104, 104, 104,
+    104, 103, 103, 103, 102, 102, 102, 101, 101, 101,
+    100, 100, 100, 99, 99, 99, 99, 98, 98, 98, 98, 97,
+    97, 97, 97, 96, 96, 96, 95, 95, 95, 95, 95, 94, 94,
+    94, 93, 93, 93, 93, 92, 92, 92, 92, 92, 91, 91, 91, 
+    90, 90, 90, 89, 89, 89, 89, 89, 88, 88, 88, 87, 87,
+    87, 86, 86, 86, 86, 85, 85, 85, 84, 84, 84, 83, 83,
+    83, 83, 83, 83, 83, 83
+};
     ControlParams current_params;
 
     void updateControlParams()

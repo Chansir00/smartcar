@@ -23,6 +23,79 @@ VideoCapture cap_init(int camera)
     return cap; // 返回未成功打开的 cap（isOpened() 为 false）
 }
 
+// int LaneProcessor::juli_caculate(const vector<Point> &Leftline, const vector<Point> &Rightline)
+// {
+//     int left_count = 0;
+//     int right_count = 0;
+//     for(int i = 0; i < 120; i++)
+//     {
+//         if(Leftline[i].x < left_straight[i])
+//         {
+//             left_count++;
+//         }
+//         if(Rightline[i].x > right_straight[i])
+//         {
+//             right_count++;
+//         }
+//     }
+//     if(left_count > right_count)
+//     {
+//         juli = right_count;
+//     }else{
+//         juli = left_count;
+//     }
+//     clamp(juli, 0, 119);
+//     cerr << "juli:" << juli << endl;
+//     return juli;
+// }
+int LaneProcessor::juli_caculate(const cv::Mat &binaryImage)
+{
+    int left_count = 0;
+    int right_count = 0;
+    
+    // 确保二值图像有效
+    if (binaryImage.empty() || binaryImage.rows != 120 || binaryImage.cols != 160) {
+        cerr << "错误：二值图像无效！" << endl;
+        return 0;
+    }
+    // 从图像底部（第119行）开始向上扫描到顶部（第0行）
+    for (int i = 0; i <= 119; i++)
+    {
+        // 获取当前行对应的左参考列
+        int left_col = left_straight[i];
+        if (binaryImage.at<uchar>(i, left_col) == 255) {
+            left_count++;
+        }
+      
+        int right_col = right_straight[i];
+        if (binaryImage.at<uchar>(i, right_col) == 255) {
+            right_count++;
+        }
+    }
+    
+    // 计算最终距离值
+    if (left_count > right_count) {
+        juli = right_count;
+    } else {
+        juli = left_count;
+    }
+    
+    // 确保距离值在合理范围内
+    clamp(juli, 0, 119);
+    cerr << "juli:" << juli << endl;
+    return juli;
+}
+int LaneProcessor::speed_decide()//const vector<TrackPoint> &Leftline, const vector<TrackPoint> &Rightline
+{
+    int a = juli;
+    if (a <= 80){
+        return 0;
+    }
+    else if (a > 80){
+        return 1;
+    }
+}
+
 // 车道检测逻辑
 DetectionResult LaneProcessor::detect(const Mat &inputImage)
 {
@@ -30,6 +103,7 @@ DetectionResult LaneProcessor::detect(const Mat &inputImage)
     float leftMissedRadius, rightMissedRadius;
     DetectionResult result;
     binaryThreshold(inputImage, result.binaryImage, result.outputImage); // 二值化处理
+
     // 预处理图像
 
     // result.warpedImage = ApplyInversePerspective(result.binaryImage);
@@ -37,7 +111,7 @@ DetectionResult LaneProcessor::detect(const Mat &inputImage)
 
     // 计算白点分布
     detectWhitePixels(result.binaryImage, roiHeight, whitePixels);
-
+    juli = juli_caculate(result.binaryImage);
     // 检测车道点
     detectLanePoints(result.binaryImage, roiHeight, whitePixels, leftLane, rightLane, leftMissedPoints, rightMissedPoints, leftMissedRadius, rightMissedRadius);
     processCircle(leftLane, rightLane, result.binaryImage, result.outputImage, roiHeight, leftMissedRadius, rightMissedRadius);
@@ -53,6 +127,9 @@ DetectionResult LaneProcessor::detect(const Mat &inputImage)
 
     return result;
 }
+
+
+
 int circleflag = 1;
 int countcircle = 0;
 bool slow_down = false;
@@ -145,13 +222,13 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = CROSSING;
         }
-        else if ((isleftstraight && lefttrend == 1 && !isrightstraight&&leftMissedRadius<=0.7 && righttrend!=1 )  && numPoints<=img_devided)
+        else if ((isleftstraight && lefttrend == 1 && !isrightstraight&&leftMissedRadius<=0.7 && righttrend!=1 )  &&numPoints<=img_devided)
         {
-            //circleState = RIGHT_TURN;
+            circleState = RIGHT_TURN;
         }
         else if ((isrightstraight && righttrend == -1 &&!isleftstraight&& rightMissedRadius<=0.7 && lefttrend!=-1) && numPoints <= img_devided)
         {
-            //circleState = LEFT_TURN;
+            circleState = LEFT_TURN;
         }
         else if (small_count > 0.9 * numPoints && numPoints >= 110 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && isleftLanecontinuous&& isrightLanecontinuous&&lefttrend==1 &&righttrend==-1)
         {
@@ -201,8 +278,8 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         mergeVirtualPath(RightLane, rightvirtualPath, -1);
         if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 14)
         {
-            circleState = RIGHT_CIRCLE_INTRY;
-            //circleState = CIRCLE_INACTIVE;
+            //circleState = RIGHT_CIRCLE_INTRY;
+            circleState = CIRCLE_INACTIVE;
         }
     }
     break;
@@ -308,8 +385,8 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         mergeVirtualPath(LeftLane, leftvirtualPath, -1);
         if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 14)
         {
-            circleState = LEFT_CIRCLE_INTRY;
-            //circleState = CIRCLE_INACTIVE;
+            //circleState = LEFT_CIRCLE_INTRY;
+            circleState = CIRCLE_INACTIVE;
         }
     }
     break;
@@ -384,7 +461,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case LEFT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints > 100|| small_count > 0.9*numPoints)
+        if (numPoints > 110|| small_count > 0.9*numPoints)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -397,7 +474,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case RIGHT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints >100 ||small_count > 0.9*numPoints)
+        if (numPoints >110 ||small_count > 0.9*numPoints)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -488,7 +565,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case ZEBRA:
     {
         gpio_set_level(BEEP, 0x1);
-        if(zebra_count<30)
+        if(zebra_count<20)
         {
             zebra_count++;
         }
@@ -850,7 +927,7 @@ void LaneProcessor::drawLanes(Mat &image, int roiHeight,
                 center.y = (leftPoint.y + rightPoint.y) / 2;
                 centerLine.push_back(center);
             }
-            if (abs(center.x - 80) < 20)
+            if (abs(center.x - 80) < 10)
             {
                 small_count++;
             }

@@ -172,6 +172,7 @@ extern struct pwm_info motor_1_pwm_info;
 extern struct pwm_info motor_2_pwm_info;
 extern struct pwm_info servo_pwm_info;
 extern int control_circle; // 环岛状态
+extern int speed_circle;
 extern int16_t encoder_left;
 extern int16_t encoder_right;
 extern float servo_motor_duty;
@@ -219,7 +220,7 @@ public:
     void count_DMF(PID_Controller& pid, float e, float ec);
 
     // --- Drivetrain Strategy Helpers
-    void ackerman_diff_control(int Speed_Goal, int state);
+    void ackerman_diff_control(int Speed_Goal, int state,int state2);
     void LSD_Control();
     void suibian_control(int speed);
 

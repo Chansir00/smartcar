@@ -12,14 +12,14 @@ float servo_motor_duty = 90.0;
 float servo_motor_dir = 1;
 int16_t encoder_left;
 int16_t encoder_right;
-int point_speed_max = 90; // 前瞻最大起始点
-int point_speed_min = 75;
+int point_speed_max = 90; // 前瞻最大起始点  //90
+int point_speed_min = 65; //65
 ; // 最小
 int speed_min = speed * 0.9;
 int speed_max = speed * 1.2; // 最大s
 int white_min = 60;          // 白点最小
 int white_max = 115;         // 白点最大
-const float BANG_BANG_THRESHOLD = 100.0f;
+const float BANG_BANG_THRESHOLD = 50.0f; //120
 //==============================================================================
 // >> Free Function Implementations
 //==============================================================================
@@ -91,13 +91,14 @@ float MotionController::ave_speed()
         average_speed += speed_buffer[i];
     }
     average_speed /= buffer_count;
-    cerr << "average_speed:" << average_speed << endl;
+    //cerr << "average_speed:" << average_speed << endl;
     return average_speed;
 }
 
 int MotionController::dongtaiqianzhan()
 {
-    int average_speed = (encoder_left + encoder_right) / 2;
+    //int average_speed = (encoder_left + encoder_right) / 2;
+    int average_speed = ave_speed();
     cerr << "average_speed:" << average_speed << endl;
     if (speed_max <= speed_min)
     {
@@ -135,6 +136,8 @@ float MotionController::Err_sum2(const vector<Point> &centerline)
     int point_white = static_cast<int>(scale * (point_speed_max - point_speed_min) + point_speed_min);
     // int point_white = (b - white_min) / (white_max - white_min) * (point_speed_max - point_speed_min) + point_speed_min; // 计算点速度
     point_white = std::clamp(point_white, 0, 89);
+    //int point_speed = dongtaiqianzhan();
+    //cerr << "point_speed: " << point_speed << endl;
     cerr << "point_white:" << point_white << endl;
     if (centerline.size() > point_white + 21)
     {
@@ -142,12 +145,12 @@ float MotionController::Err_sum2(const vector<Point> &centerline)
         {
             if (control_circle == 11 || control_circle == 12 || control_circle == 2 || control_circle == 7 || control_circle == 3 || control_circle == 8)
             {
-                error += (centerline[point_white + i].x - 80) * dongtaiquan2[i];
+                error += (centerline[point_white + i].x - 79) * dongtaiquan2[i];
                 weight_count += dongtaiquan2[i];
             }
             else
             {
-                error += (centerline[point_white + i].x - 80) * dongtaiquan[i];
+                error += (centerline[point_white + i].x - 79) * dongtaiquan[i];
                 weight_count += dongtaiquan[i];
             }
         }
@@ -156,7 +159,7 @@ float MotionController::Err_sum2(const vector<Point> &centerline)
     {
         for (int i = centerline.size() - 21; i < centerline.size(); i++)
         {
-            error += (centerline[i].x - 80) * dongtaiquan2[i];
+            error += (centerline[i].x - 79) * dongtaiquan2[i];
             weight_count += dongtaiquan2[i];
         }
     }
@@ -168,13 +171,13 @@ float MotionController::Err_sum2(const vector<Point> &centerline)
 void MotionController::motor_control(int speed, float k, int limit)
 {
     std::lock_guard<std::mutex> lock(encoder_mutex);
-    ackerman_diff_control(speed, control_circle);
+    ackerman_diff_control(speed, control_circle,speed_circle);
     // Get encoder values
     pidLeft.actual = encoder_left;
     pidRight.actual = -encoder_right;
 
     std::cerr << "left: " << pidLeft.actual << " right: " << pidRight.actual << std::endl;
-    std::cerr << "pidLeft.target: " << pidLeft.target << " pidRight.target: " << pidRight.target << std::endl;
+    //std::cerr << "pidLeft.target: " << pidLeft.target << " pidRight.target: " << pidRight.target << std::endl;
 
     float error_left = pidLeft.target - pidLeft.actual;
     float error_right = pidRight.target - pidRight.actual;
@@ -184,7 +187,7 @@ void MotionController::motor_control(int speed, float k, int limit)
         pidLeft.integral = 0;
         memset(pidLeft.error, 0, sizeof(pidLeft.error));
 
-        float raw_outL = (error_left > 0) ? 0.40f * PWM_MAX : -0.40f * PWM_MAX;
+        float raw_outL = (error_left > 0) ? 0.8f * PWM_MAX : -0.8f * PWM_MAX;
         gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 1 : 0);
         pwm_set_duty(MOTOR1_PWM, fabs(raw_outL));
     }
@@ -192,7 +195,7 @@ void MotionController::motor_control(int speed, float k, int limit)
     {
         float raw_outL = calculate_pid(pidLeft, pidLeft.target);
         gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 1 : 0);
-        float outL = std::clamp(fabs(raw_outL), 0.0f, 0.60f * static_cast<float>(PWM_MAX));
+        float outL = std::clamp(fabs(raw_outL), 0.0f, 0.40f * static_cast<float>(PWM_MAX));
         pwm_set_duty(MOTOR1_PWM, outL);
     }
     if (fabs(error_right) > BANG_BANG_THRESHOLD)
@@ -200,7 +203,7 @@ void MotionController::motor_control(int speed, float k, int limit)
         pidRight.integral = 0;
         memset(pidRight.error, 0, sizeof(pidRight.error));
 
-        float raw_outR = (error_right > 0) ? 0.40f * PWM_MAX : -0.40f * PWM_MAX;
+        float raw_outR = (error_right > 0) ? 0.8f * PWM_MAX : -0.8f * PWM_MAX;
         gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 1 : 0);
         pwm_set_duty(MOTOR2_PWM, fabs(raw_outR));
     }
@@ -208,7 +211,7 @@ void MotionController::motor_control(int speed, float k, int limit)
     {
         float raw_outR = calculate_pid(pidRight, pidRight.target);
         gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 1 : 0);
-        float outR = std::clamp(fabs(raw_outR), 0.0f, 0.60f * static_cast<float>(PWM_MAX));
+        float outR = std::clamp(fabs(raw_outR), 0.0f, 0.40f * static_cast<float>(PWM_MAX));
         pwm_set_duty(MOTOR2_PWM, outR);
     }
     // PID calculation
@@ -451,7 +454,10 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
         //  执行模糊推理
         count_DMF(pid, error * pid.fuzzy_pd.factor, ec * pid.fuzzy_pd.factor * EC_FACTOR);
         float delta_kp = Fuzzy_Kp(pid);
-        float delta_kd = abs(Fuzzy_Kd(pid));
+        float delta_kd = abs(Fuzzy_Kd(pid));//Fuzzy_Kd(pid);//abs(Fuzzy_Kd(pid));
+        if(delta_kd < 0){
+            delta_kd *= 0.5;
+        }
         float output = 0.0f;
         float P = 0.0f;
         float D = 0.0f;
@@ -471,59 +477,63 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
             delta_kp = 0.0f;
             if (error_abs < 10)
             {
-                pid.fuzzy_pd.Kp0 = 4.5f;
-                pid.fuzzy_pd.Kd0 = 10.0f;
+                pid.fuzzy_pd.Kp0 = 6.5f;  //6.5
+                pid.fuzzy_pd.Kd0 = 15.0f; //15
             }
-            else if (error_abs < 15)
-            {
-                pid.fuzzy_pd.Kp0 = 5.5f;
-                pid.fuzzy_pd.Kd0 = 11.5f;
+            // else if (error_abs < 15)
+            // {
+            //     pid.fuzzy_pd.Kp0 = 5.5f;
+            //     pid.fuzzy_pd.Kd0 = 11.5f;
+            // }
+            if (error_abs < 15){
+                pid.fuzzy_pd.Kp0 = 8.0f; //8
+                pid.fuzzy_pd.Kd0 = 20.0f; //20
             }
             else if (error_abs < 20)
             {
-                pid.fuzzy_pd.Kp0 = 6.5f;
-                pid.fuzzy_pd.Kd0 = 13.0f;
+                pid.fuzzy_pd.Kp0 = 11.0f;     //11
+                pid.fuzzy_pd.Kd0 = 18.0f;    //18.0
             }
             else if (error_abs < 25)
             {
-                pid.fuzzy_pd.Kp0 = 7.5f;
-                pid.fuzzy_pd.Kd0 = 14.5f;
+                pid.fuzzy_pd.Kp0 = 15.0f;     //15
+                pid.fuzzy_pd.Kd0 = 25.0f;    //25
             }
-            else if (error_abs < 30)
+            else if (error_abs < 100)
             {
-                pid.fuzzy_pd.Kp0 = 8.5f;
-                pid.fuzzy_pd.Kd0 = 16.0f;
+                pid.fuzzy_pd.Kp0 = 15.0f;     //15
+                pid.fuzzy_pd.Kd0 = 30.0f;     //30
             }
-            else if (error_abs < 35)
-            {
-                pid.fuzzy_pd.Kp0 = 11.5f;
-                pid.fuzzy_pd.Kd0 = 18.0f;
-            }
-            else if (error_abs < 40)
-            {
-                pid.fuzzy_pd.Kp0 = 12.5f;
-                pid.fuzzy_pd.Kd0 = 19.5f;
-            }
-            else if (error_abs < 45)
-            {
-                pid.fuzzy_pd.Kp0 = 13.5f;
-                pid.fuzzy_pd.Kd0 = 19.0f;
-            }
-            else if (error_abs < 50)
-            {
-                pid.fuzzy_pd.Kp0 = 14.0f;
-                pid.fuzzy_pd.Kd0 = 19.0f;
-            }
-            else if (error_abs < 60)
-            {
-                pid.fuzzy_pd.Kp0 = 15.0f;
-                pid.fuzzy_pd.Kd0 = 26.0f;
-            }
-            else
-            {
-                pid.fuzzy_pd.Kp0 = 17.0f;
-                pid.fuzzy_pd.Kd0 = 30.0f;
-            }
+            // else if (error_abs < 100)
+            // {
+            //     pid.fuzzy_pd.Kp0 = 10.0f;
+            //     pid.fuzzy_pd.Kd0 = 28.0f;
+            // }
+            // else if (error_abs < 40)
+            // {
+            //     pid.fuzzy_pd.Kp0 = 12.5f;
+            //     pid.fuzzy_pd.Kd0 = 19.5f;
+            // }
+            // else if (error_abs < 45)
+            // {
+            //     pid.fuzzy_pd.Kp0 = 13.5f;
+            //     pid.fuzzy_pd.Kd0 = 19.0f;
+            // }
+            // else if (error_abs < 50)
+            // {
+            //     pid.fuzzy_pd.Kp0 = 14.0f;
+            //     pid.fuzzy_pd.Kd0 = 19.0f;
+            // }
+            // else if (error_abs < 60)
+            // {
+            //     pid.fuzzy_pd.Kp0 = 15.0f;
+            //     pid.fuzzy_pd.Kd0 = 26.0f;
+            // }
+            // else
+            // {
+            //     pid.fuzzy_pd.Kp0 = 17.0f;
+            //     pid.fuzzy_pd.Kd0 = 30.0f;
+            // }
         }
         P = (pid.fuzzy_pd.Kp0 + delta_kp) * error;
         D = (pid.fuzzy_pd.Kd0 + delta_kd) * ec; //+ delta_kd
@@ -545,61 +555,76 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
     return pid.output;
 }
 
-void MotionController::ackerman_diff_control(int Speed_Goal, int state)
+void MotionController::ackerman_diff_control(int Speed_Goal, int state ,int state2)
 {
     const float L = 200.0f, W = 150.0f;
-    float angle1 = abs((4260 - current_servo_pwm) * 0.09278f);
+    float angle1 = abs((4260 - current_servo_pwm) * 0.09f);//0.09278
     float angle_rad = angle1 * M_PI / 180.0f;
     float tn = tan(angle_rad);
 
     float outer_factor = 1.0f + 0.2f * (W / 2.0f) * tn / L;
-    float inner_factor = 1.0f - 0.8f * (W / 2.0f) * tn / L;
-    float outer_factor2 = 1.0f + 0.15f * (W / 2.0f) * tn / L;
-    float inner_factor2 = 1.0f - 0.3f * (W / 2.0f) * tn / L;
+    float inner_factor = 1.0f - 0.80f * (W / 2.0f) * tn / L;
+    float outer_factor2 = 1.0f + 0.25f * (W / 2.0f) * tn / L;
+    float inner_factor2 = 1.0f - 0.8f * (W / 2.0f) * tn / L;  // 600  0.5
 
-    inner_factor = std::max(0.7f, std::min(inner_factor, 1.2f));
-    outer_factor = std::max(1.0f, std::min(outer_factor, 1.1f));
-    inner_factor2 = std::max(0.8f, std::min(inner_factor2, 1.2f));
-    outer_factor2 = std::max(1.0f, std::min(outer_factor2, 1.1f));
-    std::cerr << "in:" << inner_factor << std::endl;
-    std::cerr << "out:" << outer_factor << std::endl;
+    inner_factor = std::max(0.65f, std::min(inner_factor, 1.2f));
+    outer_factor = std::max(1.0f, std::min(outer_factor, 1.2f));
+    inner_factor2 = std::max(0.6f, std::min(inner_factor2, 1.2f));
+    outer_factor2 = std::max(1.0f, std::min(outer_factor2, 1.2f));
+    std::cerr << "in:" << inner_factor2 << std::endl;
+    std::cerr << "out:" << outer_factor2 << std::endl;
     cerr << "state:" << state << endl;
 
     switch (state)
     {
     case 13:
-        Speed_Goal = Speed_Goal * 1.1;
+        if(abs(my_error2)<20)                          //直道
+            Speed_Goal = Speed_Goal * 1.1;
+        else
+            Speed_Goal = Speed_Goal * 0.6875;
         break;
-    case 1:
+    case 1:                           //环岛入口
         Speed_Goal = Speed_Goal * 0.9;
         break;
-    case 2:
+    case 2:                           //右环入口
         Speed_Goal = Speed_Goal * 0.87;
         break;
-    case 3:
+    case 3:                           //右环
         Speed_Goal = Speed_Goal * 0.87;
         break;
-    case 4:
+    case 4:                           //离开
         Speed_Goal = Speed_Goal * 0.9;
         break;
-    case 6:
+    case 6:                           //环岛入口
         Speed_Goal = Speed_Goal * 0.9;
         break;
-    case 7:
+    case 7:                           //左环入口
         Speed_Goal = Speed_Goal * 0.87;
         break;
-    case 8:
+    case 8:                           //左环
         Speed_Goal = Speed_Goal * 0.87;
         break;
-    case 9:
+    case 9:                           //离开
         Speed_Goal = Speed_Goal * 0.9;
+        break;
+    case 11:                           //左
+        Speed_Goal = Speed_Goal * 0.6875;
+        break;
+    case 12:                           //you
+        Speed_Goal = Speed_Goal * 0.6875;
         break;
     default:
-        if (abs(my_error2) > 20)
-            Speed_Goal = Speed_Goal * 0.9;
-        else
-            Speed_Goal = Speed_Goal;
-        break;
+         if (abs(my_error2) > 25)
+             Speed_Goal = Speed_Goal * 0.8;
+         else
+        Speed_Goal = Speed_Goal;
+        // if (state2 == 0)
+        //     Speed_Goal = Speed_Goal * 0.8; // 弯道
+        // else if (state2 == 1)
+        //     Speed_Goal = Speed_Goal; // 正常
+        // else if (speed_circle == 2)
+        //     Speed_Goal = Speed_Goal * 1.1; // 长直
+         break;
     }
     cerr << "speed_goal:" << Speed_Goal << endl;
     if (state == 2 || state == 3 || state == 4) //||current_servo_pwm <3800
@@ -623,13 +648,13 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state)
     {
         if (current_servo_pwm < 4260) // right turn
         {
-            pidLeft.target = Speed_Goal * outer_factor2;
-            pidRight.target = Speed_Goal * inner_factor2;
+            pidLeft.target = Speed_Goal * outer_factor;
+            pidRight.target = Speed_Goal * inner_factor;
         }
         else // left turn
         {
-            pidLeft.target = Speed_Goal * inner_factor2;
-            pidRight.target = Speed_Goal * outer_factor2;
+            pidLeft.target = Speed_Goal * inner_factor;
+            pidRight.target = Speed_Goal * outer_factor;
         }
     }
 }
