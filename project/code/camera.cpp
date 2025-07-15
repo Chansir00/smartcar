@@ -230,7 +230,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = LEFT_TURN;
         }
-        else if (small_count > 0.9 * numPoints && numPoints >= 110 && leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && isleftLanecontinuous&& isrightLanecontinuous&&lefttrend==1 &&righttrend==-1)
+        else if (small_count > 0.9 * numPoints && numPoints >= 115&& leftMissedRadius < 0.5 && rightMissedRadius < 0.5 && isleftLanecontinuous&& isrightLanecontinuous&&lefttrend==1 &&righttrend==-1)
         {
             circleState = STRAIGHT;
         }
@@ -461,7 +461,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case LEFT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints > 110|| small_count > 0.9*numPoints)
+        if (numPoints > img_devided)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -474,7 +474,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case RIGHT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints >110 ||small_count > 0.9*numPoints)
+        if (numPoints >img_devided )
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -565,7 +565,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case ZEBRA:
     {
         gpio_set_level(BEEP, 0x1);
-        if(zebra_count<20)
+        if(zebra_count<10)
         {
             zebra_count++;
         }
@@ -578,7 +578,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case STRAIGHT:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints < 110||rightJumpPointB.x!=-1||leftJumpPointB.x!=-1)
+        if (numPoints <= 117||rightJumpPointB.x!=-1||leftJumpPointB.x!=-1)
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -622,7 +622,7 @@ bool binaryThreshold(const Mat &input, Mat &binary, Mat &output)
         cerr << "错误：输入图像为空！" << endl;
         return false;
     }
-    Rect roi(0, 34, image_w, image_h -34); // 定义ROI区域
+    Rect roi(0, 29, image_w, image_h -29); // 定义ROI区域
     Mat croppedImage = input(roi);
     //  调整大小为160x120
     Mat resizedImage;

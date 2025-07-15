@@ -6,7 +6,7 @@ int debugmode = readFlag("./debugmode");
 const int camera = 0;
 int flag = 0;
 unsigned int send_counter = 0;
-int speed = 720; // 车速
+int speed = 820; // 车速
 const unsigned int SEND_INTERVAL = 20;
 int ready_count = 0;
 int control_circle = 0;
@@ -44,19 +44,18 @@ int main()
     brush_off();
     ctrl.motor_control(0, 0, 0);
     int new_socket = 0;
-    //int new_socket = 0;
-    //  if (udp_init(SERVER_IP, PORT) == 0)
-    //  {
-    //      printf("tcp_client ok\r\n");
-    //      udp_send_data(temp_str, sizeof(temp_str));
-    //      udp_send_data(temp_str, sizeof(temp_str));
-    //      udp_send_data(temp_str, sizeof(temp_str));
-    //  }
-    //  else
-    //  {
-    //      printf("tcp_client error\r\n");
-    //      return -1;
-    //  }
+     if (udp_init(SERVER_IP, PORT) == 0)
+     {
+         printf("tcp_client ok\r\n");
+         udp_send_data(temp_str, sizeof(temp_str));
+         udp_send_data(temp_str, sizeof(temp_str));
+         udp_send_data(temp_str, sizeof(temp_str));
+     }
+     else
+     {
+         printf("tcp_client error\r\n");
+         return -1;
+     }
     if (!debugmode)
     {
         brush_init(800);
@@ -95,9 +94,9 @@ int main()
             break;
         }
         // 回显UDP数据。
-        //sprintf(float_str1, "left_encoder: %.2f\r\n", ctrl.pidLeft.actual);
-        // sprintf(float_str2, "right_encoder: %.2f\r\n", ctrl.pidRight.actual);
-        //udp_send_data((uint8_t *)&float_str1, sizeof(float_str1));
+        sprintf(float_str1, "left_encoder: %.2f\r\n", ctrl.pidLeft.actual);
+        //sprintf(float_str2, "right_encoder: %.2f\r\n", ctrl.pidRight.actual);
+        udp_send_data((uint8_t *)&float_str1, sizeof(float_str1));
         // udp_send_data((uint8_t *)&float_str2, sizeof(float_str2));
         DetectionResult result = detector.detect(frame);
         control_circle = detector.circleState;
