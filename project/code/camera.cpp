@@ -228,11 +228,11 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = CROSSING;
         }
-        else if ((isleftstraight && lefttrend == 1 && !isrightLanecontinuous&&leftMissedRadius<=0.7 && righttrend!=1 )  &&numPoints<=img_devided )
+        else if ((isleftstraight && lefttrend == 1 && !isrightLanecontinuous&&leftMissedRadius<=0.7 && righttrend!=1 ) &&numPoints<=img_devided &&!crossing)
         {
             circleState = RIGHT_TURN;
         }
-        else if ((isrightstraight && righttrend == -1 &&!isleftLanecontinuous&& rightMissedRadius<=0.7 && lefttrend!=-1) && numPoints <= img_devided )
+        else if ((isrightstraight && righttrend == -1 &&!isleftLanecontinuous&& rightMissedRadius<=0.7 && lefttrend!=-1) &&numPoints <= img_devided &&!crossing)
         {
             circleState = LEFT_TURN;
         }
