@@ -63,12 +63,12 @@ int LaneProcessor::juli_caculate(const cv::Mat &binaryImage)
     {
         // 获取当前行对应的左参考列
         int left_col = left_straight[i];
-        if (binaryImage.at<uchar>(i, left_col) == 255) {
+        if (binaryImage.at<uchar>(119 - i, left_col) == 255) {
             left_count++;
         }
       
         int right_col = right_straight[i];
-        if (binaryImage.at<uchar>(i, right_col) == 255) {
+        if (binaryImage.at<uchar>(119 -i, right_col) == 255) {
             right_count++;
         }
     }
@@ -88,11 +88,17 @@ int LaneProcessor::juli_caculate(const cv::Mat &binaryImage)
 int LaneProcessor::speed_decide()//const vector<TrackPoint> &Leftline, const vector<TrackPoint> &Rightline
 {
     int a = juli;
-    if (a <= 80){
+    if (a <=80){
         return 0;
     }
-    else if (a > 80){
+    else if (a <= 95){
         return 1;
+    }
+    else if (a <= 110 ){
+        return 2;
+    }
+    else {
+        return 3;
     }
 }
 
@@ -157,7 +163,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     {
         crossing--;
     }
-    int img_devided = 110;
+    int img_devided = 113;
     findrightInflectionPoints(rightLane, rightJumpPointA, rightJumpPointB, isrightJumpvalid,isrightCrossing);
     findleftInflectionPoints(LeftLane, leftJumpPointA, leftJumpPointB, isleftJumpvalid,isleftCrossing);
     isleftLanecontinuous = isLaneContinuous(LeftLane);

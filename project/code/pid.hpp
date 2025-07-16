@@ -48,9 +48,9 @@ constexpr int PWM_MAX = 10000;            // 电机最大PWM
 constexpr int CONTROL_PERIOD_MS = 10;
 
 // --- Servo Parameters
-constexpr int SERVO_MOTOR_MID = 4260;
-constexpr int SERVO_MOTOR_L_MAX = 4760;
-constexpr int SERVO_MOTOR_R_MAX = 3760;
+constexpr int SERVO_MOTOR_MID = 4310;
+constexpr int SERVO_MOTOR_L_MAX = 4810;
+constexpr int SERVO_MOTOR_R_MAX = 3810;
 
 // --- Lane Following Weights
 constexpr float weight[39] = { //50
@@ -73,7 +73,7 @@ constexpr float dongtaiquan[21] = {
 1,1,3,3,5,5,10,10,20,25,25,20,20,20,15,11,9,7,5,3,1 // 0-19
 };
 constexpr float dongtaiquan2[21] = {  
-1,1,1,1,3,3,3,5,5,10,15,20,25,25,28,30,25,20,20 // 0-19
+1,1,1,1,3,3,3,5,5,10,15,20,25,25,25,30,30,30,30 // 0-19
 };
 
 // --- Fuzzy Logic Constants

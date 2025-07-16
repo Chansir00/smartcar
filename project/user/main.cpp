@@ -6,7 +6,7 @@ int debugmode = readFlag("./debugmode");
 const int camera = 0;
 int flag = 0;
 unsigned int send_counter = 0;
-int speed = 830; // 车速
+int speed = 850; // 车速
 const unsigned int SEND_INTERVAL = 20;
 int ready_count = 0;
 int control_circle = 0;
@@ -81,7 +81,7 @@ int main()
     {
         new_socket = sendImageOverSocket();
     }
-
+    
     while (true)
     {
         if (ready_count < 2000)
@@ -102,7 +102,7 @@ int main()
 
         DetectionResult result = detector.detect(frame);
         control_circle = detector.circleState;
-        speed_circle = detector.speed_decide();
+        //speed_circle = detector.speed_decide();
         cerr << "speed_circle: " << speed_circle << endl;
         if (detector.lost)
         {
@@ -115,6 +115,7 @@ int main()
         // ctrl.update_shared_error(error);
         cerr << "error: " << my_error << endl;
         ctrl.set_servo_angle(my_error2);
+        //pwm_set_duty(SERVO_MOTOR1_PWM, SERVO_MOTOR_R_MAX);
         //  pwm_set_duty(MOTOR1_PWM, 2000); // 小占空比
         //  gpio_set_level(MOTOR1_DIR, 1);
         //  pwm_set_duty(MOTOR2_PWM, 2000); // 小占空比
@@ -122,7 +123,7 @@ int main()
         //  cerr << "Forward countl: " << encoder_get_count(ENCODER_1) <<"Forward countr: " << encoder_get_count(ENCODER_2) << endl;
         if (debugmode == 0)
         {
-            //brush_control();
+            brush_control();
             flag = 1;
         }
         else if (debugmode==1 )
@@ -158,11 +159,7 @@ int main()
 
         std::cout << "函数耗时: " << duration << " 毫秒" << std::endl;
     }
-
-    // 释放摄像头资源
     cap.release();
-    // 释放资源
     close(new_socket);
-
     return 0;
 }
