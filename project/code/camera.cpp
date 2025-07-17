@@ -1,4 +1,5 @@
 #include "camera.hpp"
+int speed_level = 0;
 
 VideoCapture cap_init(int camera)
 {
@@ -83,25 +84,21 @@ int LaneProcessor::juli_caculate(const cv::Mat &binaryImage)
     // 确保距离值在合理范围内
     clamp(juli, 0, 119);
     cerr << "juli:" << juli << endl;
-    return juli;
-}
-int LaneProcessor::speed_decide()//const vector<TrackPoint> &Leftline, const vector<TrackPoint> &Rightline
-{
-    int a = juli;
-    if (a <=80){
-        return 0;
+    //return juli;
+    if (juli <=80){
+         speed_level = 0;
     }
-    else if (a <= 95){
-        return 1;
+    else if (juli <= 90){
+         speed_level = 1;
     }
-    else if (a <= 110 ){
-        return 2;
+    else if (juli <= 110 ){
+         speed_level = 2;
     }
     else {
-        return 3;
+         speed_level = 3;
     }
+    return  speed_level;
 }
-
 // 车道检测逻辑
 DetectionResult LaneProcessor::detect(const Mat &inputImage)
 {
@@ -117,7 +114,7 @@ DetectionResult LaneProcessor::detect(const Mat &inputImage)
 
     // 计算白点分布
     detectWhitePixels(result.binaryImage, roiHeight, whitePixels);
-    juli = juli_caculate(result.binaryImage);
+    //juli = juli_caculate(result.binaryImage);
     // 检测车道点
     detectLanePoints(result.binaryImage, roiHeight, whitePixels, leftLane, rightLane, leftMissedPoints, rightMissedPoints, leftMissedRadius, rightMissedRadius);
     processCircle(leftLane, rightLane, result.binaryImage, result.outputImage, roiHeight, leftMissedRadius, rightMissedRadius);
@@ -163,7 +160,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     {
         crossing--;
     }
-    int img_devided = 113;
+    int img_devided = 111;
     findrightInflectionPoints(rightLane, rightJumpPointA, rightJumpPointB, isrightJumpvalid,isrightCrossing);
     findleftInflectionPoints(LeftLane, leftJumpPointA, leftJumpPointB, isleftJumpvalid,isleftCrossing);
     isleftLanecontinuous = isLaneContinuous(LeftLane);
@@ -228,11 +225,11 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
         {
             circleState = CROSSING;
         }
-        else if ((isleftstraight && lefttrend == 1 && !isrightLanecontinuous&&leftMissedRadius<=0.7 && righttrend!=1 ) &&numPoints<=img_devided &&!crossing)
+        else if ((isleftstraight && lefttrend == 1 && leftMissedRadius<=0.7 && righttrend!=-1 ) &&numPoints<=img_devided &&!crossing)
         {
             circleState = RIGHT_TURN;
         }
-        else if ((isrightstraight && righttrend == -1 &&!isleftLanecontinuous&& rightMissedRadius<=0.7 && lefttrend!=-1) &&numPoints <= img_devided &&!crossing)
+        else if ((isrightstraight && righttrend == -1 && rightMissedRadius<=0.7 && lefttrend!=-1) &&numPoints <= img_devided &&!crossing)
         {
             circleState = LEFT_TURN;
         }
@@ -282,10 +279,10 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             generateVirtualPath(rightJumpPointB, endPoint, rightvirtualPath, true);
         }
         mergeVirtualPath(RightLane, rightvirtualPath, -1);
-        if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 14)
+        if (rightJumpPointB.x != -1 && rightJumpPointB.y >= 13)
         {
-            //circleState = RIGHT_CIRCLE_INTRY;
-            circleState = CIRCLE_INACTIVE;
+            circleState = RIGHT_CIRCLE_INTRY;
+            //circleState = CIRCLE_INACTIVE;
         }
     }
     break;
@@ -389,10 +386,10 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
             generateVirtualPath(leftJumpPointB, leftLane[leftLane.size() - 10].position, leftvirtualPath, true);
         }
         mergeVirtualPath(LeftLane, leftvirtualPath, -1);
-        if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 14)
+        if (leftJumpPointB.x != -1 && leftJumpPointB.y >= 13)
         {
-            //circleState = LEFT_CIRCLE_INTRY;
-            circleState = CIRCLE_INACTIVE;
+            circleState = LEFT_CIRCLE_INTRY;
+            //circleState = CIRCLE_INACTIVE;
         }
     }
     break;
@@ -467,7 +464,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case LEFT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints > img_devided|| small_count > 0.97*numPoints)
+        if ((numPoints > img_devided&&isrightstraight) || (numPoints > 118))
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -480,7 +477,7 @@ void LaneProcessor::processCircle(vector<TrackPoint> &LeftLane,
     case RIGHT_TURN:
     {
         gpio_set_level(BEEP, 0x1);
-        if (numPoints >img_devided ||small_count > 0.97*numPoints)
+        if ((numPoints >img_devided&&isleftstraight)||(numPoints>118))
         {
             circleState = CIRCLE_INACTIVE;
         }
@@ -628,7 +625,7 @@ bool binaryThreshold(const Mat &input, Mat &binary, Mat &output)
         cerr << "错误：输入图像为空！" << endl;
         return false;
     }
-    Rect roi(0, 48, image_w, image_h -48); // 定义ROI区域
+    Rect roi(0, 46, image_w, image_h -46); // 定义ROI区域
     Mat croppedImage = input(roi);
     //  调整大小为160x120
     Mat resizedImage;
@@ -1543,7 +1540,7 @@ bool LaneProcessor::isStraightLane(const std::vector<TrackPoint> &lane, int tren
     bool trendSet = (trend != 0); // 外部已提供初始趋势？
     int missedPoints = 0;
     int temp = roiHeight-30-startline;
-    for (int i = startline + 10; i <= roiHeight-20; ++i)
+    for (int i = startline + 5; i <= roiHeight-20; ++i)
     {
         int prevX = lane[i - 1].position.x;
         int currX = lane[i].position.x;

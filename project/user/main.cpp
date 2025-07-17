@@ -6,7 +6,7 @@ int debugmode = readFlag("./debugmode");
 const int camera = 0;
 int flag = 0;
 unsigned int send_counter = 0;
-int speed = 850; // 车速
+int speed = 860; // 车速
 const unsigned int SEND_INTERVAL = 20;
 int ready_count = 0;
 int control_circle = 0;
@@ -108,12 +108,12 @@ int main()
         {
             break;
         }
-        my_error = ctrl.Err_sum(detector.centerLine);
+        //my_error = ctrl.Err_sum(detector.centerLine);
         my_error2 = ctrl.Err_sum2(detector.centerLine);
         cout << "my_error2: " << my_error2 << endl;
         flag = 1;
         // ctrl.update_shared_error(error);
-        cerr << "error: " << my_error << endl;
+        //cerr << "error: " << my_error << endl;
         ctrl.set_servo_angle(my_error2);
         //pwm_set_duty(SERVO_MOTOR1_PWM, SERVO_MOTOR_R_MAX);
         //  pwm_set_duty(MOTOR1_PWM, 2000); // 小占空比
@@ -123,7 +123,7 @@ int main()
         //  cerr << "Forward countl: " << encoder_get_count(ENCODER_1) <<"Forward countr: " << encoder_get_count(ENCODER_2) << endl;
         if (debugmode == 0)
         {
-            brush_control();
+            brush_control(my_error2);
             flag = 1;
         }
         else if (debugmode==1 )

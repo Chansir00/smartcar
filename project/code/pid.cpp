@@ -467,7 +467,7 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
         // pid.fuzzy_pd.A = params.A_switch; // 模糊PID参数A
         if (control_circle == 13 || control_circle == 1 || control_circle == 6 || control_circle == 14)
         {
-            pid.fuzzy_pd.Kp0 = 4.5f;
+            pid.fuzzy_pd.Kp0 = 5.5f; //4.5
             pid.fuzzy_pd.Kd0 = 7.0f;
             delta_kd = 0.0f;
             delta_kp = 0.0f;
@@ -478,7 +478,7 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
             delta_kp = 0.0f;
             if (error_abs < 10)
             {
-                pid.fuzzy_pd.Kp0 = 4.5f;   // 6.5
+                pid.fuzzy_pd.Kp0 = 5.5f;   // 4.5
                 pid.fuzzy_pd.Kd0 = 15.0f; // 15
             }
             // else if (error_abs < 15)
@@ -488,7 +488,7 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
             // }
             if (error_abs < 15)
             {
-                pid.fuzzy_pd.Kp0 = 5.5f;  // 8
+                pid.fuzzy_pd.Kp0 = 6.5f;  // 5.5
                 pid.fuzzy_pd.Kd0 = 17.0f; // 20
             }
             else if (error_abs < 20)
@@ -591,14 +591,14 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state, int stat
     float angle_rad = angle1 * M_PI / 180.0f;
     float tn = tan(angle_rad);
 
-    float outer_factor = 1.0f + 0.2f * (W / 2.0f) * tn / L;
+    float outer_factor = 1.0f + 0.3f * (W / 2.0f) * tn / L;
     float inner_factor = 1.0f - 0.80f * (W / 2.0f) * tn / L;
-    float outer_factor2 = 1.0f + 0.1f * (W / 2.0f) * tn / L;
-    float inner_factor2 = 1.0f - 0.6f * (W / 2.0f) * tn / L; // 600  0.5
+    float outer_factor2 = 1.0f + 0.2f * (W / 2.0f) * tn / L;
+    float inner_factor2 = 1.0f - 0.8f * (W / 2.0f) * tn / L; // 600  0.5
 
-    inner_factor = std::max(0.6f, std::min(inner_factor, 1.2f));
+    inner_factor = std::max(0.7f, std::min(inner_factor, 1.2f));
     outer_factor = std::max(1.0f, std::min(outer_factor, 1.2f));
-    inner_factor2 = std::max(0.88f, std::min(inner_factor2, 1.2f));
+    inner_factor2 = std::max(0.8f, std::min(inner_factor2, 1.2f));
     outer_factor2 = std::max(1.0f, std::min(outer_factor2, 1.2f));
     std::cerr << "in:" << inner_factor2 << std::endl;
     std::cerr << "out:" << outer_factor2 << std::endl;
@@ -615,34 +615,34 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state, int stat
             Speed_Goal = 600; // 直
         break;
     case 1: // 环岛入口
-        Speed_Goal = Speed_Goal * 0.9;
+        Speed_Goal = Speed_Goal * 0.8;
         break;
     case 2: // 右环入口
         Speed_Goal = Speed_Goal * 0.6;
         break;
     case 3: // 右环
-        Speed_Goal = Speed_Goal * 0.6;
+        Speed_Goal = Speed_Goal * 0.7;
         break;
     case 4: // 离开
-        Speed_Goal = Speed_Goal * 0.6;
+        Speed_Goal = Speed_Goal * 0.7;
         break;
     case 6: // 环岛入口
-        Speed_Goal = Speed_Goal * 0.9;
+        Speed_Goal = Speed_Goal * 0.8;
         break;
     case 7: // 左环入口
-        Speed_Goal = Speed_Goal * 0.87;
+        Speed_Goal = Speed_Goal * 0.6;
         break;
     case 8: // 左环
-        Speed_Goal = Speed_Goal * 0.87;
+        Speed_Goal = Speed_Goal * 0.7;
         break;
     case 9: // 离开
-        Speed_Goal = Speed_Goal * 0.9;
+        Speed_Goal = Speed_Goal * 0.7;
         break;
     case 11: // 左
-        Speed_Goal = Speed_Goal * 0.4;
+        Speed_Goal = Speed_Goal * 0.6;
         break;
     case 12: // you
-        Speed_Goal = Speed_Goal * 0.4;
+        Speed_Goal = Speed_Goal * 0.6;
         break;
     case 14: // 直道
         Speed_Goal = Speed_Goal * 0.8;
@@ -651,11 +651,11 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state, int stat
         if (abs(my_error2) > 50)
              Speed_Goal =Speed_Goal * 0.5; // 大弯
         else if (abs(my_error2) > 40)
-            Speed_Goal = Speed_Goal * 0.5; // 大
+            Speed_Goal = Speed_Goal * 0.6; // 大
         else if (abs(my_error2) > 30)
-            Speed_Goal = Speed_Goal*0.7; // 弯
+            Speed_Goal = Speed_Goal * 0.7; // 弯
         else if (abs(my_error2) > 20)
-            Speed_Goal = Speed_Goal * 0.8; // 弯道
+            Speed_Goal = Speed_Goal * 0.9; // 弯道
         else
             Speed_Goal = Speed_Goal;
         // if (state2 == 0)
@@ -666,16 +666,33 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state, int stat
         //     Speed_Goal = Speed_Goal * 1.1; // 长直
         break;
     }
+    // if(Speed_Goal >= 850 && Speed_Goal <= 1000 ){
+    //     switch (speed_level)
+    //     {
+    //     case 0:
+    //         Speed_Goal = Speed_Goal * 0.65;
+    //         break;
+    //     case 1:
+    //         Speed_Goal = Speed_Goal * 0.75;
+    //         break;
+    //     case 2:
+    //         Speed_Goal = Speed_Goal;
+    //         break;
+    //     default:
+    //         Speed_Goal = Speed_Goal;
+    //         break;
+    //     }
+    // }
     cerr << "speed_goal:" << Speed_Goal << endl;
     if (state == 2 || state == 3 || state == 4 || state == 12) //||current_servo_pwm <3800
     {                                                          // right turn
-        pidLeft.target = Speed_Goal;
+        pidLeft.target = Speed_Goal* outer_factor;
         pidRight.target = Speed_Goal * inner_factor;
     }
     else if (state == 7 || state == 8 || state == 9 || state == 11) //||current_servo_pwm > 4700
     {                                                               // left turn
         pidLeft.target = Speed_Goal * inner_factor;
-        pidRight.target = Speed_Goal;
+        pidRight.target = Speed_Goal * outer_factor;
     }
     else if (state == 13 || state == 1 || state == 6 || state == 14) //||current_servo_pwm > 4700
     {

@@ -11,5 +11,5 @@ extern float my_error2; // 误差2
 
 void brush_init(int duty);
 void brush_off();
-void brush_control();
+void brush_control(int error);
 #endif

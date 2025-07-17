@@ -22,6 +22,7 @@ const int WIDTH_EXTEND2 = 70;           // 辅助宽度扩展
 extern int debugmode;                   // true调试模式
 extern int speed;
 extern int ready_count; // 准备计数器
+extern int speed_level;
 
 // 数据结构
 struct TrackPoint

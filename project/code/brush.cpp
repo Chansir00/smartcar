@@ -16,19 +16,19 @@ void brush_off()
 }
 int duty_left = 0;
 int duty_right = 0;
-void brush_control()
+void brush_control(int error)
 {
     if(control_circle ==13)  //straight
     {
         duty_left = 700;
         duty_right = 700;
     }
-    else if(control_circle ==11  || control_circle == 6 || control_circle ==7 || control_circle == 8 || control_circle == 9)
+    else if(control_circle ==11  || control_circle == 6 || control_circle ==7 || control_circle == 8 || control_circle == 9 || abs(error) > 30)
     {
         duty_left = 900;
         duty_right = 900;
     }
-    else if(control_circle ==12 || control_circle == 2 || control_circle == 3 || control_circle == 4||control_circle==5)
+    else if(control_circle ==12 || control_circle == 2 || control_circle == 3 || control_circle == 4||control_circle==5 || abs(error) > 30)
     {
         duty_left = 900;
         duty_right = 900;
