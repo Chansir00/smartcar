@@ -151,7 +151,7 @@ public:
         float &k, float &b, float &r_squared);
     Point findSuddenChangePoint(const vector<TrackPoint> &points, bool isLeftLane, int y);
     float calculateLaneSlope(const std::vector<TrackPoint> &lane);
-    bool isStraightLane(const std::vector<TrackPoint> &lane, int trend);
+    bool isStraightLane(const std::vector<TrackPoint> &lane, int trend, float missedRadius);
     map<int, float> calculateTrackWidthsByY(
         const std::vector<TrackPoint> &leftLane,
         const std::vector<TrackPoint> &rightLane);

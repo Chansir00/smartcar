@@ -17,7 +17,7 @@ int point_speed_min = 65; // 65
 ;                         // 最小
 int speed_min = speed * 0.9;
 int speed_max = speed * 1.2;              // 最大s
-int white_min = 65;                       // 白点最小
+int white_min = 70;                       // 白点最小
 int white_max = 115;                      // 白点最大
 const float BANG_BANG_THRESHOLD = 200.0f; // 120
 //==============================================================================
@@ -55,7 +55,7 @@ MotionController::MotionController(LaneProcessor *lp) : laneProcessor(lp)
 
     // PID Parameter Initialization
     init_pid(pidLeft, 28.0f, 3.805f, 0.13f, PWM_MAX, DELTA_PID);
-    init_pid(pidRight, 30.0f, 3.805f, 0.18f, PWM_MAX, DELTA_PID);
+    init_pid(pidRight, 30.0f, 3.845f, 0.18f, PWM_MAX, DELTA_PID);
     init_pid(pidservo, 6.0f, 0.0f, 14.0f, 500.0f, FUZZY_PID);
 
     init_serial();
@@ -195,7 +195,7 @@ void MotionController::motor_control(int speed, float k, int limit)
     {
         float raw_outL = calculate_pid(pidLeft, pidLeft.target);
         gpio_set_level(MOTOR1_DIR, (raw_outL >= 0) ? 0 : 1);
-        float outL = std::clamp(fabs(raw_outL), 0.0f, 0.90f * static_cast<float>(PWM_MAX));
+        float outL = std::clamp(fabs(raw_outL), 0.0f, 0.80f * static_cast<float>(PWM_MAX));
         pwm_set_duty(MOTOR1_PWM, outL);
     }
     if (fabs(error_right) > BANG_BANG_THRESHOLD)
@@ -211,7 +211,7 @@ void MotionController::motor_control(int speed, float k, int limit)
     {
         float raw_outR = calculate_pid(pidRight, pidRight.target);
         gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 0 : 1);
-        float outR = std::clamp(fabs(raw_outR), 0.0f, 0.90f * static_cast<float>(PWM_MAX));
+        float outR = std::clamp(fabs(raw_outR), 0.0f, 0.80f * static_cast<float>(PWM_MAX));
         pwm_set_duty(MOTOR2_PWM, outR);
     }
     // PID calculation
@@ -465,9 +465,9 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
         // pid.fuzzy_pd.Kp0 = params.kp_switch;
         // pid.fuzzy_pd.Kd0 = params.kd_switch;
         // pid.fuzzy_pd.A = params.A_switch; // 模糊PID参数A
-        if (control_circle == 13 || control_circle == 1 || control_circle == 6 || control_circle == 14)
+        if (control_circle == 13 || control_circle == 1 || control_circle==5|control_circle == 6||control_circle==10|| control_circle == 14)
         {
-            pid.fuzzy_pd.Kp0 = 5.5f; //4.5
+            pid.fuzzy_pd.Kp0 = 5.f; //4.5
             pid.fuzzy_pd.Kd0 = 7.0f;
             delta_kd = 0.0f;
             delta_kp = 0.0f;
@@ -479,7 +479,7 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
             if (error_abs < 10)
             {
                 pid.fuzzy_pd.Kp0 = 5.5f;   // 4.5
-                pid.fuzzy_pd.Kd0 = 15.0f; // 15
+                pid.fuzzy_pd.Kd0 = 13.0f; // 15
             }
             // else if (error_abs < 15)
             // {
@@ -488,7 +488,7 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
             // }
             if (error_abs < 15)
             {
-                pid.fuzzy_pd.Kp0 = 6.5f;  // 5.5
+                pid.fuzzy_pd.Kp0 = 5.5f;  // 5.5
                 pid.fuzzy_pd.Kd0 = 17.0f; // 20
             }
             else if (error_abs < 20)
@@ -508,20 +508,20 @@ float MotionController::calculate_pid(PID_Controller &pid, float target)
             }
             else if (error < 45)
             {
-                pid.fuzzy_pd.Kp0 = 15.0f; // 15
+                pid.fuzzy_pd.Kp0 = 15.5f; // 15
                 pid.fuzzy_pd.Kd0 = 33.0f; // 30
             }
             else if (error_abs < 50)
             {
-                pid.fuzzy_pd.Kp0 = 15.0f; // 15
+                pid.fuzzy_pd.Kp0 = 15.5f; // 15
                 pid.fuzzy_pd.Kd0 = 33.0f; // 30
             }
             else if (error_abs < 60)
             {
-                pid.fuzzy_pd.Kp0 = 15.0f; // 15
+                pid.fuzzy_pd.Kp0 = 15.5f; // 15
                 pid.fuzzy_pd.Kd0 = 33.0f; // 30
             }
-            else if (error_abs < 100)
+            else
             {
                 pid.fuzzy_pd.Kp0 = 15.0f; // 15
                 pid.fuzzy_pd.Kd0 = 33.0f; // 30
@@ -596,7 +596,7 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state, int stat
     float outer_factor2 = 1.0f + 0.2f * (W / 2.0f) * tn / L;
     float inner_factor2 = 1.0f - 0.8f * (W / 2.0f) * tn / L; // 600  0.5
 
-    inner_factor = std::max(0.7f, std::min(inner_factor, 1.2f));
+    inner_factor = std::max(0.6f, std::min(inner_factor, 1.2f));
     outer_factor = std::max(1.0f, std::min(outer_factor, 1.2f));
     inner_factor2 = std::max(0.8f, std::min(inner_factor2, 1.2f));
     outer_factor2 = std::max(1.0f, std::min(outer_factor2, 1.2f));
@@ -608,54 +608,54 @@ void MotionController::ackerman_diff_control(int Speed_Goal, int state, int stat
     {
     case 13:
         if (abs(my_error2) < 10) // 直道
-            Speed_Goal = Speed_Goal * 1.05;
+            Speed_Goal = Speed_Goal * 1.1;
         else if (Speed_Goal < 15)
-            Speed_Goal = Speed_Goal * 0.8;
+            Speed_Goal = Speed_Goal * 0.9;
         else
             Speed_Goal = 600; // 直
         break;
     case 1: // 环岛入口
-        Speed_Goal = Speed_Goal * 0.8;
+        Speed_Goal = Speed_Goal * 0.75;
         break;
     case 2: // 右环入口
         Speed_Goal = Speed_Goal * 0.6;
         break;
     case 3: // 右环
-        Speed_Goal = Speed_Goal * 0.7;
+        Speed_Goal = Speed_Goal * 0.75;
         break;
     case 4: // 离开
         Speed_Goal = Speed_Goal * 0.7;
         break;
     case 6: // 环岛入口
-        Speed_Goal = Speed_Goal * 0.8;
+        Speed_Goal = Speed_Goal * 0.75;
         break;
     case 7: // 左环入口
         Speed_Goal = Speed_Goal * 0.6;
         break;
     case 8: // 左环
-        Speed_Goal = Speed_Goal * 0.7;
+        Speed_Goal = Speed_Goal * 0.75;
         break;
     case 9: // 离开
         Speed_Goal = Speed_Goal * 0.7;
         break;
     case 11: // 左
-        Speed_Goal = Speed_Goal * 0.6;
+        Speed_Goal = Speed_Goal * 0.65;
         break;
     case 12: // you
-        Speed_Goal = Speed_Goal * 0.6;
+        Speed_Goal = Speed_Goal * 0.65;
         break;
     case 14: // 直道
         Speed_Goal = Speed_Goal * 0.8;
         break;
     default:
         if (abs(my_error2) > 50)
-             Speed_Goal =Speed_Goal * 0.5; // 大弯
+             Speed_Goal =Speed_Goal * 0.7; // 大弯
         else if (abs(my_error2) > 40)
-            Speed_Goal = Speed_Goal * 0.6; // 大
+            Speed_Goal = Speed_Goal * 0.7; // 大
         else if (abs(my_error2) > 30)
             Speed_Goal = Speed_Goal * 0.7; // 弯
         else if (abs(my_error2) > 20)
-            Speed_Goal = Speed_Goal * 0.9; // 弯道
+            Speed_Goal = Speed_Goal * 0.95; // 弯道
         else
             Speed_Goal = Speed_Goal;
         // if (state2 == 0)
