@@ -62,7 +62,7 @@ int main()
         gpio_set_level(BEEP, 0x1);
         system_delay_ms(1500);
         gpio_set_level(BEEP, 0x0);
-        brush_init(800); // 初始化
+        brush_init(750); // 初始化
         pit_ms_init(5, [&ctrl, &detector]()
                     { 
             if (!detector.lost && ready_count > 50)
@@ -123,7 +123,7 @@ int main()
         //  cerr << "Forward countl: " << encoder_get_count(ENCODER_1) <<"Forward countr: " << encoder_get_count(ENCODER_2) << endl;
         if (debugmode == 0)
         {
-            brush_control(my_error2);
+            //brush_control(my_error2);
             flag = 1;
         }
         else if (debugmode==1 )

@@ -48,9 +48,9 @@ constexpr int PWM_MAX = 10000;            // 电机最大PWM
 constexpr int CONTROL_PERIOD_MS = 10;
 
 // --- Servo Parameters
-constexpr int SERVO_MOTOR_MID = 4310;
-constexpr int SERVO_MOTOR_L_MAX = 4810;
-constexpr int SERVO_MOTOR_R_MAX = 3810;
+constexpr int SERVO_MOTOR_MID = 4160;
+constexpr int SERVO_MOTOR_L_MAX = 4670;
+constexpr int SERVO_MOTOR_R_MAX = 3710;
 
 // --- Lane Following Weights
 constexpr float weight[39] = { //50
@@ -242,7 +242,7 @@ public:
     int16_t encoder_err_last = 0;
 
     float Speed_Goal = 0.0f;
-    const uint16_t steer_middle = 4360;
+    const uint16_t steer_middle = 4160;
     const float Left_Speed = 1.2f;
     const float Right_Speed = 1.1f;
     float current_servo_pwm = steer_middle;

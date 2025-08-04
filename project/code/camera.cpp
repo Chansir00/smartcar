@@ -630,7 +630,7 @@ bool binaryThreshold(const Mat &input, Mat &binary, Mat &output)
         cerr << "错误：输入图像为空！" << endl;
         return false;
     }
-    Rect roi(0, 46, image_w, image_h - 46); // 定义ROI区域
+    Rect roi(0, 44, image_w, image_h - 44); // 定义ROI区域
     Mat croppedImage = input(roi);
     //  调整大小为160x120
     Mat resizedImage;

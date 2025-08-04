@@ -56,7 +56,7 @@ MotionController::MotionController(LaneProcessor *lp) : laneProcessor(lp)
     // PID Parameter Initialization
     init_pid(pidLeft, 28.0f, 3.805f, 0.13f, PWM_MAX, DELTA_PID);
     init_pid(pidRight, 30.0f, 3.845f, 0.18f, PWM_MAX, DELTA_PID);
-    init_pid(pidservo, 6.0f, 0.0f, 14.0f, 500.0f, FUZZY_PID);
+    init_pid(pidservo, 6.0f, 0.0f, 14.0f, 510.0f, FUZZY_PID);
 
     init_serial();
 }
@@ -204,13 +204,13 @@ void MotionController::motor_control(int speed, float k, int limit)
         memset(pidRight.error, 0, sizeof(pidRight.error));
 
         float raw_outR = (error_right > 0) ? 0.6f * PWM_MAX : -0.6f * PWM_MAX;
-        gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 0 : 1);
+        gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 1 : 0);
         pwm_set_duty(MOTOR2_PWM, fabs(raw_outR));
     }
     else
     {
         float raw_outR = calculate_pid(pidRight, pidRight.target);
-        gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 0 : 1);
+        gpio_set_level(MOTOR2_DIR, (raw_outR >= 0) ? 1 : 0);
         float outR = std::clamp(fabs(raw_outR), 0.0f, 0.80f * static_cast<float>(PWM_MAX));
         pwm_set_duty(MOTOR2_PWM, outR);
     }
@@ -367,21 +367,17 @@ void MotionController::set_servo_angle(int error)
     pidservo.actual = error;
 
     float pwm_adjustment = calculate_pid(pidservo, pidservo.target);
-
+    if(pwm_adjustment > 0 && error <= 10 ){
+        pwm_adjustment *= 2.43;
+    }
     float target_pwm = SERVO_MOTOR_MID + pwm_adjustment;
+    // if(pwm_adjustment > 0){
+    //     pwm_adjustment *= 1.23;
+    // }
     // if(target_pwm > 4500){
     //     target_pwm *=1.1;
     // }
-    target_pwm = std::clamp(target_pwm, static_cast<float>(SERVO_MOTOR_R_MAX), static_cast<float>(SERVO_MOTOR_L_MAX));
-
-    pwm_set_duty(SERVO_MOTOR1_PWM, target_pwm);
-    std::cerr << "pwm" << target_pwm << std::endl;
-    current_servo_pwm = target_pwm;
-    error_last = error;
-    // 死区处理 (±4像素不响应)
-    // if(abs(error_last - error) >30) error = error_last;
 }
-
 void MotionController::init_pid(PID_Controller &pid, float Kp, float Ki, float Kd, float max_out, PID_Mode mode)
 {
     pid.Kp = Kp;
